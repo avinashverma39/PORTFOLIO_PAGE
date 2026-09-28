@@ -3,17 +3,23 @@
 
     */
 
-import { createClient } from 'https://esm.sh/@insforge/sdk@latest';
-
-const insforge = createClient({
-  baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
-  anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
-});
+let insforge = null;
+import('https://esm.sh/@insforge/sdk@latest')
+  .then(({ createClient }) => {
+    insforge = createClient({
+      baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
+      anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
+    });
+    checkAuth();
+  })
+  .catch(() => {
+    // Insforge offline or CDN unavailable; portfolio remains fully functional
+  });
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---- Wait for DOM to load ---- */
-document.addEventListener('DOMContentLoaded', async () => {
+/* ---- App Initialization ---- */
+function startApp() {
   initCustomCursor();
   initNavbar();
   initHamburger();
@@ -25,19 +31,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   initActiveNavLink();   
   initBackToTop();       
   initAchievements();   
-  initResources();       
+  initProjects();
+  initResources();
+  initJourney();
+  initFloatingSkillIcons();
+  initCardFan();       
+  initFooter();
 
+  checkAuth();
+}
 
-  // Check auth and update nav link (kept for safety)
+async function checkAuth() {
   const authNavLink = document.getElementById('authNavLink');
-  if (authNavLink) {
-    const { data: { user } } = await insforge.auth.getCurrentUser();
-    if (user) {
-      authNavLink.textContent = 'Dashboard';
-      authNavLink.href = 'dashboard.html';
+  if (authNavLink && insforge?.auth) {
+    try {
+      const { data } = await insforge.auth.getCurrentUser();
+      if (data?.user) {
+        authNavLink.textContent = 'Dashboard';
+        authNavLink.href = 'dashboard.html';
+      }
+    } catch (err) {
+      console.debug('Auth check skipped:', err);
     }
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp(); // Executes immediately if DOM is already ready
+}
 
 
 /* 
@@ -47,42 +70,92 @@ function initCustomCursor() {
   const cursor = document.getElementById('cursor');
   const follower = document.getElementById('cursorFollower');
   if (!cursor || !follower) return;
-  if (prefersReducedMotion) return;
 
-  let mouseX = 0, mouseY = 0;
-  let followerX = 0, followerY = 0;
+  const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (isTouch || prefersReducedMotion) {
+    cursor.style.display = 'none';
+    follower.style.display = 'none';
+    return;
+  }
 
-  document.addEventListener('mousemove', (e) => {
+  let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+  let followerX = mouseX, followerY = mouseY;
+  let isVisible = false;
+
+  cursor.style.left = '0px';
+  cursor.style.top = '0px';
+  follower.style.left = '0px';
+  follower.style.top = '0px';
+
+  // Window-level tracking ensures cursor stays live over modals and overlays
+  window.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top = mouseY + 'px';
-  });
+    cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+    if (!isVisible) {
+      cursor.style.opacity = '1';
+      follower.style.opacity = '0.6';
+      cursor.style.display = 'block';
+      follower.style.display = 'block';
+      isVisible = true;
+    }
+  }, { passive: true });
+
+  // Keep cursor visible during scroll
+  window.addEventListener('scroll', () => {
+    if (isVisible) {
+      cursor.style.opacity = '1';
+      follower.style.opacity = '0.6';
+    }
+  }, { passive: true });
 
   // Smooth RAF-based follower
   function animateFollower() {
-    followerX += (mouseX - followerX) * 0.12;
-    followerY += (mouseY - followerY) * 0.12;
-    follower.style.left = followerX + 'px';
-    follower.style.top = followerY + 'px';
+    followerX += (mouseX - followerX) * 0.16;
+    followerY += (mouseY - followerY) * 0.16;
+    follower.style.transform = `translate3d(${followerX}px, ${followerY}px, 0) translate(-50%, -50%)`;
     requestAnimationFrame(animateFollower);
   }
   animateFollower();
 
-  const interactives = document.querySelectorAll('a, button, input, textarea, .project-card, .hobby-card, .stat-card, .tech-icon-card, .achievement-card, .detail-item, .timeline-card, .filter-btn');
-  interactives.forEach(el => {
-    el.addEventListener('mouseenter', () => {
+  // Delegated dynamic hover listener (works for static AND dynamic modal elements)
+  const hoverSelector = 'a, button, input, textarea, .project-card, .card-fan-item, .arc-card, .arc-nav-btn, .arc-play-btn, .arc-filter-btn, .arc-btn-pill, .arc-modal-close, .project-modal-close, .arc-pill-dot, .btn, .hobby-card, .stat-card, .floating-skill-icon, .achievement-card, .detail-item, .timeline-card, .filter-btn, .resources-pill-btn, .res-filter-tab, .res-ctrl-btn, .ribbon-card, .ribbon-quick-action';
+
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest(hoverSelector)) {
       cursor.classList.add('cursor-hover');
       follower.classList.add('cursor-hover');
-    });
-    el.addEventListener('mouseleave', () => {
-      cursor.classList.remove('cursor-hover');
-      follower.classList.remove('cursor-hover');
-    });
+    }
   });
 
-  document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; follower.style.opacity = '0'; });
-  document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; follower.style.opacity = '0.6'; });
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest(hoverSelector)) {
+      cursor.classList.remove('cursor-hover');
+      follower.classList.remove('cursor-hover');
+    }
+  });
+
+  document.addEventListener('mouseleave', (e) => {
+    if (e.clientY <= 0 || e.clientX <= 0 || (e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)) {
+      cursor.style.opacity = '0';
+      follower.style.opacity = '0';
+      isVisible = false;
+    }
+  });
+
+  document.addEventListener('mouseenter', () => {
+    cursor.style.opacity = '1';
+    follower.style.opacity = '0.6';
+    isVisible = true;
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cursor.style.opacity = '0';
+      follower.style.opacity = '0';
+      isVisible = false;
+    }
+  });
 }
 
 
@@ -308,11 +381,13 @@ function initTypingEffect() {
 
       // 2. Direct InsForge Database Backup
       try {
-        const { error: dbErr } = await insforge
-          .database
-          .from('messages')
-          .insert([{ name, email, message }]);
-        if (dbErr) console.warn('InsForge database direct insert notice:', dbErr);
+        if (insforge && insforge.database) {
+          const { error: dbErr } = await insforge
+            .database
+            .from('messages')
+            .insert([{ name, email, message }]);
+          if (dbErr) console.warn('InsForge database direct insert notice:', dbErr);
+        }
       } catch (e) {
         console.warn('InsForge database direct insert exception:', e);
       }
@@ -348,10 +423,93 @@ function initTypingEffect() {
     } catch (err) {
       console.error(err);
       showFieldError('message', 'messageError', 'Sorry, there was an error. Please check your network and try again.');
-      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
+      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Direct Message';
       sendBtn.disabled = false;
     }
   });
+
+  // Interactive Topic Chips
+  const inquiryChips = document.querySelectorAll('.inquiry-chip');
+  const subjectInput = document.getElementById('subject');
+  if (inquiryChips.length && subjectInput) {
+    inquiryChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        inquiryChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        subjectInput.value = 'Inquiry: ' + chip.dataset.topic;
+      });
+    });
+  }
+
+  // Live Message Character Counter
+  const messageInput = document.getElementById('message');
+  const charCounter = document.getElementById('charCounter');
+  if (messageInput && charCounter) {
+    messageInput.addEventListener('input', () => {
+      charCounter.textContent = `${messageInput.value.length} / 600`;
+    });
+  }
+
+  // Contact Interactive Copy Buttons
+  const copyBtns = document.querySelectorAll('.contact-copy-btn');
+  copyBtns.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check" style="color: #4ade80;"></i>';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+      } catch (err) {
+        const temp = document.createElement('input');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check" style="color: #4ade80;"></i>';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+      }
+    });
+  });
+
+  // Live Local Time Clock for Lucknow (IST)
+  function updateContactClock() {
+    const clockEl = document.getElementById('contactLocalTime');
+    if (!clockEl) return;
+    const now = new Date();
+    const options = {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
+    const istTime = now.toLocaleTimeString('en-US', options);
+    clockEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${istTime} (IST / UTC+5:30)`;
+  }
+  updateContactClock();
+  setInterval(updateContactClock, 1000);
+
+  // Reset Form Button (Send Another Message)
+  const resetBtn = document.getElementById('resetContactFormBtn');
+  if (resetBtn && form) {
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      form.style.display = 'flex';
+      const formSuccess = document.getElementById('formSuccess');
+      if (formSuccess) formSuccess.style.display = 'none';
+      if (charCounter) charCounter.textContent = '0 / 600';
+      if (subjectInput) subjectInput.value = 'Inquiry: Full-Time / Internship Opportunity';
+      const sendBtn = document.getElementById('sendBtn');
+      if (sendBtn) {
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Direct Message';
+        sendBtn.disabled = false;
+      }
+    });
+  }
 })();
 
 function validateEmail(email) {
@@ -386,12 +544,19 @@ function clearFormErrors() {
     */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      const offset = 70;
-      const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    const href = this.getAttribute('href');
+    if (!href || href === '#' || href === '#!') return;
+    try {
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        const navbar = document.getElementById('navbar');
+        const offset = (navbar?.offsetHeight || 70) + 10;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      }
+    } catch (err) {
+      console.debug('Invalid anchor selector:', href);
     }
   });
 });
@@ -703,7 +868,279 @@ function initBackToTop() {
   });
 }
 
+/* ═══════════════════════════════════════════════════════════
+   20. PROJECTS DATA & MODAL SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+const projectsData = [
+  {
+    id: 'project-ai-studio',
+    title: 'Neural Canvas — AI Design Studio',
+    category: 'web',
+    categoryLabel: 'Web Apps / AI Concept',
+    image: 'assets/projects/project_ai_studio.jpg',
+    description: 'A futuristic web application and concept studio exploring AI-assisted layout generation, neural interface optimization, and dynamic cyber design components. Built with HTML5, CSS3, and JavaScript.',
+    details: 'Neural Canvas is engineered as an experimental generative design environment. It leverages modular algorithmic component trees, intelligent grid restructuring, and cyber-aesthetic shaders to provide real-time canvas layouts. The system features responsive touch-friendly manipulation, automated contrast balancing, and high-performance DOM orchestration.',
+    features: [
+      'Generative cyber design layout engine with dynamic aspect ratios',
+      'Neural palette harmonization and contrast analysis in real time',
+      'Interactive component studio with instant preview & code export',
+      'Lightweight vanilla JavaScript architecture with zero heavy runtimes'
+    ],
+    tags: ['AI Design', 'HTML5', 'CSS3', 'JavaScript', 'Generative UI'],
+    github: 'https://github.com/avinashverma39',
+    demo: 'https://github.com/avinashverma39'
+  },
+  {
+    id: 'project-portfolio',
+    title: 'Interactive Dev Showcase & Portfolio Hub',
+    category: 'web',
+    categoryLabel: 'Web Apps / Portfolio',
+    image: 'assets/projects/project_portfolio.jpg',
+    description: 'A responsive personal portfolio website featuring dark/light theme switching, custom particle canvas animations, interactive filter categories, and a printable modern CV layout.',
+    details: 'Designed from the ground up to reflect senior-grade frontend craft. It combines 60 FPS GPU-accelerated canvas particles, dynamic 3D arc carousels, fluid card fans, an accessible modal architecture, and custom magnetic cursor tracking. Built with clean semantic HTML5 and vanilla CSS custom properties.',
+    features: [
+      'Dual-theme engine (cyber obsidian dark & clean crisp light mode)',
+      'Custom HTML5 Canvas particle network with distance-reactive connectors',
+      'Full-stack contact pipeline with AI acknowledgment and database persistence',
+      'Comprehensive responsive layout calibrated from 320px mobile to 4K displays'
+    ],
+    tags: ['HTML5', 'CSS3', 'JavaScript', 'Responsive UI', 'Canvas', 'GSAP'],
+    github: 'https://github.com/avinashverma39/portfolio',
+    demo: 'https://avinashverma39.github.io/portfolio/'
+  },
+  {
+    id: 'project-bank',
+    title: 'Smart Bank & Account Management System',
+    category: 'software',
+    categoryLabel: 'Software / Java Enterprise',
+    image: 'assets/projects/project_bank.jpg',
+    description: 'A robust object-oriented software system developed in Java for managing customer accounts, transaction ledgers, balance inquiries, and security checks with modular architecture.',
+    details: 'An enterprise-grade Java banking console and ledger management architecture. Built following SOLID object-oriented design principles, custom exception hierarchies, and persistent file I/O record keeping. It features atomic transaction processing, interest calculation engines, and pin verification safeguards.',
+    features: [
+      'Multi-tier account hierarchy (Savings, Current, Fixed Deposit) using OOP inheritance',
+      'Atomic deposit, withdrawal, and inter-account fund transfers with rollback safeguards',
+      'Encrypted user authentication and security credential validation',
+      'Structured audit logs with date-stamped transaction ledger persistence'
+    ],
+    tags: ['Java', 'OOP', 'Data Structures', 'File I/O', 'Enterprise Architecture'],
+    github: 'https://github.com/avinashverma39/JAVA_PROJECT',
+    demo: 'https://github.com/avinashverma39/JAVA_PROJECT'
+  },
+  {
+    id: 'project-weather',
+    title: 'Weather Pulse — Live Meteorology Station',
+    category: 'web api',
+    categoryLabel: 'Web Apps / REST API',
+    image: 'assets/projects/project_weather.jpg',
+    description: 'A real-time weather analytics web app integrating OpenWeatherMap API with geolocation, dynamic atmospheric metrics, interactive forecasts, and animated status cards.',
+    details: 'Weather Pulse provides instant meteorology metrics across global cities. It processes live RESTful weather endpoints with asynchronous fetch pipelines, client-side caching to reduce rate limits, dynamic SVG weather state visualization, and geographic coordinate resolution.',
+    features: [
+      'Live geolocation query with automatic local climate loading',
+      'Dynamic metric tracking: humidity, wind speed, UV index, and barometric pressure',
+      'Multi-day predictive forecast charts with interactive temperature trends',
+      'Intelligent debounced search with instant city auto-suggestions'
+    ],
+    tags: ['REST API', 'JavaScript', 'CSS3', 'Asynchronous', 'OpenWeatherMap'],
+    github: 'https://github.com/avinashverma39',
+    demo: 'https://github.com/avinashverma39'
+  },
+  {
+    id: 'project-calc',
+    title: 'Matrix Lab — Scientific Calculator & Solver',
+    category: 'web software api',
+    categoryLabel: 'Software / Scientific Web',
+    image: 'assets/projects/project_calc.jpg',
+    description: 'A fully functional scientific calculator and formula solver supporting complex arithmetic, trigonometric graphing, keyboard bindings, and mathematical formula parsing.',
+    details: 'Matrix Lab combines an intuitive scientific calculation surface with expression parsing algorithms. Built using the Shunting-Yard tokenization algorithm, it safely evaluates nested arithmetic expressions, trigonometric operations, and exponential curves while preventing arithmetic overflows and NaN errors.',
+    features: [
+      'Shunting-yard algorithm for infix-to-postfix mathematical expression parsing',
+      'Full scientific functionality: trigonometry, logarithms, factorials, and powers',
+      'Complete keyboard shortcut support with numeric keypad bindings',
+      'Calculation memory store with recallable history ledger'
+    ],
+    tags: ['HTML5', 'CSS3', 'JavaScript', 'Algorithms', 'Parser'],
+    github: 'https://github.com/avinashverma39',
+    demo: 'https://github.com/avinashverma39'
+  },
+  {
+    id: 'project-todo',
+    title: 'FluxFlow — Agile Task & Productivity Hub',
+    category: 'web',
+    categoryLabel: 'Web Apps / Productivity',
+    image: 'assets/projects/project_todo.jpg',
+    description: 'A dynamic task management and kanban workflow application with state persistence, priority tagging, categorization filters, and clean responsive micro-interactions.',
+    details: 'FluxFlow streamlines sprint planning and personal task productivity. It incorporates state management synchronized with browser LocalStorage, dynamic drag-and-drop category lane reordering, search filtering, and celebratory completion micro-animations.',
+    features: [
+      'Columnar sprint kanban board with custom priority flags (High, Medium, Low)',
+      'Persistent LocalStorage state schema with automatic schema migration',
+      'Fast real-time keyword search and tag-based filtering',
+      'Progress metrics bar tracking completion velocity and open tickets'
+    ],
+    tags: ['HTML5', 'CSS3', 'JavaScript', 'LocalStorage', 'Productivity'],
+    github: 'https://github.com/avinashverma39',
+    demo: 'https://github.com/avinashverma39'
+  },
+  {
+    id: 'project-cpp-game',
+    title: 'Number Guessing Game & Algorithmic Logic',
+    category: 'software',
+    categoryLabel: 'Software / C++ Systems',
+    image: '',
+    description: 'An interactive number guessing game and logic problem solver built using C++ core concepts, memory management, attempt limits, and terminal user interaction.',
+    details: 'A clean demonstration of systems programming fundamentals in modern C++. Incorporates random seed generation, binary search optimal-guess analysis, modular logic functions, and input validation routines preventing buffer invalidation.',
+    features: [
+      'Dynamic pseudo-random number generator calibrated to configurable difficulty tiers',
+      'Algorithmic feedback engine calculating optimal logarithmic search bounds',
+      'Robust input stream validation preventing infinite loops on invalid characters',
+      'Session scoring system recording top high scores and attempt records'
+    ],
+    tags: ['C++', 'Console UI', 'Algorithms', 'Game Logic', 'STL'],
+    github: 'https://github.com/avinashverma39/CPP_Project',
+    demo: 'https://github.com/avinashverma39/CPP_Project'
+  }
+];
 
+function initProjects() {
+  const filterBtns = document.querySelectorAll('.project-filters .filter-btn');
+  const projectCards = document.querySelectorAll('.projects-grid .project-card');
+
+  // Category Filtering
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filterVal = btn.getAttribute('data-filter');
+
+      projectCards.forEach(card => {
+        const cat = card.getAttribute('data-category') || '';
+        const matches = filterVal === 'all' || cat.split(' ').includes(filterVal);
+
+        if (matches) {
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        } else {
+          card.style.display = 'none';
+          card.style.opacity = '0';
+        }
+      });
+    });
+  });
+
+  // Setup Project Modal
+  initProjectModal();
+
+  // Attach modal trigger to project cards and details buttons
+  projectCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't trigger modal if user clicked directly on external link
+      if (e.target.closest('a')) return;
+      const pid = card.getAttribute('data-project-id');
+      if (pid) openProjectModal(pid);
+    });
+
+    const detailBtn = card.querySelector('.project-open-detail-btn');
+    if (detailBtn) {
+      detailBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pid = detailBtn.getAttribute('data-project-id') || card.getAttribute('data-project-id');
+        if (pid) openProjectModal(pid);
+      });
+    }
+  });
+}
+
+function initProjectModal() {
+  const overlay = document.getElementById('projectModalOverlay');
+  const closeBtn = document.getElementById('projectModalClose');
+  if (!overlay) return;
+
+  function closeModal() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      if (!overlay.classList.contains('active')) {
+        overlay.style.display = 'none';
+      }
+    }, 350);
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      closeModal();
+    }
+  });
+}
+
+function openProjectModal(projectId) {
+  const overlay = document.getElementById('projectModalOverlay');
+  const modalBody = document.getElementById('projectModalBody');
+  if (!overlay || !modalBody) return;
+
+  const project = projectsData.find(p => p.id === projectId);
+  if (!project) return;
+
+  const featuresHTML = project.features
+    ? project.features.map(f => `<li><i class="fa-solid fa-check"></i> <span>${f}</span></li>`).join('')
+    : '';
+
+  const tagsHTML = project.tags
+    ? project.tags.map(t => `<span>${t}</span>`).join('')
+    : '';
+
+  let imgHTML = '';
+  if (project.image) {
+    imgHTML = `<div class="project-modal-img-wrap"><img src="${project.image}" alt="${project.title} Preview" /></div>`;
+  } else {
+    imgHTML = `<div class="project-modal-img-wrap" style="height: 160px; background: linear-gradient(135deg, #111e13, #0a110b);"><i class="devicon-cplusplus-plain colored" style="font-size: 3.5rem;"></i></div>`;
+  }
+
+  modalBody.innerHTML = `
+    ${imgHTML}
+    <div class="project-modal-content">
+      <div class="project-modal-meta">
+        <span class="project-modal-category"><i class="fa-solid fa-code-branch"></i> ${project.categoryLabel}</span>
+      </div>
+      <h3 class="project-modal-title">${project.title}</h3>
+      <p class="project-modal-desc">${project.details || project.description}</p>
+      
+      ${featuresHTML ? `
+        <div class="project-modal-section-title"><i class="fa-solid fa-layer-group"></i> Key Engineering Highlights</div>
+        <ul class="project-modal-features">${featuresHTML}</ul>
+      ` : ''}
+
+      <div class="project-modal-section-title"><i class="fa-solid fa-microchip"></i> Technologies &amp; Architecture</div>
+      <div class="project-modal-tags">${tagsHTML}</div>
+
+      <div class="project-modal-actions">
+        ${project.demo && project.demo !== '#' ? `
+          <a href="${project.demo}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo / Preview
+          </a>
+        ` : ''}
+        ${project.github && project.github !== '#' ? `
+          <a href="${project.github}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+            <i class="fa-brands fa-github"></i> GitHub Code
+          </a>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(() => {
+    overlay.classList.add('active');
+    overlay.focus();
+  });
+}
 
 /* ── Achievement Data — Add your own entries here ─── */
 const achievementsData = [
@@ -809,49 +1246,56 @@ const achievementsData = [
 ];
 
 function initAchievements() {
-  const grid = document.getElementById('achievementsGrid');
+  const fan = document.getElementById('achievementsFan');
   const countersEl = document.getElementById('achievementCounters');
   const filterBtns = document.querySelectorAll('[data-achievement-filter]');
   const viewAllWrap = document.getElementById('achievementsViewAllWrap');
-  const viewAllBtn = document.getElementById('achievementsViewAllBtn');
 
-  if (!grid) return;
-
-  const INITIAL_VISIBLE = 6;
-  let showAll = false;
-  let currentFilter = 'all';
+  if (viewAllWrap) {
+    viewAllWrap.style.display = 'none';
+  }
 
   /* ── Render Counters ─── */
   renderCounters();
 
-  /* ── Render Cards ─── */
-  renderCards();
+  /* ── Setup Modal ─── */
+  initCertModal();
+
+  if (!fan) return;
+
+  /* ── Attach Certificate Preview Modal Trigger to Buttons ─── */
+  fan.querySelectorAll('.achievement-view-cert-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.getAttribute('data-achievement-id');
+      openCertModal(id);
+    });
+  });
 
   /* ── Setup Filters ─── */
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentFilter = btn.getAttribute('data-achievement-filter');
-      showAll = false;
-      if (viewAllBtn) {
-        viewAllBtn.querySelector('span').textContent = 'View All Achievements';
+      const filterVal = btn.getAttribute('data-achievement-filter');
+      const cards = fan.querySelectorAll('.card-fan-item');
+
+      cards.forEach(card => {
+        const cat = card.getAttribute('data-category') || '';
+        if (filterVal === 'all' || cat === filterVal) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+          card.classList.remove('active');
+        }
+      });
+
+      if (typeof fan.spreadCards === 'function') {
+        fan.spreadCards();
       }
-      renderCards();
     });
   });
-
-  /* ── Setup View All ─── */
-  if (viewAllBtn) {
-    viewAllBtn.addEventListener('click', () => {
-      showAll = !showAll;
-      viewAllBtn.querySelector('span').textContent = showAll ? 'Show Less' : 'View All Achievements';
-      renderCards();
-    });
-  }
-
-  /* ── Setup Modal ─── */
-  initCertModal();
 
   /* ── Render counters ─── */
   function renderCounters() {
@@ -886,122 +1330,6 @@ function initAchievements() {
     });
 
     countersEl.innerHTML = pills.join('');
-  }
-
-  /* ── Render cards ─── */
-  function renderCards() {
-    const filtered = currentFilter === 'all'
-      ? achievementsData
-      : achievementsData.filter(a => a.category === currentFilter);
-
-    const visible = showAll ? filtered : filtered.slice(0, INITIAL_VISIBLE);
-
-    grid.innerHTML = visible.map(a => createCardHTML(a)).join('');
-
-    // Show/hide "View All" button
-    if (viewAllWrap) {
-      viewAllWrap.style.display = filtered.length > INITIAL_VISIBLE ? 'block' : 'none';
-    }
-
-    // Attach card click handlers for modal
-    grid.querySelectorAll('.achievement-view-cert-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const id = btn.getAttribute('data-achievement-id');
-        openCertModal(id);
-      });
-    });
-
-    // Lazy load images
-    lazyLoadImages();
-
-    // Re-register custom cursor interactives on new cards
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('cursorFollower');
-    if (cursor && follower && !prefersReducedMotion) {
-      grid.querySelectorAll('.achievement-card').forEach(card => {
-        card.addEventListener('mouseenter', () => {
-          cursor.classList.add('cursor-hover');
-          follower.classList.add('cursor-hover');
-        });
-        card.addEventListener('mouseleave', () => {
-          cursor.classList.remove('cursor-hover');
-          follower.classList.remove('cursor-hover');
-        });
-      });
-    }
-  }
-
-  /* ── Create card HTML ─── */
-  function createCardHTML(a) {
-    const categoryMeta = {
-      certificate: { icon: 'fa-certificate', label: 'Certificate' },
-      course: { icon: 'fa-book', label: 'Course' },
-      internship: { icon: 'fa-briefcase', label: 'Internship' },
-      achievement: { icon: 'fa-trophy', label: 'Achievement' }
-    };
-    const meta = categoryMeta[a.category] || { icon: 'fa-star', label: 'Other' };
-
-    const imageHTML = a.image
-      ? `<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="${a.image}" alt="${a.title}" loading="lazy" />`
-      : `<div class="achievement-placeholder-img">
-           <i class="fa-solid ${meta.icon} placeholder-icon"></i>
-           <span class="placeholder-label">Replace with certificate image</span>
-         </div>`;
-
-    const credentialHTML = a.credentialId
-      ? `<div class="achievement-card-credential"><strong>ID:</strong> ${a.credentialId}</div>`
-      : '';
-
-    const skillsHTML = a.skills.map(s => `<span>${s}</span>`).join('');
-
-    return `
-      <article class="achievement-card" data-achievement-category="${a.category}" data-achievement-id="${a.id}">
-        <div class="achievement-card-image">
-          ${imageHTML}
-          <div class="achievement-card-badge">
-            <i class="fa-solid ${meta.icon}"></i>
-            ${meta.label}
-          </div>
-        </div>
-        <div class="achievement-card-body">
-          <div class="achievement-card-header">
-            <h3 class="achievement-card-title">${a.title}</h3>
-            <span class="achievement-card-date">${a.date}</span>
-          </div>
-          <div class="achievement-card-org">
-            <i class="fa-solid fa-building"></i>
-            ${a.organization}
-          </div>
-          <p class="achievement-card-desc">${a.description}</p>
-          ${credentialHTML}
-          <div class="achievement-card-skills">${skillsHTML}</div>
-        </div>
-        <div class="achievement-card-actions">
-          <button class="btn btn-outline achievement-view-cert-btn" data-achievement-id="${a.id}">
-            <i class="fa-solid fa-eye"></i> View Certificate
-          </button>
-        </div>
-      </article>
-    `;
-  }
-
-  /* ── Lazy load images ─── */
-  function lazyLoadImages() {
-    const images = grid.querySelectorAll('img[data-src]');
-    if (images.length === 0) return;
-
-    const imgObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target;
-        img.src = img.getAttribute('data-src');
-        img.removeAttribute('data-src');
-        imgObserver.unobserve(img);
-      });
-    }, { rootMargin: '100px' });
-
-    images.forEach(img => imgObserver.observe(img));
   }
 }
 
@@ -1247,97 +1575,612 @@ const resourcesData = [
 ];
 
 function initResources() {
-  const grid = document.getElementById('resourcesGrid');
+  const stage = document.getElementById('resourcesPanoramicStage');
+  const track = document.getElementById('resourcesCylinderTrack');
   const filterBtns = document.querySelectorAll('[data-resource-filter]');
-
-  if (!grid) return;
-
-  let currentFilter = 'all';
-
-  /* ── Render Cards ─── */
-  renderResourceCards();
-
-  /* ── Setup Filters ─── */
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.getAttribute('data-resource-filter');
-      renderResourceCards();
-    });
-  });
+  const exploreBtn = document.getElementById('resourcesExploreBtn');
+  const prevBtn = document.getElementById('resPrevBtn');
+  const nextBtn = document.getElementById('resNextBtn');
+  const playBtn = document.getElementById('resPlayBtn');
 
   /* ── Setup Modal ─── */
   initResourceModal();
 
-  /* ── Render resource cards ─── */
-  function renderResourceCards() {
-    const filtered = currentFilter === 'all'
-      ? resourcesData
-      : resourcesData.filter(r => r.category === currentFilter);
+  if (!stage || !track) return;
+  if (track.dataset.cloned) return;
+  track.dataset.cloned = 'true';
 
-    grid.innerHTML = filtered.map(r => createResourceCardHTML(r)).join('');
+  // Duplicate cards for seamless infinite cylinder loop
+  const originalCards = Array.from(track.children);
+  originalCards.forEach(card => {
+    const clone = card.cloneNode(true);
+    track.appendChild(clone);
+  });
 
-    // Attach card click handlers for modal
-    grid.querySelectorAll('.resource-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        // Don't open modal if clicking the action button link directly
-        if (e.target.closest('.resource-action-link')) return;
-        const id = card.getAttribute('data-resource-id');
-        openResourceModal(id);
+  const allCards = Array.from(track.children);
+
+  /* ── State variables for continuous 3D ribbon motion ─── */
+  let scrollOffset = 0;
+  let targetOffset = 0;
+  let isPlaying = true;
+  let isHovered = false;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartOffset = 0;
+  let dragDelta = 0;
+  const speed = 0.55;
+  const cardStep = 232; // card width + gap
+
+  // Measure single loop width after rendering
+  let singleWidth = 0;
+  function updateMeasurements() {
+    singleWidth = (allCards.length / 2) * cardStep;
+  }
+  updateMeasurements();
+  window.addEventListener('resize', updateMeasurements);
+
+  /* ── 3D Cylinder Curvature Transform Updater ─── */
+  function update3DCurvature() {
+    if (!stage) return;
+    const stageRect = stage.getBoundingClientRect();
+    const centerX = stageRect.left + stageRect.width / 2;
+    const halfWidth = Math.max(stageRect.width * 0.45, 300);
+
+    allCards.forEach(card => {
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      const relDist = (cardCenter - centerX) / halfWidth;
+      const clampedDist = Math.max(-1.5, Math.min(1.5, relDist));
+
+      // Concave cylinder curve:
+      // Left cards turned towards center (positive rotateY), right cards turned towards center (negative rotateY)
+      const rotateY = clampedDist * 22;
+      const translateZ = -Math.pow(Math.abs(clampedDist), 1.35) * 45;
+      const scale = Math.max(0.86, 1 - Math.pow(Math.abs(clampedDist), 2) * 0.07);
+
+      card.style.transform = `perspective(1200px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`;
+    });
+  }
+
+  /* ── Continuous Animation Loop ─── */
+  function animateRibbon() {
+    if (isPlaying && !isHovered && !isDragging) {
+      targetOffset -= speed;
+    }
+
+    // Smooth lerp
+    scrollOffset += (targetOffset - scrollOffset) * 0.12;
+
+    // Seamless loop wrapping
+    if (singleWidth > 0) {
+      if (scrollOffset <= -singleWidth) {
+        scrollOffset += singleWidth;
+        targetOffset += singleWidth;
+      } else if (scrollOffset >= 0) {
+        scrollOffset -= singleWidth;
+        targetOffset -= singleWidth;
+      }
+    }
+
+    track.style.transform = `translateX(${scrollOffset}px)`;
+    update3DCurvature();
+
+    requestAnimationFrame(animateRibbon);
+  }
+
+  requestAnimationFrame(animateRibbon);
+
+  /* ── Hover Pause/Resume ─── */
+  stage.addEventListener('mouseenter', () => { isHovered = true; });
+  stage.addEventListener('mouseleave', () => { isHovered = false; });
+
+  /* ── Drag & Swipe Interaction ─── */
+  function onDragStart(clientX) {
+    isDragging = true;
+    dragStartX = clientX;
+    dragStartOffset = targetOffset;
+    dragDelta = 0;
+  }
+
+  function onDragMove(clientX) {
+    if (!isDragging) return;
+    dragDelta = clientX - dragStartX;
+    targetOffset = dragStartOffset + dragDelta;
+  }
+
+  function onDragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+  }
+
+  // Mouse events
+  stage.addEventListener('mousedown', (e) => {
+    onDragStart(e.clientX);
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (isDragging) onDragMove(e.clientX);
+  });
+  window.addEventListener('mouseup', () => {
+    if (isDragging) onDragEnd();
+  });
+
+  // Touch events
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 0) onDragStart(e.touches[0].clientX);
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    if (isDragging && e.touches.length > 0) onDragMove(e.touches[0].clientX);
+  }, { passive: true });
+  window.addEventListener('touchend', () => {
+    if (isDragging) onDragEnd();
+  });
+
+  /* ── Card Click to Open Preview Modal Directly ─── */
+  track.addEventListener('click', (e) => {
+    // If dragging significantly, don't trigger click
+    if (Math.abs(dragDelta) > 7) return;
+
+    const cardWrap = e.target.closest('.ribbon-card-wrap');
+    if (!cardWrap) return;
+
+    const resId = cardWrap.getAttribute('data-resource-id');
+    if (resId) {
+      openResourceModal(resId);
+    }
+  });
+
+  /* ── Pill Action Button: Explore All ─── */
+  if (exploreBtn) {
+    exploreBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openResourceModal('res-dsa-notes');
+    });
+  }
+
+  /* ── Controls: Prev / Next / Play-Pause ─── */
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      targetOffset += cardStep;
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      targetOffset -= cardStep;
+    });
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+      playBtn.title = isPlaying ? 'Auto-moving is active' : 'Auto-moving is paused';
+    });
+  }
+
+  /* ── Category Filters ─── */
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filterVal = btn.getAttribute('data-resource-filter');
+
+      allCards.forEach(card => {
+        const cat = card.getAttribute('data-category') || '';
+        if (filterVal === 'all' || cat === filterVal) {
+          card.classList.remove('filtered-out');
+        } else {
+          card.classList.add('filtered-out');
+        }
       });
     });
+  });
+}
 
-    // Re-register custom cursor interactives on new cards
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('cursorFollower');
-    if (cursor && follower && !prefersReducedMotion) {
-      grid.querySelectorAll('.resource-card').forEach(card => {
-        card.addEventListener('mouseenter', () => {
-          cursor.classList.add('cursor-hover');
-          follower.classList.add('cursor-hover');
-        });
-        card.addEventListener('mouseleave', () => {
-          cursor.classList.remove('cursor-hover');
-          follower.classList.remove('cursor-hover');
+
+
+/* =============================================
+   24B. 3D CURVED ARC SHOWCASE (JOURNEY & HOBBIES)
+   Continuously moving curved 3D cards engine
+   ============================================= */
+function initJourney() {
+  initArcShowcases();
+}
+
+function initArcShowcases() {
+  const configs = [
+    {
+      id: 'journey',
+      trackId: 'journeyArcTrack',
+      sliderId: 'journeyPillSlider',
+      filterContainerId: 'journeyFilters',
+      hasFilters: true
+    },
+    {
+      id: 'hobbies',
+      trackId: 'hobbiesArcTrack',
+      sliderId: 'hobbiesPillSlider',
+      filterContainerId: null,
+      hasFilters: false
+    }
+  ];
+
+  configs.forEach(cfg => setupArcShowcase(cfg));
+  setupArcDetailModal();
+}
+
+function setupArcShowcase(cfg) {
+  const track = document.getElementById(cfg.trackId);
+  if (!track) return;
+
+  const allCards = Array.from(track.querySelectorAll('.arc-card'));
+  if (!allCards.length) return;
+
+  let visibleCards = [...allCards];
+  let activeIndex = visibleCards.length > 2 ? 2 : 0; // Centerpiece as default
+  let isAutoMoving = true;
+  let autoTimer = null;
+
+  const stageCard = track.closest('.arc-stage-card');
+  const prevBtn = stageCard?.querySelector(`.arc-prev-btn[data-target="${cfg.id}"]`);
+  const nextBtn = stageCard?.querySelector(`.arc-next-btn[data-target="${cfg.id}"]`);
+  const playBtn = stageCard?.querySelector(`.arc-play-btn[data-target="${cfg.id}"]`);
+  const slider = document.getElementById(cfg.sliderId);
+
+  /* ── Position cards in 3D Arc ─── */
+  function updateArcPositions() {
+    const total = visibleCards.length;
+    if (total === 0) return;
+
+    // Constrain activeIndex
+    activeIndex = ((activeIndex % total) + total) % total;
+
+    allCards.forEach(card => {
+      // Clear previous slot classes
+      card.classList.remove(
+        'pos-slot-far-left',
+        'pos-slot-near-left',
+        'pos-slot-center',
+        'pos-slot-near-right',
+        'pos-slot-far-right',
+        'pos-slot-hidden'
+      );
+
+      const vIdx = visibleCards.indexOf(card);
+      if (vIdx === -1) {
+        card.classList.add('pos-slot-hidden');
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+
+      // Compute circular distance relative to activeIndex
+      let offset = vIdx - activeIndex;
+      if (offset > total / 2) offset -= total;
+      if (offset < -total / 2) offset += total;
+
+      if (offset === 0) {
+        card.classList.add('pos-slot-center');
+      } else if (offset === -1) {
+        card.classList.add('pos-slot-near-left');
+      } else if (offset === 1) {
+        card.classList.add('pos-slot-near-right');
+      } else if (offset === -2) {
+        card.classList.add('pos-slot-far-left');
+      } else if (offset === 2) {
+        card.classList.add('pos-slot-far-right');
+      } else {
+        card.classList.add('pos-slot-hidden');
+      }
+    });
+
+    // Update bottom indicator dots
+    if (slider && visibleCards[activeIndex]) {
+      const activeOriginalIdx = visibleCards[activeIndex].getAttribute('data-index');
+      const dots = slider.querySelectorAll('.arc-pill-dot');
+      dots.forEach(dot => {
+        if (dot.getAttribute('data-index') === activeOriginalIdx) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+  }
+
+  /* ── Auto Movement Engine ─── */
+  function stepForward() {
+    if (!visibleCards.length) return;
+    activeIndex = (activeIndex + 1) % visibleCards.length;
+    updateArcPositions();
+  }
+
+  function startAutoCycle() {
+    stopAutoCycle();
+    autoTimer = setInterval(() => {
+      if (isAutoMoving) {
+        stepForward();
+      }
+    }, 2800);
+  }
+
+  function stopAutoCycle() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function updatePlayBtnUI() {
+    if (!playBtn) return;
+    const icon = playBtn.querySelector('i');
+    if (isAutoMoving) {
+      playBtn.classList.remove('paused');
+      playBtn.title = 'Continuous motion active (Click to pause)';
+      if (icon) icon.className = 'fa-solid fa-pause';
+    } else {
+      playBtn.classList.add('paused');
+      playBtn.title = 'Motion paused (Click to resume)';
+      if (icon) icon.className = 'fa-solid fa-play';
+    }
+  }
+
+  // Hover Pause & Resume
+  if (stageCard) {
+    stageCard.addEventListener('mouseenter', () => {
+      isAutoMoving = false;
+      updatePlayBtnUI();
+    });
+    stageCard.addEventListener('mouseleave', () => {
+      isAutoMoving = true;
+      updatePlayBtnUI();
+    });
+  }
+
+  // Play / Pause Toggle
+  if (playBtn) {
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isAutoMoving = !isAutoMoving;
+      updatePlayBtnUI();
+    });
+  }
+
+  // Prev / Next Chevron Navigation
+  if (prevBtn) {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activeIndex = (activeIndex - 1 + visibleCards.length) % visibleCards.length;
+      updateArcPositions();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepForward();
+    });
+  }
+
+  // Click ANY card to direct access details & center it
+  allCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Direct certificate preview button trigger
+      const certBtn = e.target.closest('.achievement-view-cert-btn');
+      if (certBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        const certId = certBtn.getAttribute('data-achievement-id');
+        if (typeof openCertModal === 'function') openCertModal(certId);
+        return;
+      }
+
+      // Allow natural external link if specifically clicked
+      const extLink = e.target.closest('a');
+      if (extLink && extLink.getAttribute('href')?.startsWith('http') && !e.target.closest('.arc-card-inner')) {
+        return;
+      }
+
+      e.stopPropagation();
+      e.preventDefault();
+
+      // Center this card in the 3D arc
+      const vIdx = visibleCards.indexOf(card);
+      if (vIdx !== -1) {
+        activeIndex = vIdx;
+        updateArcPositions();
+      }
+
+      // Directly access this card's detail modal
+      openCardDetail(card);
+    });
+  });
+
+  // Slider Pill Dot Jumps
+  if (slider) {
+    slider.querySelectorAll('.arc-pill-dot').forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetIdx = dot.getAttribute('data-index');
+        const foundIdx = visibleCards.findIndex(c => c.getAttribute('data-index') === targetIdx);
+        if (foundIdx !== -1) {
+          activeIndex = foundIdx;
+          updateArcPositions();
+        }
+      });
+    });
+  }
+
+  // Category Filters (if present)
+  if (cfg.hasFilters && cfg.filterContainerId) {
+    const filterContainer = document.getElementById(cfg.filterContainerId);
+    if (filterContainer) {
+      const filterBtns = filterContainer.querySelectorAll('.arc-filter-btn');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const filterVal = btn.getAttribute('data-journey-filter');
+          if (filterVal === 'all') {
+            visibleCards = [...allCards];
+          } else {
+            visibleCards = allCards.filter(c => c.getAttribute('data-category') === filterVal);
+          }
+
+          activeIndex = 0;
+          updateArcPositions();
         });
       });
     }
   }
 
-  /* ── Create card HTML ─── */
-  function createResourceCardHTML(r) {
-    const categoryMeta = {
-      notes: { icon: 'fa-sticky-note', label: 'Notes', bgClass: 'notes-bg' },
-      books: { icon: 'fa-book-open', label: 'Book', bgClass: 'books-bg' },
-      questions: { icon: 'fa-circle-question', label: 'Questions', bgClass: 'questions-bg' }
-    };
-    const meta = categoryMeta[r.category] || { icon: 'fa-file', label: 'Resource', bgClass: 'notes-bg' };
+  // Initial render & launch auto-moving
+  updateArcPositions();
+  startAutoCycle();
+}
 
-    const tagsHTML = r.tags.map(t => `<span>${t}</span>`).join('');
+/* ── Global Helper: Open Card Detail Modal ─── */
+function openCardDetail(card) {
+  if (!card) return;
 
-    return `
-      <article class="resource-card" data-resource-category="${r.category}" data-resource-id="${r.id}">
-        <div class="resource-card-icon-header ${meta.bgClass}">
-          <i class="${r.icon}"></i>
-          <div class="resource-card-badge">
-            <i class="fa-solid ${meta.icon}"></i>
-            ${meta.label}
-          </div>
-        </div>
-        <div class="resource-card-body">
-          <h3 class="resource-card-title">${r.title}</h3>
-          <p class="resource-card-desc">${r.description}</p>
-          <div class="resource-card-tags">${tagsHTML}</div>
-        </div>
-        <div class="resource-card-action">
-          <button class="btn btn-outline">
-            <i class="${r.actionIcon}"></i> ${r.actionLabel}
-          </button>
-        </div>
-      </article>
+  const certId = card.getAttribute('data-cert-id');
+  if (certId && typeof openCertModal === 'function') {
+    openCertModal(certId);
+    return;
+  }
+
+  const modal = document.getElementById('arcDetailModal');
+  const body = document.getElementById('arcModalBody');
+  if (!modal || !body) return;
+
+  // Ensure modal is visible before showing
+  modal.style.display = 'flex';
+
+  const title = card.getAttribute('data-title') || '';
+  const sub = card.getAttribute('data-sub') || '';
+  const org = card.getAttribute('data-org') || '';
+  const desc = card.getAttribute('data-desc') || '';
+  const tagsStr = card.getAttribute('data-tags') || '';
+  const link = card.getAttribute('data-link') || '';
+  const linkText = card.getAttribute('data-link-text') || 'Explore More';
+
+  const tags = tagsStr.split(',').filter(Boolean);
+
+  let actionHtml = '';
+  if (certId) {
+    actionHtml = `
+      <button type="button" class="btn btn-primary btn-sm achievement-view-cert-btn" data-achievement-id="${certId}">
+        <i class="fa-solid fa-certificate"></i> View Certificate
+      </button>
+    `;
+  } else if (link) {
+    const isExternal = link.startsWith('http');
+    actionHtml = `
+      <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i> ${linkText}
+      </a>
     `;
   }
+
+  body.innerHTML = `
+    <span class="arc-modal-meta-tag">${sub || 'Showcase'}</span>
+    <h3 class="arc-modal-title">${title}</h3>
+    ${org ? `<div class="arc-modal-sub"><i class="fa-solid fa-layer-group"></i> ${org}</div>` : ''}
+    <p class="arc-modal-desc">${desc}</p>
+    ${tags.length ? `
+      <div class="arc-modal-tags">
+        ${tags.map(t => `<span>${t}</span>`).join('')}
+      </div>
+    ` : ''}
+    <div class="arc-modal-actions">
+      ${actionHtml}
+    </div>
+  `;
+
+  // Wire cert button inside modal if present
+  const modalCertBtn = body.querySelector('.achievement-view-cert-btn');
+  if (modalCertBtn) {
+    modalCertBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      const id = modalCertBtn.getAttribute('data-achievement-id');
+      if (typeof openCertModal === 'function') {
+        openCertModal(id);
+      }
+    });
+  }
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Ensure custom cursor stays explicitly active and visible on top of modal
+  const cur = document.getElementById('cursor');
+  const fol = document.getElementById('cursorFollower');
+  if (cur) {
+    cur.style.opacity = '1';
+    cur.style.display = 'block';
+    cur.classList.remove('cursor-hover');
+  }
+  if (fol) {
+    fol.style.opacity = '0.6';
+    fol.style.display = 'block';
+    fol.classList.remove('cursor-hover');
+  }
+}
+
+/* ── Arc Detail Modal Engine ─── */
+function setupArcDetailModal() {
+  const modal = document.getElementById('arcDetailModal');
+  const closeBtn = document.getElementById('arcModalClose');
+  if (!modal) return;
+
+  function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      if (!modal.classList.contains('active')) {
+        modal.style.display = 'none';
+      }
+    }, 400);
+
+    const cur = document.getElementById('cursor');
+    const fol = document.getElementById('cursorFollower');
+    if (cur) cur.classList.remove('cursor-hover');
+    if (fol) fol.classList.remove('cursor-hover');
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+  });
+
+  // Explicit button clicks also open
+  document.querySelectorAll('.arc-open-modal-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const card = btn.closest('.arc-card');
+      openCardDetail(card);
+    });
+  });
+
+  // Wire cert button triggers directly on arc cards
+  document.querySelectorAll('.arc-card .achievement-view-cert-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const id = btn.getAttribute('data-achievement-id');
+      if (typeof openCertModal === 'function') {
+        openCertModal(id);
+      }
+    });
+  });
 }
 
 
@@ -1437,3 +2280,286 @@ function openResourceModal(resourceId) {
     });
   });
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   26. FLOATING SKILL ICONS — Cursor Following Parallax Cloud
+   ═══════════════════════════════════════════════════════════ */
+function initFloatingSkillIcons() {
+  const cloud = document.getElementById('skillsIconCloud');
+  if (!cloud) return;
+
+  const icons = cloud.querySelectorAll('.floating-skill-icon');
+  if (!icons.length) return;
+
+  // Initial positions — scattered across the container
+  const positions = [];
+  const cloudRect = cloud.getBoundingClientRect();
+  const cloudW = cloud.offsetWidth || 800;
+  const cloudH = cloud.offsetHeight || 340;
+
+  // Pre-defined scatter positions (percentages) for natural-looking layout
+  const scatterPositions = [
+    { x: 5,  y: 15 },  // C
+    { x: 18, y: 55 },  // C++
+    { x: 35, y: 10 },  // Java
+    { x: 50, y: 60 },  // JavaScript
+    { x: 8,  y: 75 },  // HTML5
+    { x: 65, y: 25 },  // CSS3
+    { x: 28, y: 35 },  // Git
+    { x: 78, y: 55 },  // GitHub
+    { x: 45, y: 85 },  // VS Code
+    { x: 88, y: 15 },  // Python
+    { x: 72, y: 80 },  // Node.js
+    { x: 92, y: 50 },  // npm
+    { x: 15, y: 90 },  // AWS
+  ];
+
+  icons.forEach((icon, i) => {
+    const pos = scatterPositions[i % scatterPositions.length];
+    const depth = parseFloat(icon.getAttribute('data-depth')) || 1.0;
+    const delay = parseFloat(icon.getAttribute('data-float-delay')) || 0;
+
+    positions.push({
+      baseX: pos.x,
+      baseY: pos.y,
+      currentX: 0,
+      currentY: 0,
+      targetX: 0,
+      targetY: 0,
+      depth: depth,
+      floatDelay: delay,
+      floatPhase: Math.random() * Math.PI * 2,
+      floatSpeedX: 0.3 + Math.random() * 0.5,
+      floatSpeedY: 0.4 + Math.random() * 0.6,
+      floatAmplitudeX: 8 + Math.random() * 15,
+      floatAmplitudeY: 6 + Math.random() * 12,
+    });
+
+    // Set initial position
+    icon.style.left = pos.x + '%';
+    icon.style.top = pos.y + '%';
+  });
+
+  let mouseX = 0, mouseY = 0;
+  let isMouseOver = false;
+
+  cloud.addEventListener('mousemove', (e) => {
+    const rect = cloud.getBoundingClientRect();
+    mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;  // -1 to 1
+    mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;  // -1 to 1
+    isMouseOver = true;
+  });
+
+  cloud.addEventListener('mouseleave', () => {
+    isMouseOver = false;
+  });
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  let startTime = performance.now();
+
+  function animate() {
+    const elapsed = (performance.now() - startTime) / 1000;
+
+    icons.forEach((icon, i) => {
+      const p = positions[i];
+      const t = elapsed + p.floatPhase;
+
+      // Idle floating motion
+      const floatX = Math.sin(t * p.floatSpeedX) * p.floatAmplitudeX;
+      const floatY = Math.cos(t * p.floatSpeedY) * p.floatAmplitudeY;
+
+      // Cursor influence
+      let cursorX = 0, cursorY = 0;
+      if (isMouseOver) {
+        cursorX = mouseX * p.depth * 30;
+        cursorY = mouseY * p.depth * 25;
+      }
+
+      p.targetX = floatX + cursorX;
+      p.targetY = floatY + cursorY;
+
+      // Smooth lerp
+      p.currentX = lerp(p.currentX, p.targetX, 0.06);
+      p.currentY = lerp(p.currentY, p.targetY, 0.06);
+
+      icon.style.transform = `translate(${p.currentX}px, ${p.currentY}px)`;
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  if (!prefersReducedMotion) {
+    animate();
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   27. CARD FAN — 3D Fan-Spread Card Layout with Click Expand
+   ═══════════════════════════════════════════════════════════ */
+function initCardFan() {
+  const fanContainers = document.querySelectorAll('.card-fan-container');
+  if (!fanContainers.length) return;
+
+  fanContainers.forEach(container => {
+    const cards = container.querySelectorAll('.card-fan-item');
+    if (!cards.length) return;
+
+    let activeCard = null;
+
+    // Calculate fan spread
+    function spreadCards() {
+      const isMobile = window.innerWidth <= 600;
+      const visibleCards = Array.from(cards).filter(c => c.style.display !== 'none');
+      const count = visibleCards.length;
+      if (count === 0) return;
+
+      const center = (count - 1) / 2;
+      const spreadAngle = isMobile ? 0 : (count > 4 ? 7.5 : (count > 3 ? 9 : 12)); // adaptive spread
+      const cardSpacing = isMobile ? 0 : (count > 4 ? 90 : (count > 3 ? 105 : 120));  // adaptive spacing
+
+      visibleCards.forEach((card, i) => {
+        if (isMobile) {
+          card.style.transform = 'none';
+          card.style.zIndex = card === activeCard ? '35' : '1';
+          return;
+        }
+
+        const offset = i - center;
+        const rotation = offset * spreadAngle;
+        const translateX = offset * cardSpacing;
+        const translateZ = -Math.abs(offset) * 20;
+        const translateY = Math.abs(offset) * 8;
+
+        if (card === activeCard) {
+          // Active card moves to front, no rotation, high elevation
+          card.style.zIndex = '35';
+          card.style.transform = `translateX(0px) translateY(-30px) translateZ(80px) rotateZ(0deg) scale(1.08)`;
+        } else {
+          const baseZ = Math.max(1, 15 - Math.round(Math.abs(offset)));
+          card.style.zIndex = String(baseZ);
+
+          // When a card is active, push other visible cards further apart
+          let extraPush = 0;
+          if (activeCard) {
+            const activeIndex = visibleCards.indexOf(activeCard);
+            if (activeIndex !== -1) {
+              const direction = i < activeIndex ? -1 : 1;
+              extraPush = direction * 70;
+            }
+          }
+          card.style.transform = `translateX(${translateX + extraPush}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateZ(${rotation}deg)`;
+        }
+      });
+    }
+
+    // Expose spreadCards on container
+    container.spreadCards = spreadCards;
+
+    // Handle click
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        // If clicking inside details buttons/links, don't toggle
+        if (e.target.closest('a') || e.target.closest('button')) return;
+
+        if (activeCard === card) {
+          // Deactivate
+          activeCard = null;
+          card.classList.remove('active');
+        } else {
+          // Deactivate previous
+          if (activeCard) activeCard.classList.remove('active');
+          activeCard = card;
+          card.classList.add('active');
+        }
+        spreadCards();
+      });
+    });
+
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+      if (activeCard && !container.contains(e.target)) {
+        activeCard.classList.remove('active');
+        activeCard = null;
+        spreadCards();
+      }
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      const isMobile = window.innerWidth <= 600;
+      if (isMobile && activeCard) {
+        activeCard.classList.remove('active');
+        activeCard = null;
+      }
+      spreadCards();
+    });
+
+    // Initial spread
+    spreadCards();
+  });
+}
+
+/* 
+   FOOTER — INTERACTIVE CLOCK & QUOTE CYCLER
+*/
+function initFooter() {
+  // 1. Live Local Clock (IST / Asia/Kolkata)
+  const clockEl = document.getElementById('footerLocalClock');
+  if (clockEl) {
+    const updateClock = () => {
+      try {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        clockEl.textContent = `${timeString} IST`;
+      } catch (err) {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString();
+      }
+    };
+    updateClock();
+    setInterval(updateClock, 1000);
+  }
+
+  // 2. Interactive Quotes Cycler
+  const quoteBtn = document.getElementById('footerQuoteBtn');
+  const quoteText = document.getElementById('footerQuoteText');
+  
+  if (quoteBtn && quoteText) {
+    const quotes = [
+      '"Code is like humor. When you have to explain it, it\'s bad."',
+      '"First, solve the problem. Then, write the code." — John Johnson',
+      '"Simplicity is prerequisite for reliability." — Edsger W. Dijkstra',
+      '"Make it work, make it right, make it fast." — Kent Beck',
+      '"Talk is cheap. Show me the code." — Linus Torvalds',
+      '"Software is a great combination between artistry and engineering." — Bill Gates',
+      '"Programs must be written for people to read, and only incidentally for machines to execute." — Abelson & Sussman',
+      '"The only way to do great work is to love what you do." — Steve Jobs',
+      '"Clean code always looks like it was written by someone who cares." — Robert C. Martin'
+    ];
+
+    let currentIdx = 0;
+
+    quoteBtn.addEventListener('click', () => {
+      quoteText.style.opacity = '0';
+      quoteText.style.transform = 'translateY(4px)';
+      quoteText.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+
+      setTimeout(() => {
+        currentIdx = (currentIdx + 1) % quotes.length;
+        quoteText.textContent = quotes[currentIdx];
+        quoteText.style.opacity = '1';
+        quoteText.style.transform = 'translateY(0)';
+      }, 200);
+    });
+  }
+}
+

@@ -62,22 +62,96 @@
       position: relative;
     }
 
-    /* Print settings overrides */
+    /* Ambient Glowing Orbs */
+    .cv-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.22;
+    }
+    .cv-orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #32cd32 0%, transparent 70%);
+      top: -120px;
+      right: -100px;
+    }
+    .cv-orb-2 {
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, #00ffff 0%, transparent 70%);
+      bottom: -100px;
+      left: -150px;
+    }
+
+    /* Print settings overrides (ATS Optimized) */
     @media print {
       body {
-        background: white !important;
-        color: black !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
         padding-top: 0 !important;
+        font-size: 10.5pt !important;
+      }
+      .cv-orb, .actions-bar, .navbar, .cursor, .cursor-follower, .cv-toast, .work-banner, #scrollProgress, .sidebar-quote {
+        display: none !important;
       }
       .cv-container {
         margin: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
         border: none !important;
         box-shadow: none !important;
-        grid-template-columns: 280px 1fr !important;
+        background: #ffffff !important;
+        grid-template-columns: 240px 1fr !important;
+        backdrop-filter: none !important;
       }
-      .actions-bar, .navbar {
-        display: none !important;
+      .cv-sidebar {
+        background: #f8fafc !important;
+        border-right: 1px solid #e2e8f0 !important;
+        padding: 20px 15px !important;
+      }
+      .cv-main {
+        padding: 20px 25px !important;
+        background: #ffffff !important;
+      }
+      .header-info h1 {
+        color: #0f172a !important;
+        -webkit-text-fill-color: #0f172a !important;
+        font-size: 24pt !important;
+      }
+      .header-info h2 {
+        color: #0284c7 !important;
+        font-size: 12pt !important;
+      }
+      .metric-card, .project-card, .exp-card, .highlight-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        page-break-inside: avoid !important;
+      }
+      .metric-val, .exp-role, .proj-name, .highlight-title {
+        color: #0f172a !important;
+      }
+      .exp-company {
+        color: #0284c7 !important;
+      }
+      .exp-duration {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        border: 1px solid #bae6fd !important;
+      }
+      .skill-track {
+        background: #e2e8f0 !important;
+      }
+      .skill-fill {
+        background: #0284c7 !important;
+      }
+      a {
+        color: #0284c7 !important;
+        text-decoration: none !important;
       }
     }
 
@@ -89,6 +163,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+      z-index: 10;
     }
     .actions-left {
       display: flex;
@@ -114,22 +190,173 @@
     }
     .btn-pdf {
       background: var(--gradient-main);
-      color: white;
-      box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
+      color: #070913;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(50, 205, 50, 0.35);
     }
     .btn-pdf:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(50, 205, 50, 0.45);
+      box-shadow: 0 6px 22px rgba(50, 205, 50, 0.55);
     }
-    .btn-img {
-      background: rgba(124, 58, 237, 0.15);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      color: #a78bfa;
+    .btn-copy {
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      color: #00ffff;
     }
-    .btn-img:hover {
-      background: rgba(124, 58, 237, 0.25);
-      color: white;
+    .btn-copy:hover {
+      background: rgba(0, 255, 255, 0.2);
+      color: #fff;
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 255, 255, 0.35);
+    }
+    .btn-home {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+    }
+    .btn-home:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    /* Toast Notification */
+    .cv-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 15, 26, 0.95);
+      border: 1px solid #32cd32;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(50, 205, 50, 0.3);
+      backdrop-filter: blur(16px);
+      color: #e8e8f0;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .cv-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .cv-toast i {
+      color: #32cd32;
+      font-size: 16px;
+    }
+
+    /* Status Pill */
+    .cv-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(50, 205, 50, 0.1);
+      border: 1px solid rgba(50, 205, 50, 0.3);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 16px;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #32cd32;
+      box-shadow: 0 0 8px #32cd32;
+      animation: cvPulse 2s infinite;
+    }
+    @keyframes cvPulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(50, 205, 50, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(50, 205, 50, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(50, 205, 50, 0); }
+    }
+
+    /* 3D Interactive Card Classes */
+    .cv-3d-card {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
+      will-change: transform;
+    }
+    .cv-3d-card:hover {
+      border-color: rgba(50, 205, 50, 0.5) !important;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 25px rgba(50, 205, 50, 0.2) !important;
+    }
+
+    /* Highlights Deck */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .highlight-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .highlight-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .highlight-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .highlight-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Certifications Chips */
+    .cert-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .cert-chip {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+    .cert-chip:hover {
+      border-color: var(--border-light);
+      transform: translateX(4px);
+    }
+    .cert-chip i {
+      color: var(--accent-pink);
+      font-size: 14px;
     }
 
     /* LEFT SIDEBAR (Dark Theme) */
@@ -637,6 +864,9 @@
       .metrics-grid {
         grid-template-columns: 1fr;
       }
+      .highlights-grid {
+        grid-template-columns: 1fr;
+      }
       .projects-grid {
         grid-template-columns: 1fr;
       }
@@ -660,6 +890,11 @@
   </style>
 </head>
 <body>
+
+  <!-- Ambient Orbs & Toast Notification -->
+  <div class="cv-orb cv-orb-1"></div>
+  <div class="cv-orb cv-orb-2"></div>
+  <div id="cvToast" class="cv-toast"><i class="fas fa-circle-check"></i> <span>CV link copied to clipboard!</span></div>
 
   <!-- ========== CURSOR ========== -->
   <div class="cursor" id="cursor"></div>
@@ -686,6 +921,7 @@
         <li><a href="index.html#projects" class="nav-link">Projects</a></li>
         <li><a href="index.html#achievements" class="nav-link">Achievements</a></li>
         <li><a href="index.html#hobbies" class="nav-link">Hobbies</a></li>
+        <li><a href="index.html#resume" class="nav-link">Resume</a></li>
         <li><a href="index.html#contact" class="nav-link">Contact</a></li>
       </ul>
 
@@ -716,14 +952,17 @@
   <!-- ACTIONS BAR -->
   <div class="actions-bar anim-fade-up">
     <div class="actions-left">
-      <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 30px; text-decoration: none;">
-        <i class="fas fa-arrow-left"></i> Home
+      <a href="index.html" class="btn-action btn-home">
+        <i class="fas fa-arrow-left"></i> Portfolio Home
       </a>
     </div>
     <div class="actions-right">
+      <button id="copyCvLinkBtn" class="btn-action btn-copy" aria-label="Copy link to CV">
+        <i class="fas fa-link"></i> Copy Link
+      </button>
       <!-- One-click PDF download -->
-      <button onclick="window.print()" class="btn-action btn-pdf">
-        <i class="fas fa-file-pdf"></i> Download PDF
+      <button onclick="window.print()" class="btn-action btn-pdf" aria-label="Download CV as PDF">
+        <i class="fas fa-file-arrow-down"></i> Download PDF
       </button>
     </div>
   </div>
@@ -816,40 +1055,56 @@
         <h3 class="cv-section-title"><i class="fas fa-cogs"></i> Professional Skills</h3>
         <div class="skills-list">
           <div class="skill-bar-wrap">
-            <div class="skill-info"><span>C++ Development</span><span>80%</span></div>
+            <div class="skill-info"><span>C++ Systems</span><span>85%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+          </div>
+          <div class="skill-bar-wrap">
+            <div class="skill-info"><span>AI Web Architectures</span><span>80%</span></div>
             <div class="skill-track"><div class="skill-fill" data-pct="80"></div></div>
           </div>
           <div class="skill-bar-wrap">
-            <div class="skill-info"><span>AI Web Architectures</span><span>75%</span></div>
+            <div class="skill-info"><span>Data Structures &amp; Algorithms</span><span>75%</span></div>
             <div class="skill-track"><div class="skill-fill" data-pct="75"></div></div>
           </div>
           <div class="skill-bar-wrap">
-            <div class="skill-info"><span>Problem Solving</span><span>65%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-pct="65"></div></div>
+            <div class="skill-info"><span>HTML5 / Modern CSS3</span><span>85%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
           </div>
           <div class="skill-bar-wrap">
-            <div class="skill-info"><span>HTML / CSS</span><span>80%</span></div>
+            <div class="skill-info"><span>JavaScript (ES6+) &amp; React</span><span>70%</span></div>
+            <div class="skill-track"><div class="skill-fill" data-pct="70"></div></div>
+          </div>
+          <div class="skill-bar-wrap">
+            <div class="skill-info"><span>Java OOP Development</span><span>80%</span></div>
             <div class="skill-track"><div class="skill-fill" data-pct="80"></div></div>
           </div>
-          <div class="skill-bar-wrap">
-            <div class="skill-info"><span>JavaScript / React</span><span>60%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-pct="60"></div></div>
-          </div>
-          <div class="skill-bar-wrap">
-            <div class="skill-info"><span>Java Development</span><span>80%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-pct="80"></div></div>
-          </div>
-          <div class="skill-bar-wrap">
-            <div class="skill-info"><span>Time Management</span><span>90%</span></div>
-            <div class="skill-track"><div class="skill-fill" data-pct="90"></div></div>
-          </div>
+        </div>
+      </div>
+
+      <!-- CERTIFICATIONS & HONORS -->
+      <div>
+        <h3 class="cv-section-title"><i class="fas fa-certificate"></i> Certifications</h3>
+        <div class="cert-chips">
+          <div class="cert-chip"><i class="fas fa-medal"></i> RRGI Innovathon 2025 Finalist</div>
+          <div class="cert-chip"><i class="fas fa-code"></i> C++ Programming Specialist</div>
+          <div class="cert-chip"><i class="fas fa-cubes"></i> Java Application Arch</div>
+          <div class="cert-chip"><i class="fas fa-globe"></i> Full-Stack Web Dev Foundations</div>
+        </div>
+      </div>
+
+      <!-- LANGUAGES -->
+      <div>
+        <h3 class="cv-section-title"><i class="fas fa-language"></i> Languages</h3>
+        <div class="cert-chips">
+          <div class="cert-chip"><i class="fas fa-check-circle"></i> English (Professional)</div>
+          <div class="cert-chip"><i class="fas fa-check-circle"></i> Hindi (Native)</div>
         </div>
       </div>
 
       <!-- QUOTE -->
       <div class="sidebar-quote">
         <i class="fas fa-quote-left"></i>
-        "Turning ideas into intelligent & interactive digital experiences."
+        "Turning complex algorithms into intelligent &amp; interactive digital experiences."
       </div>
     </div>
 
@@ -858,32 +1113,70 @@
       
       <!-- HEADER INFO -->
       <div class="header-info anim-fade-up">
+        <div class="cv-status-badge">
+          <span class="pulse-dot"></span> Available for Full-Time &amp; Internship Opportunities
+        </div>
         <h1>AVINASH <span>VERMA</span></h1>
         <h2>C++ &amp; AI Web Developer</h2>
-        <p>Hello, I'm a C++ and AI Web Developer with freshers experience and a strong focus on solving algorithms, designing clean layouts, and creating next-generation web architectures.</p>
+        <p>Goal-oriented Computer Science undergraduate &amp; developer specializing in AI-infused web platforms, high-performance C++ systems, and modern responsive front-ends. Passionate about solving algorithmic challenges, designing intuitive UI layouts, and engineering clean production code.</p>
       </div>
 
       <!-- METRICS GRID -->
       <div class="metrics-grid anim-fade-up anim-delay-1">
-        <div class="metric-card">
+        <div class="metric-card cv-3d-card">
           <div class="metric-icon"><i class="fas fa-briefcase"></i></div>
           <div class="metric-val">Fresher</div>
           <div class="metric-lbl">Real Project Experience</div>
         </div>
-        <div class="metric-card">
+        <div class="metric-card cv-3d-card">
           <div class="metric-icon"><i class="fas fa-code"></i></div>
-          <div class="metric-val">3+</div>
-          <div class="metric-lbl">Projects Completed</div>
+          <div class="metric-val">6+</div>
+          <div class="metric-lbl">Major Projects Shipped</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-icon"><i class="fas fa-users"></i></div>
-          <div class="metric-val">5+</div>
-          <div class="metric-lbl">Achievements</div>
-        </div>
-        <div class="metric-card">
+        <div class="metric-card cv-3d-card">
           <div class="metric-icon"><i class="fas fa-award"></i></div>
+          <div class="metric-val">8+</div>
+          <div class="metric-lbl">Certificates &amp; Honors</div>
+        </div>
+        <div class="metric-card cv-3d-card">
+          <div class="metric-icon"><i class="fas fa-bolt"></i></div>
           <div class="metric-val">100%</div>
-          <div class="metric-lbl">Dedication &amp; Quality</div>
+          <div class="metric-lbl">Dedication &amp; Speed</div>
+        </div>
+      </div>
+
+      <!-- CAREER HIGHLIGHTS 3D DECK -->
+      <div class="anim-fade-up anim-delay-1">
+        <h3 class="main-section-title"><i class="fas fa-layer-group"></i> Core Competencies &amp; Highlights</h3>
+        <div class="highlights-grid">
+          <div class="highlight-card cv-3d-card">
+            <div class="highlight-icon" style="color: #38bdf8; background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.25);">
+              <i class="fas fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="highlight-title">Full-Stack AI Architectures</div>
+            <div class="highlight-desc">Developing responsive, dynamic web applications with modern JS/CSS, real-time backend integrations, and AI APIs.</div>
+          </div>
+          <div class="highlight-card cv-3d-card">
+            <div class="highlight-icon" style="color: #32cd32; background: rgba(50, 205, 50, 0.1); border-color: rgba(50, 205, 50, 0.25);">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <div class="highlight-title">C++ High Performance Systems</div>
+            <div class="highlight-desc">Strong command of memory models, Object-Oriented Programming, pointer efficiency, and competitive algorithmic solutions.</div>
+          </div>
+          <div class="highlight-card cv-3d-card">
+            <div class="highlight-icon" style="color: #eab308; background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.25);">
+              <i class="fas fa-server"></i>
+            </div>
+            <div class="highlight-title">Java Enterprise Applications</div>
+            <div class="highlight-desc">Engineered modular desktop &amp; banking software with multi-client security, transactional data flow, and OOP designs.</div>
+          </div>
+          <div class="highlight-card cv-3d-card">
+            <div class="highlight-icon" style="color: #fb7185; background: rgba(251, 113, 133, 0.1); border-color: rgba(251, 113, 133, 0.25);">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div class="highlight-title">Hackathon &amp; Problem Solving</div>
+            <div class="highlight-desc">RRGI Innovathon 2025 finalist, active DSA practitioner on LeetCode with hundreds of logic problems resolved.</div>
+          </div>
         </div>
       </div>
 
@@ -891,14 +1184,14 @@
       <div class="anim-fade-up anim-delay-2">
         <h3 class="main-section-title"><i class="fas fa-user-tie"></i> About Me</h3>
         <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
-          I am a passionate C++ and AI Web Developer with a strong foundation in designing and building modern, responsive, and user-friendly web applications. I love solving complex structural problems, designing smooth layouts, and continuously learning new technologies to deliver high-performance digital experiences.
+          I am a passionate C++ and AI Web Developer with a solid academic background in Computer Science and Engineering from RRIMT Lucknow. I excel in transforming concepts into clean, high-performance digital products, solving algorithmic problems, designing smooth layouts, and continuously integrating modern web technologies and AI capabilities.
         </p>
       </div>
 
       <!-- EXPERIENCE -->
       <div class="anim-fade-up anim-delay-2">
         <h3 class="main-section-title"><i class="fas fa-history"></i> Experience</h3>
-        <div class="exp-card">
+        <div class="exp-card cv-3d-card">
           <div class="exp-header">
             <div>
               <div class="exp-role">Web Developer &amp; Designer</div>
@@ -907,11 +1200,11 @@
             <span class="exp-duration">Real Project Experience</span>
           </div>
           <ul class="exp-list">
-            <li>Designed and developed responsive, high-performance, and user-friendly websites.</li>
-            <li>Built custom and highly optimized front-end interfaces using HTML, CSS, and JavaScript and AI tools.</li>
-            <li>Managed full-stack web projects from initial architectural concepts all the way to cloud deployment.</li>
-            <li>Collaborated closely with clients to dissect system requirements and engineer tailored, high-quality answers.</li>
-            <li>Obsessed over clean code practices, browser compatibility, and pixel-perfect design metrics.</li>
+            <li>Designed and developed responsive, high-performance, and user-friendly websites with dynamic interactions.</li>
+            <li>Built custom and highly optimized front-end interfaces using HTML, CSS, JavaScript, and AI development workflows.</li>
+            <li>Managed full-stack web deployments, DNS configurations, and performance optimizations.</li>
+            <li>Collaborated directly with clients to translate functional requirements into scalable technical solutions.</li>
+            <li>Applied clean architecture, modular code organization, and strict cross-browser compatibility standards.</li>
           </ul>
         </div>
       </div>
@@ -921,12 +1214,12 @@
         <h3 class="main-section-title"><i class="fas fa-cubes"></i> Featured Projects</h3>
         <div class="projects-grid">
           
-          <div class="project-card">
+          <div class="project-card cv-3d-card">
             <div class="proj-top">
               <div class="proj-icon"><i class="fas fa-university"></i></div>
               <div class="proj-name">Bankmanagement System</div>
             </div>
-            <div class="proj-desc">A secure, multi-client banking system designed in Java. Manages customer accounts, balances, transactions, and interest calculations.</div>
+            <div class="proj-desc">A secure, multi-client banking system designed in Java. Manages customer accounts, balances, transactions, and interest calculations with robust validation.</div>
             <div class="proj-links">
               <a href="https://github.com/avinashverma39/JAVA_PROJECT" target="_blank" class="proj-link">
                 <i class="fab fa-github"></i> GitHub Repo
@@ -934,51 +1227,25 @@
             </div>
           </div>
 
-          <div class="project-card">
+          <div class="project-card cv-3d-card">
             <div class="proj-top">
               <div class="proj-icon"><i class="fas fa-laptop-code"></i></div>
-              <div class="proj-name">Portfolio Website</div>
+              <div class="proj-name">Modern 3D Portfolio Platform</div>
             </div>
-            <div class="proj-desc">Personal portfolio website built with HTML, CSS, JavaScript. Designed to showcase modern layouts, projects, and animated skill timelines.</div>
+            <div class="proj-desc">Interactive portfolio website featuring 3D perspective card fan models, dynamic category filters, custom cursor lens, and animated GSAP timelines.</div>
             <div class="proj-links">
               <a href="https://github.com/avinashverma39/portfolio" target="_blank" class="proj-link">
                 <i class="fab fa-github"></i> GitHub Repo
               </a>
             </div>
           </div>
-          
-          <!-- <div class="project-card">
-            <div class="proj-top">
-              <div class="proj-icon"><i class="fas fa-chart-line"></i></div>
-              <div class="proj-name">Dashboard UI</div>
-            </div>
-            <div class="proj-desc">Premium analytics dashboard UI featuring real-time data flow, dynamic chart updates, and highly polished glassmorphic styling tokens.</div>
-            <div class="proj-links">
-              <a href="https://github.com/avinashverma39" target="_blank" class="proj-link">
-                <i class="fab fa-github"></i> GitHub Repo
-              </a>
-            </div>
-          </div> -->
-          
-          <!-- <div class="project-card">
-            <div class="proj-top">
-              <div class="proj-icon"><i class="fas fa-pager"></i></div>
-              <div class="proj-name">Landing Page</div>
-            </div>
-            <div class="proj-desc">Clean, conversion-optimized landing page for high-tech SaaS platforms with interactive layouts and lightning-fast load times.</div>
-            <div class="proj-links">
-              <a href="https://github.com/avinashverma39" target="_blank" class="proj-link">
-                <i class="fab fa-github"></i> GitHub Repo
-              </a>
-            </div>
-          </div> -->
-          
-          <div class="project-card">
+
+          <div class="project-card cv-3d-card">
             <div class="proj-top">
               <div class="proj-icon"><i class="fas fa-store"></i></div>
-              <div class="proj-name">Business Website</div>
+              <div class="proj-name">Business Website Solutions</div>
             </div>
-            <div class="proj-desc">Multi-page business application with professional layout grids, inquiry form validation, and responsive mobile-first views.</div>
+            <div class="proj-desc">Multi-page business application with professional responsive layout grids, asynchronous inquiry validation, and fast load times.</div>
             <div class="proj-links">
               <a href="https://github.com/avinashverma39/portfolio" target="_blank" class="proj-link">
                 <i class="fab fa-github"></i> GitHub Repo
@@ -986,32 +1253,17 @@
             </div>
           </div>
 
-          <!-- <div class="project-card">
-            <div class="proj-top">
-              <div class="proj-icon"><i class="fas fa-blog"></i></div>
-              <div class="proj-name">Blog Website</div>
-            </div>
-            <div class="proj-desc">Dynamic blog layout including real-time text search, structured categorization tags, and clean readability profiles.</div>
-            <div class="proj-links">
-              <a href="https://github.com/avinashverma39" target="_blank" class="proj-link">
-                <i class="fab fa-github"></i> GitHub Repo
-              </a>
-            </div>
-          </div> -->
-
-          <div class="project-card">
+          <div class="project-card cv-3d-card">
             <div class="proj-top">
               <div class="proj-icon"><i class="fas fa-palette"></i></div>
-              <div class="proj-name">Portfolio v2</div>
+              <div class="proj-name">AI-Driven UI Lab</div>
             </div>
-            <div class="proj-desc">Advanced version of my personal portfolio utilizing modern micro-interactions, CSS transitions, and an optimized user flow.</div>
+            <div class="proj-desc">Next-generation user interface experimentation featuring dynamic dark/light themes, fluid micro-interactions, and real-time backend data binding.</div>
             <div class="proj-links">
               <a href="https://github.com/avinashverma39/portfolio" target="_blank" class="proj-link">
                 <i class="fab fa-github"></i> GitHub Repo
-              </a>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -1061,8 +1313,57 @@
       
       initCustomCursor();
       initHamburger();
+      init3DTiltCards();
+      initCopyCvLink();
       await checkAuthButtons();
     });
+
+    function init3DTiltCards() {
+      const cards = document.querySelectorAll('.cv-3d-card');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
+          const rotX = ((y - cy) / cy) * -7;
+          const rotY = ((x - cx) / cx) * 7;
+          card.style.transform = `perspective(800px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-4px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+      });
+    }
+
+    function initCopyCvLink() {
+      const btn = document.getElementById('copyCvLinkBtn');
+      const toast = document.getElementById('cvToast');
+      if (!btn) return;
+
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          if (toast) {
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2800);
+          }
+        } catch (err) {
+          // Fallback
+          const input = document.createElement('input');
+          input.value = window.location.href;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+          if (toast) {
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2800);
+          }
+        }
+      });
+    }
 
     function initCustomCursor() {
       const cursor = document.getElementById('cursor');

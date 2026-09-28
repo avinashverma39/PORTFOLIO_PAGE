@@ -388,20 +388,26 @@
         });
       }
 
-      const techIcons = document.querySelector('.tech-icons');
-      if (techIcons) {
+      /* Floating Skill Icon Cloud entrance */
+      const iconCloud = document.querySelector('.skills-icon-cloud');
+      if (iconCloud) {
         ScrollTrigger.create({
-          trigger: techIcons,
+          trigger: iconCloud,
           start: 'top 82%',
           once: true,
           onEnter: () => {
             anime({
-              targets: '.tech-icon-card',
-              opacity: [0, 1],
-              scale: [0.6, 1],
-              translateY: [25, 0],
-              delay: anime.stagger(65, { grid: [5, 3], from: 'center' }),
-              duration: 800,
+              targets: '.floating-skill-icon',
+              opacity: [0, function(el) {
+                const depth = parseFloat(el.getAttribute('data-depth')) || 1.0;
+                if (depth <= 0.6) return 0.55;
+                if (depth <= 0.9) return 0.7;
+                if (depth <= 1.2) return 0.85;
+                return 1;
+              }],
+              scale: [0.3, 1],
+              delay: anime.stagger(80, { from: 'center' }),
+              duration: 900,
               easing: 'spring(1, 80, 12, 0)'
             });
           }
@@ -411,179 +417,91 @@
 
 
     /* ─────────────────────────────────────────────────────────────
-       8. PROJECTS — CATEGORY FILTERS & ANIME.JS 3D TILT PHYSICS
+       8. PROJECTS — CARD FAN ENTRANCE & 3D TILT
        ───────────────────────────────────────────────────────────── */
     (function projectCards() {
+      /* Projects Grid ScrollTrigger entrance */
       const projectsGrid = document.querySelector('.projects-grid');
-      const filterBtns = document.querySelectorAll('.project-filters .filter-btn');
-      const cards = document.querySelectorAll('.project-card');
-
       if (projectsGrid) {
         ScrollTrigger.create({
           trigger: projectsGrid,
-          start: 'top 80%',
+          start: 'top 85%',
           once: true,
           onEnter: () => {
+            const cards = projectsGrid.querySelectorAll('.project-card');
             anime({
-              targets: '.project-card',
+              targets: Array.from(cards),
               opacity: [0, 1],
               translateY: [60, 0],
-              scale: [0.92, 1],
-              delay: anime.stagger(140),
+              scale: [0.95, 1],
+              delay: anime.stagger(100),
               duration: 900,
-              easing: 'spring(1, 78, 10, 0)'
+              easing: 'easeOutCubic'
             });
           }
         });
       }
 
-      /* Category filtering transition with Anime.js */
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          filterBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          const filterVal = btn.getAttribute('data-filter');
-
-          anime({
-            targets: '.project-card',
-            opacity: 0,
-            scale: 0.85,
-            translateY: 20,
-            duration: 250,
-            easing: 'easeInCubic',
-            complete: () => {
-              cards.forEach(card => {
-                const cat = card.getAttribute('data-category') || '';
-                if (filterVal === 'all' || cat.includes(filterVal)) {
-                  card.style.display = 'block';
-                } else {
-                  card.style.display = 'none';
-                }
-              });
-
-              const visibleCards = Array.from(cards).filter(c => c.style.display !== 'none');
-              anime({
-                targets: visibleCards,
-                opacity: [0, 1],
-                scale: [0.85, 1],
-                translateY: [20, 0],
-                delay: anime.stagger(90),
-                duration: 650,
-                easing: 'spring(1, 80, 12, 0)'
-              });
-            }
-          });
+      /* Card Fan entrance animation for other fan containers like achievements */
+      const fanContainers = document.querySelectorAll('.card-fan-container');
+      fanContainers.forEach(container => {
+        ScrollTrigger.create({
+          trigger: container,
+          start: 'top 80%',
+          once: true,
+          onEnter: () => {
+            const cards = container.querySelectorAll('.card-fan-item');
+            anime({
+              targets: Array.from(cards),
+              opacity: [0, 1],
+              translateY: [80, 0],
+              scale: [0.8, 1],
+              delay: anime.stagger(120),
+              duration: 1000,
+              easing: 'spring(1, 78, 10, 0)'
+            });
+          }
         });
       });
 
-      /* Cursor lens mode on project card hover */
+      /* Cursor lens mode on card hover */
       const follower = document.getElementById('cursorFollower');
-      cards.forEach(card => {
+      document.querySelectorAll('.project-card, .card-fan-item').forEach(card => {
         card.addEventListener('mouseenter', () => {
           if (follower) follower.classList.add('cursor-view-lens');
         });
         card.addEventListener('mouseleave', () => {
           if (follower) follower.classList.remove('cursor-view-lens');
         });
-
-        /* 3D Tilt physics */
-        card.addEventListener('mousemove', e => {
-          const r = card.getBoundingClientRect();
-          const x = (e.clientX - r.left) / r.width - 0.5;
-          const y = (e.clientY - r.top) / r.height - 0.5;
-          anime({
-            targets: card,
-            rotateX: -y * 8,
-            rotateY: x * 8,
-            translateZ: 10,
-            translateY: -6,
-            duration: 400,
-            easing: 'easeOutQuad'
-          });
-        });
-
-        card.addEventListener('mouseleave', () => {
-          anime({
-            targets: card,
-            rotateX: 0,
-            rotateY: 0,
-            translateZ: 0,
-            translateY: 0,
-            duration: 800,
-            easing: 'spring(1, 75, 10, 0)'
-          });
-        });
       });
     })();
 
     /* 
-       16. ACHIEVEMENTS — SCROLL ENTRANCE, 3D TILT & FILTER ANIMATION
+       16. ACHIEVEMENTS — SCROLL ENTRANCE & FILTER ANIMATION
         */
     (function achievementsSection() {
-      const grid = document.querySelector('.achievements-grid');
       const counters = document.querySelector('.achievement-counters');
       const filters = document.querySelector('.achievement-filters');
+      const achievementsContainer = document.getElementById('achievementsFan');
 
-      /* Entrance animation for achievement cards (called on initial load + filter) */
-      function animateCards() {
-        const cards = grid?.querySelectorAll('.achievement-card');
-        if (!cards || cards.length === 0) return;
-
-        anime({
-          targets: Array.from(cards),
-          opacity: [0, 1],
-          translateY: [50, 0],
-          scale: [0.92, 1],
-          delay: anime.stagger(100),
-          duration: 800,
-          easing: 'spring(1, 78, 10, 0)'
-        });
-
-        /* 3D Tilt physics on hover */
-        cards.forEach(card => {
-          card.addEventListener('mousemove', e => {
-            const r = card.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width - 0.5;
-            const y = (e.clientY - r.top) / r.height - 0.5;
+      /* Filter click animation for visible achievement fan cards */
+      const achieveFilterBtns = document.querySelectorAll('[data-achievement-filter]');
+      achieveFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!achievementsContainer) return;
+          const visibleCards = achievementsContainer.querySelectorAll('.card-fan-item:not([style*="display: none"])');
+          if (visibleCards.length > 0) {
             anime({
-              targets: card,
-              rotateX: -y * 6,
-              rotateY: x * 6,
-              translateZ: 8,
-              duration: 400,
-              easing: 'easeOutQuad'
+              targets: Array.from(visibleCards),
+              opacity: [0, 1],
+              scale: [0.88, 1],
+              delay: anime.stagger(60),
+              duration: 600,
+              easing: 'spring(1, 80, 12, 0)'
             });
-          });
-
-          card.addEventListener('mouseleave', () => {
-            anime({
-              targets: card,
-              rotateX: 0,
-              rotateY: 0,
-              translateZ: 0,
-              duration: 800,
-              easing: 'spring(1, 75, 10, 0)'
-            });
-          });
+          }
         });
-      }
-
-      /* Initial scroll-triggered entrance */
-      if (grid) {
-        ScrollTrigger.create({
-          trigger: grid,
-          start: 'top 82%',
-          once: true,
-          onEnter: animateCards
-        });
-
-        /* Watch for DOM changes (filter/view-all re-renders cards) */
-        const observer = new MutationObserver(() => {
-          animateCards();
-        });
-        observer.observe(grid, { childList: true });
-      }
+      });
 
       /* Counter pills entrance */
       if (counters) {
@@ -672,71 +590,30 @@
 
 
     /* 
-       17. RESOURCES — SCROLL ENTRANCE, 3D TILT & FILTER ANIMATION
+       17. RESOURCES — SCROLL ENTRANCE & FILTER ANIMATION
         */
     (function resourcesSection() {
-      const grid = document.querySelector('.resources-grid');
       const filters = document.querySelector('.resource-filters');
+      const resourcesContainer = document.getElementById('resourcesFan');
 
-      /* Entrance animation for resource cards (called on initial load + filter) */
-      function animateCards() {
-        const cards = grid?.querySelectorAll('.resource-card');
-        if (!cards || cards.length === 0) return;
-
-        anime({
-          targets: Array.from(cards),
-          opacity: [0, 1],
-          translateY: [50, 0],
-          scale: [0.92, 1],
-          delay: anime.stagger(100),
-          duration: 800,
-          easing: 'spring(1, 78, 10, 0)'
-        });
-
-        /* 3D Tilt physics on hover */
-        cards.forEach(card => {
-          card.addEventListener('mousemove', e => {
-            const r = card.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width - 0.5;
-            const y = (e.clientY - r.top) / r.height - 0.5;
+      /* Filter click animation for visible resource fan cards */
+      const resFilterBtns = document.querySelectorAll('[data-resource-filter]');
+      resFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!resourcesContainer) return;
+          const visibleCards = resourcesContainer.querySelectorAll('.card-fan-item:not([style*="display: none"])');
+          if (visibleCards.length > 0) {
             anime({
-              targets: card,
-              rotateX: -y * 6,
-              rotateY: x * 6,
-              translateZ: 8,
-              duration: 400,
-              easing: 'easeOutQuad'
+              targets: Array.from(visibleCards),
+              opacity: [0, 1],
+              scale: [0.88, 1],
+              delay: anime.stagger(60),
+              duration: 600,
+              easing: 'spring(1, 80, 12, 0)'
             });
-          });
-
-          card.addEventListener('mouseleave', () => {
-            anime({
-              targets: card,
-              rotateX: 0,
-              rotateY: 0,
-              translateZ: 0,
-              duration: 800,
-              easing: 'spring(1, 75, 10, 0)'
-            });
-          });
+          }
         });
-      }
-
-      /* Initial scroll-triggered entrance */
-      if (grid) {
-        ScrollTrigger.create({
-          trigger: grid,
-          start: 'top 82%',
-          once: true,
-          onEnter: animateCards
-        });
-
-        /* Watch for DOM changes (filter re-renders cards) */
-        const observer = new MutationObserver(() => {
-          animateCards();
-        });
-        observer.observe(grid, { childList: true });
-      }
+      });
 
       /* Filter buttons entrance */
       if (filters) {
@@ -747,6 +624,53 @@
           onEnter: () => {
             anime({
               targets: '.resource-filters .filter-btn',
+              opacity: [0, 1],
+              translateY: [12, 0],
+              delay: anime.stagger(60),
+              duration: 600,
+              easing: 'easeOutCubic'
+            });
+          }
+        });
+      }
+    })();
+
+
+    /* 
+       18. JOURNEY — SCROLL ENTRANCE & FILTER ANIMATION
+        */
+    (function journeySection() {
+      const filters = document.querySelector('.journey-filters');
+      const journeyContainer = document.getElementById('journeyFan');
+
+      /* Filter click animation for visible journey fan cards */
+      const journeyFilterBtns = document.querySelectorAll('[data-journey-filter]');
+      journeyFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!journeyContainer) return;
+          const visibleCards = journeyContainer.querySelectorAll('.card-fan-item:not([style*="display: none"])');
+          if (visibleCards.length > 0) {
+            anime({
+              targets: Array.from(visibleCards),
+              opacity: [0, 1],
+              scale: [0.88, 1],
+              delay: anime.stagger(60),
+              duration: 600,
+              easing: 'spring(1, 80, 12, 0)'
+            });
+          }
+        });
+      });
+
+      /* Filter buttons entrance */
+      if (filters) {
+        ScrollTrigger.create({
+          trigger: filters,
+          start: 'top 85%',
+          once: true,
+          onEnter: () => {
+            anime({
+              targets: '.journey-filters .filter-btn',
               opacity: [0, 1],
               translateY: [12, 0],
               delay: anime.stagger(60),
@@ -999,18 +923,18 @@
     /* 
        15. TECH ICON CARDS — Hover 3D flip tease
         */
-    (function techIconHover() {
-      document.querySelectorAll('.tech-icon-card').forEach(card => {
-        card.addEventListener('mouseenter', () => {
-          gsap.to(card, {
-            rotateY: 12, scale: 1.08, y: -6,
+    (function floatingSkillIconHover() {
+      document.querySelectorAll('.floating-skill-icon').forEach(icon => {
+        icon.addEventListener('mouseenter', () => {
+          gsap.to(icon, {
+            scale: 1.25, y: -8,
             duration: 0.35, ease: EASE.spring,
             transformPerspective: 600,
           });
         });
-        card.addEventListener('mouseleave', () => {
-          gsap.to(card, {
-            rotateY: 0, scale: 1, y: 0,
+        icon.addEventListener('mouseleave', () => {
+          gsap.to(icon, {
+            scale: 1, y: 0,
             duration: 0.4, ease: EASE.out,
           });
         });
