@@ -957,6 +957,10 @@
             x: 0, y: 0,
             duration: 0.6, ease: EASE.spring,
           });
+        });
+      });
+    })();
+
     /* ─────────────────────────────────────────────────────────────
        19. CONTINUOUS MOVING & ANIMATED CARDS ENGINE FOR EVERY SECTION
        Subtle perpetual floating, organic wave motion, and interactive
@@ -1069,12 +1073,12 @@
         });
       });
 
-      // 6. ACHIEVEMENTS SECTION: Fan & Achievement Cards
-      const achieveCards = document.querySelectorAll('.achievements-section .card-fan-item, .achievements-section .achievement-card');
-      achieveCards.forEach((card, i) => {
-        gsap.to(card, {
-          y: -8,
-          duration: 2.9 + (i * 0.25),
+      // 6. ACHIEVEMENTS SECTION: Section Badges & Ambient Glow
+      const achieveDecors = document.querySelectorAll('.achievements-section .achievement-counters, .achievements-section .achievements-bg-glow');
+      achieveDecors.forEach((el, i) => {
+        gsap.to(el, {
+          y: -6,
+          duration: 3.2 + (i * 0.4),
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
@@ -1108,12 +1112,12 @@
         });
       });
 
-      // 10. RESUME / HIGHLIGHTS SECTION:
-      const resumeCards = document.querySelectorAll('.resume-section .resume-card, .resume-section .resume-box, .resume-section .resume-feature');
-      resumeCards.forEach((card, i) => {
-        gsap.to(card, {
-          y: -7,
-          duration: 3.3 + (i * 0.3),
+      // 10. RESUME / HIGHLIGHTS SECTION: Executive Banner & Profile
+      const resumeDecors = document.querySelectorAll('.resume-section .resume-profile-banner');
+      resumeDecors.forEach((el, i) => {
+        gsap.to(el, {
+          y: -6,
+          duration: 3.5 + (i * 0.3),
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',

@@ -8186,15 +8186,21 @@ LARGE SCREEN ADJUSTMENTS
 }
 
 /* =============================================
-   NON-CLICKABLE CARDS & CONTINUOUS MOVING CARDS
+   CARD INTERACTIONS & MOTION RULES
    ============================================= */
 .project-card,
 .arc-card,
 .ribbon-card-wrap,
-.card-fan-item,
 .timeline-card,
 .stat-card {
   cursor: default !important;
+  user-select: none;
+  will-change: transform;
+}
+
+/* 3D Card Fan items (Achievements & Resume) are interactive, clickable & switchable */
+.card-fan-item {
+  cursor: pointer !important;
   user-select: none;
   will-change: transform;
 }

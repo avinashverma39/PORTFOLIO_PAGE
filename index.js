@@ -2458,9 +2458,36 @@ function initCardFan() {
     // Expose spreadCards on container
     container.spreadCards = spreadCards;
 
-    // Cards are non-clickable display items (no erratic click jumps)
+    // Enable card click to slide open details and switch active cards
     cards.forEach(card => {
-      card.style.cursor = 'default';
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', (e) => {
+        // If clicking inside interactive links or action buttons, let them fire naturally
+        if (e.target.closest('a') || (e.target.closest('button') && !e.target.classList.contains('card-fan-item'))) {
+          return;
+        }
+
+        if (activeCard === card) {
+          // Deactivate current active card
+          activeCard = null;
+          card.classList.remove('active');
+        } else {
+          // Switch to this card
+          if (activeCard) activeCard.classList.remove('active');
+          activeCard = card;
+          card.classList.add('active');
+        }
+        spreadCards();
+      });
+    });
+
+    // Click outside to collapse active card
+    document.addEventListener('click', (e) => {
+      if (activeCard && !container.contains(e.target)) {
+        activeCard.classList.remove('active');
+        activeCard = null;
+        spreadCards();
+      }
     });
 
     // Handle resize
