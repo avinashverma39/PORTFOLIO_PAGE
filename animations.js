@@ -957,6 +957,180 @@
             x: 0, y: 0,
             duration: 0.6, ease: EASE.spring,
           });
+    /* ─────────────────────────────────────────────────────────────
+       19. CONTINUOUS MOVING & ANIMATED CARDS ENGINE FOR EVERY SECTION
+       Subtle perpetual floating, organic wave motion, and interactive
+       3D parallax drift to cards across every section:
+       Hero, About, Education, Skills, Projects, Achievements,
+       Resources, Journey, Hobbies, Resume, and Contact.
+       ───────────────────────────────────────────────────────────── */
+    (function initEverySectionCardMotion() {
+      // 1. HERO SECTION: Floating badge cards & tech pills
+      const heroBadges = document.querySelectorAll('.hero-badge, .stat-badge, .floating-card-1, .floating-card-2, .hero-tag, .hero-buttons .btn');
+      heroBadges.forEach((badge, i) => {
+        gsap.to(badge, {
+          y: -10,
+          rotation: (i % 2 === 0 ? 1.5 : -1.5),
+          duration: 3.2 + (i * 0.35),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: (i % 4) * 0.25
+        });
+      });
+
+      // 2. ABOUT SECTION: Stat Cards & Info Cards
+      const aboutCards = document.querySelectorAll('.about-section .stat-card, .about-section .about-card, .about-section .about-text');
+      aboutCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -8,
+          duration: 3.0 + (i * 0.4),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.3
+        });
+
+        // Interactive 3D tilt tracking without click
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const rx = ((e.clientY - r.top - r.height / 2) / (r.height / 2)) * -8;
+          const ry = ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 8;
+          gsap.to(card, {
+            rotationX: rx,
+            rotationY: ry,
+            transformPerspective: 800,
+            duration: 0.3,
+            ease: 'power1.out'
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            rotationX: 0,
+            rotationY: 0,
+            duration: 0.7,
+            ease: 'elastic.out(1, 0.6)'
+          });
+        });
+      });
+
+      // 3. EDUCATION SECTION: Timeline Cards
+      const eduCards = document.querySelectorAll('.education-section .timeline-card');
+      eduCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -7,
+          duration: 3.4 + (i * 0.3),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: 0.2 + (i * 0.35)
+        });
+
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const rx = ((e.clientY - r.top - r.height / 2) / (r.height / 2)) * -5;
+          const ry = ((e.clientX - r.left - r.width / 2) / (r.width / 2)) * 6;
+          gsap.to(card, {
+            rotationX: rx,
+            rotationY: ry,
+            transformPerspective: 900,
+            duration: 0.3,
+            ease: 'power1.out'
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, { rotationX: 0, rotationY: 0, duration: 0.6, ease: 'power2.out' });
+        });
+      });
+
+      // 4. SKILLS SECTION: Skills Group Cards & Skill Cards
+      const skillCards = document.querySelectorAll('.skills-section .skills-group, .skills-section .skill-card');
+      skillCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -6,
+          duration: 3.5 + (i * 0.4),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.25
+        });
+      });
+
+      // 5. PROJECTS SECTION: Project Cards with Continuous Floating Wave
+      const projectCards = document.querySelectorAll('.projects-section .project-card');
+      projectCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -10,
+          duration: 3.2 + ((i % 3) * 0.4),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: (i % 3) * 0.35
+        });
+      });
+
+      // 6. ACHIEVEMENTS SECTION: Fan & Achievement Cards
+      const achieveCards = document.querySelectorAll('.achievements-section .card-fan-item, .achievements-section .achievement-card');
+      achieveCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -8,
+          duration: 2.9 + (i * 0.25),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.2
+        });
+      });
+
+      // 7. LEARNING RESOURCES SECTION: Cylinder Track & Ribbon Cards
+      const resCards = document.querySelectorAll('.resources-section .ribbon-card-wrap, .resources-section .resource-card');
+      resCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -6,
+          duration: 2.8 + ((i % 4) * 0.3),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: (i % 4) * 0.2
+        });
+      });
+
+      // 8. CODING JOURNEY & 9. HOBBIES SECTIONS: 3D Arc Cards
+      const arcCards = document.querySelectorAll('.arc-showcase-section .arc-card');
+      arcCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -6,
+          duration: 3.0 + ((i % 5) * 0.3),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: (i % 5) * 0.25
+        });
+      });
+
+      // 10. RESUME / HIGHLIGHTS SECTION:
+      const resumeCards = document.querySelectorAll('.resume-section .resume-card, .resume-section .resume-box, .resume-section .resume-feature');
+      resumeCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -7,
+          duration: 3.3 + (i * 0.3),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.2
+        });
+      });
+
+      // 11. CONTACT SECTION: Contact Cards
+      const contactCards = document.querySelectorAll('.contact-section .contact-card, .contact-section .contact-info-card, .contact-section .contact-form-wrapper');
+      contactCards.forEach((card, i) => {
+        gsap.to(card, {
+          y: -6,
+          duration: 3.4 + (i * 0.4),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.3
         });
       });
     })();
