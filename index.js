@@ -1733,17 +1733,11 @@ function initResources() {
     if (isDragging) onDragEnd();
   });
 
-  /* ── Card Click to Open Preview Modal Directly ─── */
+  /* ── Cards are moving display items and do not click into modals ─── */
   track.addEventListener('click', (e) => {
-    // If dragging significantly, don't trigger click
-    if (Math.abs(dragDelta) > 7) return;
-
-    const cardWrap = e.target.closest('.ribbon-card-wrap');
-    if (!cardWrap) return;
-
-    const resId = cardWrap.getAttribute('data-resource-id');
-    if (resId) {
-      openResourceModal(resId);
+    // Allow direct clicks on any standard external links if present
+    if (!e.target.closest('a')) {
+      e.preventDefault();
     }
   });
 
@@ -1981,19 +1975,10 @@ function setupArcShowcase(cfg) {
     });
   }
 
-  // Click ANY card to direct access details & center it
+  // Cards are animated 3D curved elements (no modal popup on click)
   allCards.forEach(card => {
+    card.style.cursor = 'default';
     card.addEventListener('click', (e) => {
-      // Direct certificate preview button trigger
-      const certBtn = e.target.closest('.achievement-view-cert-btn');
-      if (certBtn) {
-        e.stopPropagation();
-        e.preventDefault();
-        const certId = certBtn.getAttribute('data-achievement-id');
-        if (typeof openCertModal === 'function') openCertModal(certId);
-        return;
-      }
-
       // Allow natural external link if specifically clicked
       const extLink = e.target.closest('a');
       if (extLink && extLink.getAttribute('href')?.startsWith('http') && !e.target.closest('.arc-card-inner')) {
@@ -2003,15 +1988,12 @@ function setupArcShowcase(cfg) {
       e.stopPropagation();
       e.preventDefault();
 
-      // Center this card in the 3D arc
+      // Center this card in the 3D arc without opening any modal popup
       const vIdx = visibleCards.indexOf(card);
       if (vIdx !== -1) {
         activeIndex = vIdx;
         updateArcPositions();
       }
-
-      // Directly access this card's detail modal
-      openCardDetail(card);
     });
   });
 
@@ -2476,33 +2458,9 @@ function initCardFan() {
     // Expose spreadCards on container
     container.spreadCards = spreadCards;
 
-    // Handle click
+    // Cards are non-clickable display items (no erratic click jumps)
     cards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        // If clicking inside details buttons/links, don't toggle
-        if (e.target.closest('a') || e.target.closest('button')) return;
-
-        if (activeCard === card) {
-          // Deactivate
-          activeCard = null;
-          card.classList.remove('active');
-        } else {
-          // Deactivate previous
-          if (activeCard) activeCard.classList.remove('active');
-          activeCard = card;
-          card.classList.add('active');
-        }
-        spreadCards();
-      });
-    });
-
-    // Click outside to close
-    document.addEventListener('click', (e) => {
-      if (activeCard && !container.contains(e.target)) {
-        activeCard.classList.remove('active');
-        activeCard = null;
-        spreadCards();
-      }
+      card.style.cursor = 'default';
     });
 
     // Handle resize
