@@ -1589,6 +1589,60 @@ const resourcesData = [
     actionLabel: 'Practice Questions',
     actionIcon: 'fa-solid fa-pen-to-square',
     actionUrl: '#'
+  },
+  {
+    id: 'res-system-design',
+    title: 'System Design & Scalable Architecture',
+    category: 'notes',
+    icon: 'fa-solid fa-network-wired',
+    description: 'Comprehensive engineering blueprints on scalable system architectures, microservices, load balancing, caching strategies, and distributed databases.',
+    content: [
+      'Scalability Fundamentals — vertical vs horizontal scaling, latency vs throughput',
+      'Caching & Content Delivery — Redis, Memcached, CDN edge caching strategies',
+      'Load Balancing & Gateways — Nginx, reverse proxies, round-robin & consistent hashing',
+      'Databases — SQL vs NoSQL trade-offs, sharding, replication, CAP theorem',
+      'Message Queues — Kafka, RabbitMQ, asynchronous pub-sub architectures'
+    ],
+    tags: ['System Design', 'Microservices', 'Distributed Systems', 'Architecture'],
+    actionLabel: 'Read Architecture Notes',
+    actionIcon: 'fa-solid fa-book-open-reader',
+    actionUrl: '#'
+  },
+  {
+    id: 'res-dbms-notes',
+    title: 'DBMS & SQL Deep Dive',
+    category: 'notes',
+    icon: 'fa-solid fa-database',
+    description: 'Detailed study notes covering relational database engines, normalization, B-Tree index optimization, transaction isolation levels, and complex SQL joins.',
+    content: [
+      'Relational Theory — ER modeling, functional dependencies, 1NF to BCNF',
+      'Transactions & Concurrency — ACID properties, serializability, 2PL, MVCC',
+      'Indexing & Optimization — B+ Trees, hash indexes, query execution plans',
+      'Advanced SQL — window functions, CTEs, subqueries, stored procedures',
+      'NoSQL & Document Stores — MongoDB schema design, indexing, aggregation pipelines'
+    ],
+    tags: ['DBMS', 'SQL', 'PostgreSQL', 'Database Internals'],
+    actionLabel: 'Read DBMS Notes',
+    actionIcon: 'fa-solid fa-book-open-reader',
+    actionUrl: '#'
+  },
+  {
+    id: 'res-leetcode-75',
+    title: 'LeetCode 75 Top Interview Question Bank',
+    category: 'questions',
+    icon: 'fa-solid fa-code',
+    description: 'Curated problem bank of the top 75 essential coding interview questions categorized by core algorithmic patterns with step-by-step solution breakdowns.',
+    content: [
+      'Array / String — Greatest Common Divisor of Strings, Reverse Vowels, Increasing Triplet',
+      'Two Pointers & Sliding Window — Is Subsequence, Max Number of Vowels, Longest 1s Subarray',
+      'Prefix Sum & Hash Map — Find Pivot Index, Unique Number of Occurrences, Equal Row/Column Pairs',
+      'Stack & Queue — Asteroid Collision, Decode String, Number of Recent Calls',
+      'Binary Tree & Graph — Leaf-Similar Trees, Path Sum III, Nearest Exit from Entrance in Maze'
+    ],
+    tags: ['LeetCode 75', 'FAANG Prep', 'Algorithms', 'Pattern Mastery'],
+    actionLabel: 'Practice LeetCode 75',
+    actionIcon: 'fa-solid fa-circle-play',
+    actionUrl: '#'
   }
 ];
 
@@ -1616,6 +1670,8 @@ function initResources() {
   });
 
   const allCards = Array.from(track.children);
+  const cardStep = 232; // 210px card width + 22px gap
+  let singleWidth = originalCards.length * cardStep;
 
   /* ── State variables for continuous 3D ribbon motion ─── */
   let scrollOffset = 0;
@@ -1626,35 +1682,38 @@ function initResources() {
   let dragStartX = 0;
   let dragStartOffset = 0;
   let dragDelta = 0;
-  const speed = 0.55;
-  const cardStep = 232; // card width + gap
+  const normalSpeed = 0.65;
+  const hoverSpeed = 0.15;
 
-  // Measure single loop width after rendering
-  let singleWidth = 0;
   function updateMeasurements() {
-    singleWidth = (allCards.length / 2) * cardStep;
+    const firstCard = track.children[0];
+    const secondCard = track.children[1];
+    if (firstCard && secondCard) {
+      const computedStep = secondCard.offsetLeft - firstCard.offsetLeft;
+      if (computedStep > 0) {
+        singleWidth = originalCards.length * computedStep;
+      }
+    }
   }
   updateMeasurements();
   window.addEventListener('resize', updateMeasurements);
 
-  /* ── 3D Cylinder Curvature Transform Updater ─── */
+  /* ── Smooth 3D Perspective Curvature Transform Updater ─── */
   function update3DCurvature() {
     if (!stage) return;
-    const stageRect = stage.getBoundingClientRect();
-    const centerX = stageRect.left + stageRect.width / 2;
-    const halfWidth = Math.max(stageRect.width * 0.45, 300);
+    const stageWidth = stage.offsetWidth || 1200;
+    const stageCenterX = stageWidth / 2;
+    const halfSpan = Math.max(stageWidth * 0.45, 320);
 
-    allCards.forEach(card => {
-      const cardRect = card.getBoundingClientRect();
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const relDist = (cardCenter - centerX) / halfWidth;
-      const clampedDist = Math.max(-1.5, Math.min(1.5, relDist));
+    allCards.forEach((card, idx) => {
+      // Calculate geometric position along continuous loop
+      const cardCenter = scrollOffset + (idx * cardStep) + (cardStep / 2);
+      const relDist = (cardCenter - stageCenterX) / halfSpan;
+      const clampedDist = Math.max(-1.4, Math.min(1.4, relDist));
 
-      // Concave cylinder curve:
-      // Left cards turned towards center (positive rotateY), right cards turned towards center (negative rotateY)
-      const rotateY = clampedDist * 22;
-      const translateZ = -Math.pow(Math.abs(clampedDist), 1.35) * 45;
-      const scale = Math.max(0.86, 1 - Math.pow(Math.abs(clampedDist), 2) * 0.07);
+      const rotateY = clampedDist * 18;
+      const translateZ = -Math.pow(Math.abs(clampedDist), 1.25) * 38;
+      const scale = Math.max(0.88, 1 - Math.pow(Math.abs(clampedDist), 2) * 0.05);
 
       card.style.transform = `perspective(1200px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`;
     });
@@ -1662,14 +1721,15 @@ function initResources() {
 
   /* ── Continuous Animation Loop ─── */
   function animateRibbon() {
-    if (isPlaying && !isHovered && !isDragging) {
-      targetOffset -= speed;
+    if (isPlaying && !isDragging) {
+      const currentSpeed = isHovered ? hoverSpeed : normalSpeed;
+      targetOffset -= currentSpeed;
     }
 
-    // Smooth lerp
-    scrollOffset += (targetOffset - scrollOffset) * 0.12;
+    // Smooth lerp for buttery motion
+    scrollOffset += (targetOffset - scrollOffset) * 0.14;
 
-    // Seamless loop wrapping
+    // Seamless infinite loop wrapping
     if (singleWidth > 0) {
       if (scrollOffset <= -singleWidth) {
         scrollOffset += singleWidth;
@@ -1688,7 +1748,7 @@ function initResources() {
 
   requestAnimationFrame(animateRibbon);
 
-  /* ── Hover Pause/Resume ─── */
+  /* ── Hover Slow/Drift ─── */
   stage.addEventListener('mouseenter', () => { isHovered = true; });
   stage.addEventListener('mouseleave', () => { isHovered = false; });
 
@@ -1711,7 +1771,7 @@ function initResources() {
     isDragging = false;
   }
 
-  // Mouse events
+  // Mouse drag events
   stage.addEventListener('mousedown', (e) => {
     onDragStart(e.clientX);
   });
@@ -1722,7 +1782,7 @@ function initResources() {
     if (isDragging) onDragEnd();
   });
 
-  // Touch events
+  // Touch swipe events
   stage.addEventListener('touchstart', (e) => {
     if (e.touches.length > 0) onDragStart(e.touches[0].clientX);
   }, { passive: true });
@@ -1733,11 +1793,18 @@ function initResources() {
     if (isDragging) onDragEnd();
   });
 
-  /* ── Cards are moving display items and do not click into modals ─── */
+  /* ── CLICK CARD TO SHOW FULL DETAILS, NOTES, QUESTIONS & CHAPTERS PREVIEW ─── */
   track.addEventListener('click', (e) => {
-    // Allow direct clicks on any standard external links if present
-    if (!e.target.closest('a')) {
-      e.preventDefault();
+    // If dragging significantly, don't trigger click modal
+    if (Math.abs(dragDelta) > 7) return;
+
+    const cardWrap = e.target.closest('.ribbon-card-wrap');
+    if (!cardWrap) return;
+
+    const resId = cardWrap.getAttribute('data-resource-id');
+    if (resId) {
+      e.stopPropagation();
+      openResourceModal(resId);
     }
   });
 
@@ -1751,22 +1818,25 @@ function initResources() {
 
   /* ── Controls: Prev / Next / Play-Pause ─── */
   if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      targetOffset += cardStep;
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      targetOffset += cardStep * 1.5;
     });
   }
 
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      targetOffset -= cardStep;
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      targetOffset -= cardStep * 1.5;
     });
   }
 
   if (playBtn) {
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       isPlaying = !isPlaying;
       playBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
-      playBtn.title = isPlaying ? 'Auto-moving is active' : 'Auto-moving is paused';
+      playBtn.title = isPlaying ? 'Auto-moving is active (Click to pause)' : 'Motion paused (Click to resume)';
     });
   }
 

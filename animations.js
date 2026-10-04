@@ -1086,16 +1086,16 @@
         });
       });
 
-      // 7. LEARNING RESOURCES SECTION: Cylinder Track & Ribbon Cards
-      const resCards = document.querySelectorAll('.resources-section .ribbon-card-wrap, .resources-section .resource-card');
-      resCards.forEach((card, i) => {
-        gsap.to(card, {
-          y: -6,
-          duration: 2.8 + ((i % 4) * 0.3),
+      // 7. LEARNING RESOURCES SECTION: Ambient Glow & Stage Aura
+      const resDecors = document.querySelectorAll('.resources-section .resources-ambient-glow');
+      resDecors.forEach((el, i) => {
+        gsap.to(el, {
+          y: -8,
+          duration: 3.4 + (i * 0.4),
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
-          delay: (i % 4) * 0.2
+          delay: i * 0.2
         });
       });
 

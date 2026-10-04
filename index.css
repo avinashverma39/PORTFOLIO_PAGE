@@ -8190,7 +8190,6 @@ LARGE SCREEN ADJUSTMENTS
    ============================================= */
 .project-card,
 .arc-card,
-.ribbon-card-wrap,
 .timeline-card,
 .stat-card {
   cursor: default !important;
@@ -8198,8 +8197,10 @@ LARGE SCREEN ADJUSTMENTS
   will-change: transform;
 }
 
-/* 3D Card Fan items (Achievements & Resume) are interactive, clickable & switchable */
-.card-fan-item {
+/* 3D Card Fan (Achievements & Resume) and Resource Ribbon Cards (Study & Master) are interactive & clickable */
+.card-fan-item,
+.ribbon-card-wrap,
+.ribbon-card {
   cursor: pointer !important;
   user-select: none;
   will-change: transform;
@@ -8208,13 +8209,17 @@ LARGE SCREEN ADJUSTMENTS
 .project-card a,
 .arc-card a,
 .ribbon-card-wrap a,
+.ribbon-card-wrap button,
 .card-fan-item a,
 .card-fan-item button,
 .project-card button,
 .project-card .btn,
 .arc-nav-btn,
 .arc-play-btn,
-.arc-filter-btn {
+.arc-filter-btn,
+.res-filter-tab,
+.res-ctrl-btn,
+.resources-pill-btn {
   cursor: pointer !important;
 }
 
