@@ -1044,26 +1044,28 @@ function initProjects() {
     });
   });
 
-  // Setup Project Modal
+  // Setup Project Modal listeners if needed
   initProjectModal();
 
-  // Attach modal trigger to project cards and details buttons
+  // Cards are non-clickable (display only) with dynamic 3D moving tilt animation
   projectCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      // Don't trigger modal if user clicked directly on external link
-      if (e.target.closest('a')) return;
-      const pid = card.getAttribute('data-project-id');
-      if (pid) openProjectModal(pid);
+    card.style.cursor = 'default';
+
+    // Dynamic 3D mouse movement tilt (moving card without clicking)
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
     });
 
-    const detailBtn = card.querySelector('.project-open-detail-btn');
-    if (detailBtn) {
-      detailBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const pid = detailBtn.getAttribute('data-project-id') || card.getAttribute('data-project-id');
-        if (pid) openProjectModal(pid);
-      });
-    }
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
   });
 }
 
