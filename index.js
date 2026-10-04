@@ -2045,25 +2045,28 @@ function setupArcShowcase(cfg) {
     });
   }
 
-  // Cards are animated 3D curved elements (no modal popup on click)
+  // Cards are animated 3D curved elements with rich details & notes on click
   allCards.forEach(card => {
-    card.style.cursor = 'default';
+    card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
-      // Allow natural external link if specifically clicked
+      // Allow natural external link if specifically clicked inside action links
       const extLink = e.target.closest('a');
-      if (extLink && extLink.getAttribute('href')?.startsWith('http') && !e.target.closest('.arc-card-inner')) {
+      if (extLink && extLink.getAttribute('href')?.startsWith('http') && !e.target.closest('.arc-btn-pill')) {
         return;
       }
 
       e.stopPropagation();
       e.preventDefault();
 
-      // Center this card in the 3D arc without opening any modal popup
+      // Center this card in the 3D arc
       const vIdx = visibleCards.indexOf(card);
       if (vIdx !== -1) {
         activeIndex = vIdx;
         updateArcPositions();
       }
+
+      // Open the detail modal with full notes and questions
+      openCardDetail(card);
     });
   });
 
@@ -2115,12 +2118,6 @@ function setupArcShowcase(cfg) {
 function openCardDetail(card) {
   if (!card) return;
 
-  const certId = card.getAttribute('data-cert-id');
-  if (certId && typeof openCertModal === 'function') {
-    openCertModal(certId);
-    return;
-  }
-
   const modal = document.getElementById('arcDetailModal');
   const body = document.getElementById('arcModalBody');
   if (!modal || !body) return;
@@ -2132,25 +2129,65 @@ function openCardDetail(card) {
   const sub = card.getAttribute('data-sub') || '';
   const org = card.getAttribute('data-org') || '';
   const desc = card.getAttribute('data-desc') || '';
+  const notesStr = card.getAttribute('data-notes') || '';
+  const questionsStr = card.getAttribute('data-questions') || '';
   const tagsStr = card.getAttribute('data-tags') || '';
   const link = card.getAttribute('data-link') || '';
   const linkText = card.getAttribute('data-link-text') || 'Explore More';
+  const certId = card.getAttribute('data-cert-id');
 
-  const tags = tagsStr.split(',').filter(Boolean);
+  const tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+  const notes = notesStr ? notesStr.split('||').map(n => n.trim()).filter(Boolean) : [];
+  const questions = questionsStr ? questionsStr.split('||').map(q => q.trim()).filter(Boolean) : [];
 
   let actionHtml = '';
   if (certId) {
-    actionHtml = `
+    actionHtml += `
       <button type="button" class="btn btn-primary btn-sm achievement-view-cert-btn" data-achievement-id="${certId}">
         <i class="fa-solid fa-certificate"></i> View Certificate
       </button>
     `;
-  } else if (link) {
+  }
+  if (link) {
     const isExternal = link.startsWith('http');
-    actionHtml = `
-      <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-primary btn-sm">
+    actionHtml += `
+      <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-outline btn-sm">
         <i class="fa-solid fa-arrow-up-right-from-square"></i> ${linkText}
       </a>
+    `;
+  }
+
+  let notesHtml = '';
+  if (notes.length) {
+    notesHtml = `
+      <div class="arc-modal-section">
+        <h4 class="arc-modal-section-title"><i class="fa-solid fa-lightbulb"></i> Key Notes &amp; Highlights</h4>
+        <ul class="arc-modal-notes-list">
+          ${notes.map(note => `<li class="arc-modal-note-item"><i class="fa-solid fa-check"></i> <span>${note}</span></li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  let questionsHtml = '';
+  if (questions.length) {
+    questionsHtml = `
+      <div class="arc-modal-section">
+        <h4 class="arc-modal-section-title"><i class="fa-solid fa-circle-question"></i> Concepts &amp; Questions Explored</h4>
+        <div class="arc-modal-qna-list">
+          ${questions.map(qText => {
+            const parts = qText.split(' | ');
+            const q = parts[0] ? parts[0].replace(/^Q:\s*/i, '') : qText;
+            const a = parts[1] ? parts[1].replace(/^A:\s*/i, '') : '';
+            return `
+              <div class="arc-modal-qna-item">
+                <div class="arc-modal-question"><i class="fa-solid fa-circle-dot"></i> <strong>Q:</strong> ${q}</div>
+                ${a ? `<div class="arc-modal-answer"><i class="fa-solid fa-reply"></i> <strong>A:</strong> ${a}</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
     `;
   }
 
@@ -2159,14 +2196,18 @@ function openCardDetail(card) {
     <h3 class="arc-modal-title">${title}</h3>
     ${org ? `<div class="arc-modal-sub"><i class="fa-solid fa-layer-group"></i> ${org}</div>` : ''}
     <p class="arc-modal-desc">${desc}</p>
+    ${notesHtml}
+    ${questionsHtml}
     ${tags.length ? `
       <div class="arc-modal-tags">
         ${tags.map(t => `<span>${t}</span>`).join('')}
       </div>
     ` : ''}
-    <div class="arc-modal-actions">
-      ${actionHtml}
-    </div>
+    ${actionHtml ? `
+      <div class="arc-modal-actions">
+        ${actionHtml}
+      </div>
+    ` : ''}
   `;
 
   // Wire cert button inside modal if present
