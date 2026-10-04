@@ -1099,16 +1099,16 @@
         });
       });
 
-      // 8. CODING JOURNEY & 9. HOBBIES SECTIONS: 3D Arc Cards
-      const arcCards = document.querySelectorAll('.arc-showcase-section .arc-card');
-      arcCards.forEach((card, i) => {
-        gsap.to(card, {
+      // 8. CODING JOURNEY & 9. HOBBIES SECTIONS: Ambient Glows and Badges
+      const arcDecors = document.querySelectorAll('.arc-showcase-section .arc-ambient-glow, .arc-showcase-section .arc-stage-badge');
+      arcDecors.forEach((el, i) => {
+        gsap.to(el, {
           y: -6,
-          duration: 3.0 + ((i % 5) * 0.3),
+          duration: 3.2 + (i * 0.4),
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
-          delay: (i % 5) * 0.25
+          delay: i * 0.2
         });
       });
 
