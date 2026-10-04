@@ -589,143 +589,80 @@
     })();
 
 
-    /* 
-       17. RESOURCES — SCROLL ENTRANCE & FILTER ANIMATION
-        */
+    /* ─────────────────────────────────────────────────────────────
+       11. RESOURCES — SCROLL ENTRANCE & CYLINDER REVEAL
+       ───────────────────────────────────────────────────────────── */
     (function resourcesSection() {
-      const filters = document.querySelector('.resource-filters');
-      const resourcesContainer = document.getElementById('resourcesFan');
-
-      /* Filter click animation for visible resource fan cards */
-      const resFilterBtns = document.querySelectorAll('[data-resource-filter]');
-      resFilterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (!resourcesContainer) return;
-          const visibleCards = resourcesContainer.querySelectorAll('.card-fan-item:not([style*="display: none"])');
-          if (visibleCards.length > 0) {
-            anime({
-              targets: Array.from(visibleCards),
-              opacity: [0, 1],
-              scale: [0.88, 1],
-              delay: anime.stagger(60),
-              duration: 600,
-              easing: 'spring(1, 80, 12, 0)'
-            });
-          }
-        });
-      });
-
-      /* Filter buttons entrance */
-      if (filters) {
-        ScrollTrigger.create({
-          trigger: filters,
-          start: 'top 85%',
-          once: true,
-          onEnter: () => {
-            anime({
-              targets: '.resource-filters .filter-btn',
-              opacity: [0, 1],
-              translateY: [12, 0],
-              delay: anime.stagger(60),
-              duration: 600,
-              easing: 'easeOutCubic'
-            });
-          }
-        });
-      }
-    })();
-
-
-    /* 
-       18. JOURNEY — SCROLL ENTRANCE & FILTER ANIMATION
-        */
-    (function journeySection() {
-      const filters = document.querySelector('.journey-filters');
-      const journeyContainer = document.getElementById('journeyFan');
-
-      /* Filter click animation for visible journey fan cards */
-      const journeyFilterBtns = document.querySelectorAll('[data-journey-filter]');
-      journeyFilterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (!journeyContainer) return;
-          const visibleCards = journeyContainer.querySelectorAll('.card-fan-item:not([style*="display: none"])');
-          if (visibleCards.length > 0) {
-            anime({
-              targets: Array.from(visibleCards),
-              opacity: [0, 1],
-              scale: [0.88, 1],
-              delay: anime.stagger(60),
-              duration: 600,
-              easing: 'spring(1, 80, 12, 0)'
-            });
-          }
-        });
-      });
-
-      /* Filter buttons entrance */
-      if (filters) {
-        ScrollTrigger.create({
-          trigger: filters,
-          start: 'top 85%',
-          once: true,
-          onEnter: () => {
-            anime({
-              targets: '.journey-filters .filter-btn',
-              opacity: [0, 1],
-              translateY: [12, 0],
-              delay: anime.stagger(60),
-              duration: 600,
-              easing: 'easeOutCubic'
-            });
-          }
-        });
-      }
-    })();
-
-
-    /* 
-       9. HOBBIES SECTION — STAGGER & HOVER FLOAT
-        */
-    (function hobbiesSection() {
-      const grid = document.querySelector('.hobbies-grid');
-      if (!grid) return;
+      const stage = document.getElementById('resourcesPanoramicStage') || document.querySelector('.resources-section');
+      if (!stage) return;
 
       ScrollTrigger.create({
-        trigger: grid,
+        trigger: stage,
         start: 'top 82%',
         once: true,
         onEnter: () => {
           anime({
-            targets: '.hobby-card',
+            targets: '.resources-cylinder-track .ribbon-card-wrap',
             opacity: [0, 1],
-            scale: [0.8, 1],
+            scale: [0.85, 1],
             translateY: [35, 0],
-            delay: anime.stagger(100),
+            delay: anime.stagger(60),
+            duration: 800,
+            easing: 'spring(1, 80, 12, 0)'
+          });
+        }
+      });
+    })();
+
+
+    /* ─────────────────────────────────────────────────────────────
+       12. JOURNEY — 3D ARC STAGE SCROLL ENTRANCE
+       ───────────────────────────────────────────────────────────── */
+    (function journeySection() {
+      const stage = document.getElementById('journeyStageFrame') || document.getElementById('journey');
+      if (!stage) return;
+
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top 82%',
+        once: true,
+        onEnter: () => {
+          anime({
+            targets: '#journeyArcTrack .arc-card',
+            opacity: [0, 1],
+            scale: [0.85, 1],
+            translateY: [40, 0],
+            delay: anime.stagger(80),
             duration: 850,
             easing: 'spring(1, 80, 12, 0)'
           });
         }
       });
+    })();
 
-      document.querySelectorAll('.hobby-card').forEach(card => {
-        card.addEventListener('mouseenter', () => {
+
+    /* ─────────────────────────────────────────────────────────────
+       13. HOBBIES SECTION — 3D ARC STAGE SCROLL ENTRANCE
+       ───────────────────────────────────────────────────────────── */
+    (function hobbiesSection() {
+      const stage = document.getElementById('hobbiesStageFrame') || document.getElementById('hobbies');
+      if (!stage) return;
+
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top 82%',
+        once: true,
+        onEnter: () => {
           anime({
-            targets: card,
-            translateY: -10,
-            scale: 1.04,
-            duration: 400,
-            easing: 'spring(1, 85, 12, 0)'
+            targets: '#hobbiesArcTrack .arc-card',
+            opacity: [0, 1],
+            scale: [0.85, 1],
+            translateY: [40, 0],
+            delay: anime.stagger(80),
+            duration: 850,
+            easing: 'spring(1, 80, 12, 0)'
           });
-        });
-        card.addEventListener('mouseleave', () => {
-          anime({
-            targets: card,
-            translateY: 0,
-            scale: 1,
-            duration: 600,
-            easing: 'easeOutCubic'
-          });
-        });
+        }
       });
     })();
 
