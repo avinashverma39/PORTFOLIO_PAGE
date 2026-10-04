@@ -4,39 +4,55 @@
     */
 
 let insforge = null;
-import('https://esm.sh/@insforge/sdk@latest')
-  .then(({ createClient }) => {
-    insforge = createClient({
-      baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
-      anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
-    });
-    checkAuth();
-  })
-  .catch(() => {
-    // Insforge offline or CDN unavailable; portfolio remains fully functional
-  });
+try {
+  if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+    import('https://esm.sh/@insforge/sdk@latest')
+      .then(({ createClient }) => {
+        insforge = createClient({
+          baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
+          anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
+        });
+        checkAuth();
+      })
+      .catch(() => {
+        // Insforge offline or CDN unavailable; portfolio remains fully functional
+      });
+  }
+} catch (_) {
+  // Ignored in non-module or file:// environment
+}
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---- App Initialization ---- */
 function startApp() {
-  initCustomCursor();
-  initNavbar();
-  initHamburger();
-  initScrollProgress();
-  initThemeToggle();
-  initParticles();       
-  initTypingEffect();    
-  initSkillBars();       
-  initActiveNavLink();   
-  initBackToTop();       
-  initAchievements();   
-  initProjects();
-  initResources();
-  initJourney();
-  initFloatingSkillIcons();
-  initCardFan();       
-  initFooter();
+  const sections = [
+    ['CustomCursor', initCustomCursor],
+    ['Navbar', initNavbar],
+    ['Hamburger', initHamburger],
+    ['ScrollProgress', initScrollProgress],
+    ['ThemeToggle', initThemeToggle],
+    ['Particles', initParticles],       
+    ['TypingEffect', initTypingEffect],    
+    ['SkillBars', initSkillBars],       
+    ['ActiveNavLink', initActiveNavLink],   
+    ['BackToTop', initBackToTop],       
+    ['Achievements', initAchievements],   
+    ['Projects', initProjects],
+    ['Resources', initResources],
+    ['Journey', initJourney],
+    ['FloatingSkillIcons', initFloatingSkillIcons],
+    ['CardFan', initCardFan],       
+    ['Footer', initFooter]
+  ];
+
+  sections.forEach(([name, fn]) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn(`[Portfolio] Error initializing ${name}:`, err);
+    }
+  });
 
   checkAuth();
 }
