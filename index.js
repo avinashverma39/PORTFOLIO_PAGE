@@ -1658,6 +1658,10 @@ const resourcesData = [
   }
 ];
 
+/* Module-level timers for instant, collision-free modal opening and closing */
+let resModalCloseTimer = null;
+let arcModalCloseTimer = null;
+
 function initResources() {
   const stage = document.getElementById('resourcesPanoramicStage');
   const track = document.getElementById('resourcesCylinderTrack');
@@ -1691,6 +1695,7 @@ function initResources() {
   let isPlaying = true;
   let isHovered = false;
   let isDragging = false;
+  let isActuallyMoved = false;
   let dragStartX = 0;
   let dragStartOffset = 0;
   let dragDelta = 0;
@@ -1767,6 +1772,7 @@ function initResources() {
   /* ── Drag & Swipe Interaction ─── */
   function onDragStart(clientX) {
     isDragging = true;
+    isActuallyMoved = false;
     dragStartX = clientX;
     dragStartOffset = targetOffset;
     dragDelta = 0;
@@ -1775,12 +1781,18 @@ function initResources() {
   function onDragMove(clientX) {
     if (!isDragging) return;
     dragDelta = clientX - dragStartX;
+    if (Math.abs(dragDelta) > 8) {
+      isActuallyMoved = true;
+    }
     targetOffset = dragStartOffset + dragDelta;
   }
 
   function onDragEnd() {
     if (!isDragging) return;
     isDragging = false;
+    setTimeout(() => {
+      isActuallyMoved = false;
+    }, 50);
   }
 
   // Mouse drag events
@@ -1805,14 +1817,41 @@ function initResources() {
     if (isDragging) onDragEnd();
   });
 
-  /* ── CLICK CARD TO SHOW FULL DETAILS, NOTES, QUESTIONS & CHAPTERS PREVIEW ─── */
-  track.addEventListener('click', (e) => {
-    // If dragging significantly, don't trigger click modal
-    if (Math.abs(dragDelta) > 7) return;
+  /* ── Direct Click & Key Listeners on all ribbon cards (instant, zero lag) ─── */
+  allCards.forEach(card => {
+    card.style.cursor = 'pointer';
+    const resId = card.getAttribute('data-resource-id');
 
+    function triggerModal(e) {
+      if (isActuallyMoved && Math.abs(dragDelta) > 12) return;
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      if (resId) {
+        openResourceModal(resId);
+      }
+    }
+
+    card.addEventListener('click', triggerModal);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        triggerModal(e);
+      }
+    });
+
+    const innerBtn = card.querySelector('.ribbon-quick-action, .ribbon-card');
+    if (innerBtn) {
+      innerBtn.addEventListener('click', triggerModal);
+    }
+  });
+
+  /* ── Track-level fallback delegate ─── */
+  track.addEventListener('click', (e) => {
+    if (isActuallyMoved && Math.abs(dragDelta) > 12) return;
     const cardWrap = e.target.closest('.ribbon-card-wrap');
     if (!cardWrap) return;
-
     const resId = cardWrap.getAttribute('data-resource-id');
     if (resId) {
       e.stopPropagation();
@@ -1843,12 +1882,22 @@ function initResources() {
     });
   }
 
+  function updateResPlayBtnUI() {
+    if (!playBtn) return;
+    playBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+    playBtn.title = isPlaying ? 'Auto-moving is active (Click to pause)' : 'Motion paused (Click to resume)';
+    if (isPlaying) {
+      playBtn.classList.remove('paused');
+    } else {
+      playBtn.classList.add('paused');
+    }
+  }
+
   if (playBtn) {
     playBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       isPlaying = !isPlaying;
-      playBtn.innerHTML = isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
-      playBtn.title = isPlaying ? 'Auto-moving is active (Click to pause)' : 'Motion paused (Click to resume)';
+      updateResPlayBtnUI();
     });
   }
 
@@ -2060,30 +2109,14 @@ function setupArcShowcase(cfg) {
   // Cards are animated 3D curved elements with rich details & notes on click
   allCards.forEach(card => {
     card.style.cursor = 'pointer';
-    card.addEventListener('click', (e) => {
-      // If clicking inside certificate view button, open certificate modal directly
-      const certBtn = e.target.closest('.achievement-view-cert-btn');
-      if (certBtn) {
-        const id = certBtn.getAttribute('data-achievement-id');
-        if (id && typeof openCertModal === 'function') {
-          e.stopPropagation();
-          e.preventDefault();
-          openCertModal(id);
-          return;
-        }
-      }
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
 
-      // Allow natural link navigation if clicking an anchor
-      const extLink = e.target.closest('a');
-      if (extLink) {
-        const href = extLink.getAttribute('href');
-        if (href && (href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:'))) {
-          return;
-        }
+    function triggerModal(e) {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
       }
-
-      e.stopPropagation();
-      e.preventDefault();
 
       // Center this card in the 3D arc
       const vIdx = visibleCards.indexOf(card);
@@ -2094,6 +2127,19 @@ function setupArcShowcase(cfg) {
 
       // Open the detail modal with full notes and questions
       openCardDetail(card);
+    }
+
+    card.addEventListener('click', triggerModal);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        triggerModal(e);
+      }
+    });
+
+    // Also wire buttons/pills inside the card
+    card.querySelectorAll('button, .arc-btn-pill, .arc-open-modal-btn').forEach(btn => {
+      btn.addEventListener('click', triggerModal);
     });
   });
 
@@ -2141,7 +2187,7 @@ function setupArcShowcase(cfg) {
   startAutoCycle();
 }
 
-/* ── Global Helper: Open Card Detail Modal ─── */
+/* ── Global Helper: Open Card Detail Modal (Instant & Comprehensive) ─── */
 function openCardDetail(card) {
   if (!card) return;
 
@@ -2149,8 +2195,10 @@ function openCardDetail(card) {
   const body = document.getElementById('arcModalBody');
   if (!modal || !body) return;
 
-  // Ensure modal is visible before showing
-  modal.style.display = 'flex';
+  if (arcModalCloseTimer) {
+    clearTimeout(arcModalCloseTimer);
+    arcModalCloseTimer = null;
+  }
 
   const title = card.getAttribute('data-title') || '';
   const sub = card.getAttribute('data-sub') || '';
@@ -2160,7 +2208,7 @@ function openCardDetail(card) {
   const questionsStr = card.getAttribute('data-questions') || '';
   const tagsStr = card.getAttribute('data-tags') || '';
   const link = card.getAttribute('data-link') || '';
-  const linkText = card.getAttribute('data-link-text') || 'Explore More';
+  const linkText = card.getAttribute('data-link-text') || 'Explore Details';
   const certId = card.getAttribute('data-cert-id');
 
   const tags = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
@@ -2170,12 +2218,12 @@ function openCardDetail(card) {
   let actionHtml = '';
   if (certId) {
     actionHtml += `
-      <button type="button" class="btn btn-primary btn-sm achievement-view-cert-btn" data-achievement-id="${certId}">
-        <i class="fa-solid fa-certificate"></i> View Certificate
+      <button type="button" class="btn btn-primary btn-sm arc-modal-cert-btn" data-achievement-id="${certId}">
+        <i class="fa-solid fa-certificate"></i> View Certificate / Award
       </button>
     `;
   }
-  if (link) {
+  if (link && link !== '#') {
     const isExternal = link.startsWith('http');
     actionHtml += `
       <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-outline btn-sm">
@@ -2183,6 +2231,11 @@ function openCardDetail(card) {
       </a>
     `;
   }
+  actionHtml += `
+    <button type="button" class="btn btn-outline btn-sm arc-modal-close-trigger">
+      <i class="fa-solid fa-xmark"></i> Close
+    </button>
+  `;
 
   let notesHtml = '';
   if (notes.length) {
@@ -2190,7 +2243,7 @@ function openCardDetail(card) {
       <div class="arc-modal-section">
         <h4 class="arc-modal-section-title"><i class="fa-solid fa-lightbulb"></i> Key Notes &amp; Highlights</h4>
         <ul class="arc-modal-notes-list">
-          ${notes.map(note => `<li class="arc-modal-note-item"><i class="fa-solid fa-check"></i> <span>${note}</span></li>`).join('')}
+          ${notes.map(note => `<li class="arc-modal-note-item"><i class="fa-solid fa-circle-check"></i> <span>${note}</span></li>`).join('')}
         </ul>
       </div>
     `;
@@ -2230,15 +2283,13 @@ function openCardDetail(card) {
         ${tags.map(t => `<span>${t}</span>`).join('')}
       </div>
     ` : ''}
-    ${actionHtml ? `
-      <div class="arc-modal-actions">
-        ${actionHtml}
-      </div>
-    ` : ''}
+    <div class="arc-modal-actions">
+      ${actionHtml}
+    </div>
   `;
 
-  // Wire cert button inside modal if present
-  const modalCertBtn = body.querySelector('.achievement-view-cert-btn');
+  // Wire certificate button inside modal
+  const modalCertBtn = body.querySelector('.arc-modal-cert-btn');
   if (modalCertBtn) {
     modalCertBtn.addEventListener('click', (ev) => {
       ev.preventDefault();
@@ -2251,10 +2302,20 @@ function openCardDetail(card) {
     });
   }
 
+  // Wire close trigger inside modal action
+  const closeTrigger = body.querySelector('.arc-modal-close-trigger');
+  if (closeTrigger) {
+    closeTrigger.addEventListener('click', () => {
+      closeArcDetailModal();
+    });
+  }
+
+  // Show modal instantly
+  modal.style.display = 'flex';
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Ensure custom cursor stays explicitly active and visible on top of modal
+  // Ensure custom cursor stays active
   const cur = document.getElementById('cursor');
   const fol = document.getElementById('cursorFollower');
   if (cur) {
@@ -2269,33 +2330,38 @@ function openCardDetail(card) {
   }
 }
 
+function closeArcDetailModal() {
+  const modal = document.getElementById('arcDetailModal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  clearTimeout(arcModalCloseTimer);
+  arcModalCloseTimer = setTimeout(() => {
+    if (!modal.classList.contains('active')) {
+      modal.style.display = 'none';
+    }
+  }, 350);
+
+  const cur = document.getElementById('cursor');
+  const fol = document.getElementById('cursorFollower');
+  if (cur) cur.classList.remove('cursor-hover');
+  if (fol) fol.classList.remove('cursor-hover');
+}
+
 /* ── Arc Detail Modal Engine ─── */
 function setupArcDetailModal() {
   const modal = document.getElementById('arcDetailModal');
   const closeBtn = document.getElementById('arcModalClose');
   if (!modal) return;
 
-  function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-      if (!modal.classList.contains('active')) {
-        modal.style.display = 'none';
-      }
-    }, 400);
-
-    const cur = document.getElementById('cursor');
-    const fol = document.getElementById('cursorFollower');
-    if (cur) cur.classList.remove('cursor-hover');
-    if (fol) fol.classList.remove('cursor-hover');
-  }
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeArcDetailModal);
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+    if (e.target === modal) closeArcDetailModal();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      closeArcDetailModal();
+    }
   });
 
   // Explicit button clicks also open
@@ -2304,19 +2370,7 @@ function setupArcDetailModal() {
       e.stopPropagation();
       e.preventDefault();
       const card = btn.closest('.arc-card');
-      openCardDetail(card);
-    });
-  });
-
-  // Wire cert button triggers directly on arc cards
-  document.querySelectorAll('.arc-card .achievement-view-cert-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const id = btn.getAttribute('data-achievement-id');
-      if (typeof openCertModal === 'function') {
-        openCertModal(id);
-      }
+      if (card) openCardDetail(card);
     });
   });
 }
@@ -2331,51 +2385,59 @@ function initResourceModal() {
 
   if (!overlay) return;
 
-  /* ── Close modal ─── */
-  function closeModal() {
+  function closeResModal() {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
-    setTimeout(() => {
+    clearTimeout(resModalCloseTimer);
+    resModalCloseTimer = setTimeout(() => {
       if (!overlay.classList.contains('active')) {
         overlay.style.display = 'none';
       }
-    }, 400);
+    }, 350);
   }
 
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeResModal);
 
   // Click outside modal to close
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
+    if (e.target === overlay) closeResModal();
   });
 
   // Keyboard Esc to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && overlay.classList.contains('active')) {
-      closeModal();
+      closeResModal();
     }
   });
 }
 
-/* ── Open modal with resource data ─── */
+/* ── Open modal with resource data (Instant, zero lag) ─── */
 function openResourceModal(resourceId) {
   const overlay = document.getElementById('resourceModalOverlay');
   const modalBody = document.getElementById('resourceModalBody');
 
   if (!overlay || !modalBody) return;
 
+  if (resModalCloseTimer) {
+    clearTimeout(resModalCloseTimer);
+    resModalCloseTimer = null;
+  }
+
   const resource = resourcesData.find(r => r.id === resourceId);
   if (!resource) return;
 
   const categoryMeta = {
-    notes: { icon: 'fa-sticky-note', label: 'Notes', bgClass: 'notes-bg' },
-    books: { icon: 'fa-book-open', label: 'Book', bgClass: 'books-bg' },
-    questions: { icon: 'fa-circle-question', label: 'Questions', bgClass: 'questions-bg' }
+    notes: { icon: 'fa-sticky-note', label: 'Study Notes', bgClass: 'notes-bg' },
+    books: { icon: 'fa-book-open', label: 'Reference Book', bgClass: 'books-bg' },
+    questions: { icon: 'fa-circle-question', label: 'Question Bank', bgClass: 'questions-bg' }
   };
   const meta = categoryMeta[resource.category] || { icon: 'fa-file', label: 'Resource', bgClass: 'notes-bg' };
 
   const tagsHTML = resource.tags.map(t => `<span>${t}</span>`).join('');
-  const contentHTML = resource.content.map(item => `<li>${item}</li>`).join('');
+  const contentHTML = resource.content.map(item => `<li><i class="fa-solid fa-check"></i> <span>${item}</span></li>`).join('');
+
+  const actionHref = (resource.actionUrl && resource.actionUrl !== '#') ? resource.actionUrl : '#';
+  const hasValidHref = actionHref !== '#';
 
   modalBody.innerHTML = `
     <div class="resource-modal-header">
@@ -2393,30 +2455,46 @@ function openResourceModal(resourceId) {
     <div class="resource-modal-content">
       <p class="resource-modal-desc">${resource.description}</p>
       <div class="resource-modal-preview">
-        <h4><i class="fa-solid fa-list-check"></i> Contents Overview</h4>
-        <ul>${contentHTML}</ul>
+        <h4><i class="fa-solid fa-list-check"></i> Comprehensive Chapters &amp; Modules</h4>
+        <ul class="resource-modal-list">${contentHTML}</ul>
       </div>
       <div class="resource-modal-tags">${tagsHTML}</div>
     </div>
     <div class="resource-modal-actions">
-      <a href="${resource.actionUrl}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-        <i class="${resource.actionIcon}"></i> ${resource.actionLabel}
-      </a>
-      <button class="btn btn-outline" onclick="document.getElementById('resourceModalOverlay').classList.remove('active'); document.body.style.overflow=''; setTimeout(()=>{document.getElementById('resourceModalOverlay').style.display='none'},400)">
+      ${hasValidHref ? `
+        <a href="${actionHref}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+          <i class="${resource.actionIcon}"></i> ${resource.actionLabel}
+        </a>
+      ` : `
+        <button type="button" class="btn btn-primary" onclick="alert('Viewing comprehensive chapters for: ${resource.title}');">
+          <i class="${resource.actionIcon}"></i> ${resource.actionLabel}
+        </button>
+      `}
+      <button class="btn btn-outline resource-modal-inner-close" type="button">
         <i class="fa-solid fa-xmark"></i> Close
       </button>
     </div>
   `;
 
-  // Show modal
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      overlay.classList.add('active');
-      overlay.focus();
+  // Wire inner close button
+  const innerCloseBtn = modalBody.querySelector('.resource-modal-inner-close');
+  if (innerCloseBtn) {
+    innerCloseBtn.addEventListener('click', () => {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      clearTimeout(resModalCloseTimer);
+      resModalCloseTimer = setTimeout(() => {
+        if (!overlay.classList.contains('active')) {
+          overlay.style.display = 'none';
+        }
+      }, 350);
     });
-  });
+  }
+
+  // Show modal instantly
+  overlay.style.display = 'flex';
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 

@@ -4435,6 +4435,31 @@ button {
   color: var(--accent);
 }
 
+.resource-modal-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resource-modal-list li {
+  list-style: none !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.resource-modal-list li i {
+  color: var(--accent);
+  margin-top: 3px;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
 /* Modal Tags */
 .resource-modal-tags {
   display: flex;
