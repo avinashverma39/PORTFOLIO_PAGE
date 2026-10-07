@@ -8293,7 +8293,6 @@ LARGE SCREEN ADJUSTMENTS
    CARD INTERACTIONS & MOTION RULES
    ============================================= */
 .project-card,
-.arc-card,
 .timeline-card,
 .stat-card {
   cursor: default !important;
@@ -8301,7 +8300,9 @@ LARGE SCREEN ADJUSTMENTS
   will-change: transform;
 }
 
-/* 3D Card Fan (Achievements & Resume) and Resource Ribbon Cards (Study & Master) are interactive & clickable */
+/* 3D Arc Cards (Journey & Hobbies), 3D Card Fan (Achievements & Resume), and Resource Ribbon Cards (Study & Master) are interactive & clickable */
+.arc-card,
+.arc-card-inner,
 .card-fan-item,
 .ribbon-card-wrap,
 .ribbon-card {
@@ -8312,6 +8313,8 @@ LARGE SCREEN ADJUSTMENTS
 
 .project-card a,
 .arc-card a,
+.arc-card button,
+.arc-btn-pill,
 .ribbon-card-wrap a,
 .ribbon-card-wrap button,
 .card-fan-item a,
