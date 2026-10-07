@@ -1260,6 +1260,18 @@ const achievementsData = [
     image: null,
     credentialUrl: '#',
     credentialId: null
+  },
+  {
+    id: 'SIH-2026',
+    title: 'Smart India Hackathon (SIH) 2026 Finalist',
+    category: 'achievement',
+    organization: 'Ministry of Education & Innovation Cell, Govt of India',
+    date: '2026',
+    description: 'National Grand Finale Finalist in Smart India Hackathon 2026 for engineering SmartLearn — an adaptive AI-driven, offline-first learning platform with vernacular voice accessibility to eliminate digital barriers.',
+    skills: ['SIH 2026', 'National Finalist', 'AI EdTech', 'IndexedDB', 'WebSockets'],
+    image: null,
+    credentialUrl: '#',
+    credentialId: 'SIH-2026-FINALIST'
   }
 ];
 
@@ -2049,10 +2061,25 @@ function setupArcShowcase(cfg) {
   allCards.forEach(card => {
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
-      // Allow natural external link if specifically clicked inside action links
+      // If clicking inside certificate view button, open certificate modal directly
+      const certBtn = e.target.closest('.achievement-view-cert-btn');
+      if (certBtn) {
+        const id = certBtn.getAttribute('data-achievement-id');
+        if (id && typeof openCertModal === 'function') {
+          e.stopPropagation();
+          e.preventDefault();
+          openCertModal(id);
+          return;
+        }
+      }
+
+      // Allow natural link navigation if clicking an anchor
       const extLink = e.target.closest('a');
-      if (extLink && extLink.getAttribute('href')?.startsWith('http') && !e.target.closest('.arc-btn-pill')) {
-        return;
+      if (extLink) {
+        const href = extLink.getAttribute('href');
+        if (href && (href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:'))) {
+          return;
+        }
       }
 
       e.stopPropagation();

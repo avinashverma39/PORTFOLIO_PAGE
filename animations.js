@@ -768,7 +768,8 @@
       if (!footer) return;
 
       // Brand + tagline entrance
-      gsap.fromTo('.footer-brand',
+      const brandSelector = document.querySelector('.footer-col-brand') ? '.footer-col-brand' : '.footer-brand';
+      gsap.fromTo(brandSelector,
         { opacity: 0, y: 40, filter: 'blur(6px)' },
         {
           opacity: 1, y: 0, filter: 'blur(0px)',
@@ -781,7 +782,8 @@
         });
 
       // Nav links staggered entrance
-      gsap.fromTo('.footer-links a',
+      const linksSelector = document.querySelector('.footer-menu a') ? '.footer-menu a' : '.footer-links a';
+      gsap.fromTo(linksSelector,
         { opacity: 0, y: 20 },
         {
           opacity: 1, y: 0,
@@ -796,7 +798,8 @@
         });
 
       // Social icons pop in with spring
-      gsap.fromTo('.footer-socials a',
+      const socialSelector = document.querySelector('.footer-social-bubbles a, .footer-bubble') ? '.footer-social-bubbles a, .footer-bubble' : '.footer-socials a';
+      gsap.fromTo(socialSelector,
         { opacity: 0, scale: 0, rotation: -15 },
         {
           opacity: 1, scale: 1, rotation: 0,
@@ -811,13 +814,14 @@
         });
 
       // Footer bottom copyright fade
-      gsap.fromTo('.footer-bottom',
+      const bottomSelector = document.querySelector('.footer-bottom-bar') ? '.footer-bottom-bar' : '.footer-bottom';
+      gsap.fromTo(bottomSelector,
         { opacity: 0, y: 15 },
         {
           opacity: 1, y: 0,
           duration: 0.8, ease: EASE.out,
           scrollTrigger: {
-            trigger: '.footer-bottom',
+            trigger: '.footer',
             start: 'top 95%',
             once: true,
           },
@@ -941,7 +945,8 @@
        18. FOOTER SOCIAL ICONS — Magnetic hover
        ───────────────────────────────────────────────────────────── */
     (function footerSocialMagnetic() {
-      document.querySelectorAll('.footer-socials a').forEach(icon => {
+      const socialIcons = document.querySelectorAll('.footer-social-bubbles a, .footer-bubble, .footer-socials a');
+      socialIcons.forEach(icon => {
         icon.addEventListener('mousemove', e => {
           const r = icon.getBoundingClientRect();
           const dx = (e.clientX - (r.left + r.width  / 2)) * 0.35;
