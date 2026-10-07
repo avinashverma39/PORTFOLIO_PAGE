@@ -1295,12 +1295,18 @@
   </div>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@insforge/sdk@latest';
-
-    const insforge = createClient({
-      baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
-      anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
-    });
+    let insforge = null;
+    try {
+      if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+        const { createClient } = await import('https://esm.sh/@insforge/sdk@latest');
+        insforge = createClient({
+          baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
+          anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
+        });
+      }
+    } catch (_) {
+      // InsForge offline or unavailable; page remains fully functional
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
       // Trigger skill progress bar animations on load
@@ -1430,15 +1436,15 @@
     async function checkAuthButtons() {
       try {
         const authNavLink = document.getElementById('authNavLink');
-        if (authNavLink) {
-          const { data: { user } } = await insforge.auth.getCurrentUser();
-          if (user) {
+        if (authNavLink && insforge?.auth) {
+          const { data } = await insforge.auth.getCurrentUser();
+          if (data?.user) {
             authNavLink.textContent = 'Dashboard';
             authNavLink.href = 'dashboard.html';
           }
         }
       } catch (e) {
-        console.error("Auth check failed:", e);
+        console.debug("Auth check notice:", e);
       }
     }
 
