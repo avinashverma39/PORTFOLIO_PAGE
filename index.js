@@ -42,7 +42,8 @@ function startApp() {
     ['Resources', initResources],
     ['Journey', initJourney],
     ['FloatingSkillIcons', initFloatingSkillIcons],
-    ['CardFan', initCardFan],       
+    ['CardFan', initCardFan],
+    ['ResumeGallery', initResumeGallery],
     ['Footer', initFooter]
   ];
 
@@ -135,7 +136,7 @@ function initCustomCursor() {
   animateFollower();
 
   // Delegated dynamic hover listener (works for static AND dynamic modal elements)
-  const hoverSelector = 'a, button, input, textarea, .project-card, .card-fan-item, .arc-card, .arc-nav-btn, .arc-play-btn, .arc-filter-btn, .arc-btn-pill, .arc-modal-close, .project-modal-close, .arc-pill-dot, .btn, .hobby-card, .stat-card, .floating-skill-icon, .achievement-card, .detail-item, .timeline-card, .filter-btn, .resources-pill-btn, .res-filter-tab, .res-ctrl-btn, .ribbon-card, .ribbon-quick-action';
+  const hoverSelector = 'a, button, input, textarea, .project-card, .card-fan-item, .resume-visual-card, .res-gallery-pill, .res-nav-btn, .rc-circle-action, .arc-card, .arc-nav-btn, .arc-play-btn, .arc-filter-btn, .arc-btn-pill, .arc-modal-close, .project-modal-close, .arc-pill-dot, .btn, .hobby-card, .stat-card, .floating-skill-icon, .achievement-card, .detail-item, .timeline-card, .filter-btn, .resources-pill-btn, .res-filter-tab, .res-ctrl-btn, .ribbon-card, .ribbon-quick-action';
 
   document.addEventListener('mouseover', (e) => {
     if (e.target.closest(hoverSelector)) {
@@ -2780,5 +2781,138 @@ function initFooter() {
       }, 200);
     });
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   28. RESUME VISUAL GALLERY — 3D CoverFlow Showcase
+   ═══════════════════════════════════════════════════════════ */
+function initResumeGallery() {
+  const stage = document.getElementById('resumeVisualStage');
+  const track = document.getElementById('resumeVisualTrack');
+  if (!stage || !track) return;
+
+  const cards = Array.from(track.querySelectorAll('.resume-visual-card'));
+  const filterPills = Array.from(document.querySelectorAll('.resume-gallery-filters .res-gallery-pill:not(.res-gallery-pill-link)'));
+  const prevBtn = document.getElementById('resNavPrev');
+  const nextBtn = document.getElementById('resNavNext');
+
+  if (!cards.length) return;
+
+  let currentIndex = 0;
+  const totalCards = cards.length;
+
+  function updateCoverFlow(newIndex) {
+    currentIndex = ((newIndex % totalCards) + totalCards) % totalCards;
+
+    cards.forEach((card, i) => {
+      let diff = i - currentIndex;
+      // circular wrap shortest distance
+      if (diff > totalCards / 2) diff -= totalCards;
+      if (diff < -totalCards / 2) diff += totalCards;
+
+      card.classList.remove('active', 'slot-left-1', 'slot-right-1', 'slot-left-2', 'slot-right-2', 'slot-hidden');
+
+      if (diff === 0) {
+        card.classList.add('active');
+        card.setAttribute('aria-hidden', 'false');
+      } else if (diff === -1) {
+        card.classList.add('slot-left-1');
+        card.setAttribute('aria-hidden', 'true');
+      } else if (diff === 1) {
+        card.classList.add('slot-right-1');
+        card.setAttribute('aria-hidden', 'true');
+      } else if (diff === -2) {
+        card.classList.add('slot-left-2');
+        card.setAttribute('aria-hidden', 'true');
+      } else if (diff === 2) {
+        card.classList.add('slot-right-2');
+        card.setAttribute('aria-hidden', 'true');
+      } else {
+        card.classList.add('slot-hidden');
+        card.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    filterPills.forEach((pill, idx) => {
+      const isActive = idx === currentIndex;
+      pill.classList.toggle('active', isActive);
+      pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
+  // Filter Pill Clicks
+  filterPills.forEach((pill, idx) => {
+    pill.addEventListener('click', () => {
+      updateCoverFlow(idx);
+    });
+  });
+
+  // Direct Card Clicks
+  cards.forEach((card, idx) => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a') || (e.target.closest('button') && !e.target.classList.contains('resume-visual-card'))) {
+        return; // Let direct anchor/button clicks work immediately
+      }
+      if (idx !== currentIndex) {
+        updateCoverFlow(idx);
+      }
+    });
+  });
+
+  // Circular Prev/Next Controls
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      updateCoverFlow(currentIndex - 1);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      updateCoverFlow(currentIndex + 1);
+    });
+  }
+
+  // Touch Swipe Gesture Support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  stage.addEventListener('touchstart', (e) => {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      touchStartX = e.changedTouches[0].screenX;
+    }
+  }, { passive: true });
+
+  stage.addEventListener('touchend', (e) => {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          updateCoverFlow(currentIndex - 1);
+        } else {
+          updateCoverFlow(currentIndex + 1);
+        }
+      }
+    }
+  }, { passive: true });
+
+  // Keyboard Arrow Keys when section in viewport
+  const resumeSection = document.getElementById('resume');
+  if (resumeSection) {
+    window.addEventListener('keydown', (e) => {
+      const rect = resumeSection.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
+      if (inView) {
+        if (e.key === 'ArrowLeft') {
+          updateCoverFlow(currentIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          updateCoverFlow(currentIndex + 1);
+        }
+      }
+    });
+  }
+
+  // Initial layout activation
+  updateCoverFlow(0);
 }
 
