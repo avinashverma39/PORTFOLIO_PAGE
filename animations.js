@@ -768,69 +768,61 @@
       if (!footer) return;
 
       // Brand + tagline entrance
-      if (document.querySelector('.footer-col-brand')) {
-        gsap.fromTo('.footer-col-brand',
-          { opacity: 0, y: 40, filter: 'blur(6px)' },
-          {
-            opacity: 1, y: 0, filter: 'blur(0px)',
-            duration: 1, ease: EASE.out,
-            scrollTrigger: {
-              trigger: '.footer',
-              start: 'top 90%',
-              once: true,
-            }
-          });
-      }
+      gsap.fromTo('.footer-brand',
+        { opacity: 0, y: 40, filter: 'blur(6px)' },
+        {
+          opacity: 1, y: 0, filter: 'blur(0px)',
+          duration: 1, ease: EASE.out,
+          scrollTrigger: {
+            trigger: '.footer',
+            start: 'top 90%',
+            once: true,
+          }
+        });
 
       // Nav links staggered entrance
-      if (document.querySelector('.footer-menu a')) {
-        gsap.fromTo('.footer-menu a',
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1, y: 0,
-            duration: 0.6, ease: EASE.out,
-            stagger: 0.07,
-            scrollTrigger: {
-              trigger: '.footer',
-              start: 'top 88%',
-              once: true,
-            },
-            delay: 0.2,
-          });
-      }
+      gsap.fromTo('.footer-links a',
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.6, ease: EASE.out,
+          stagger: 0.07,
+          scrollTrigger: {
+            trigger: '.footer',
+            start: 'top 88%',
+            once: true,
+          },
+          delay: 0.2,
+        });
 
       // Social icons pop in with spring
-      if (document.querySelector('.footer-social-bubbles a, .footer-bubble')) {
-        gsap.fromTo('.footer-social-bubbles a, .footer-bubble',
-          { opacity: 0, scale: 0, rotation: -15 },
-          {
-            opacity: 1, scale: 1, rotation: 0,
-            duration: 0.7, ease: EASE.spring,
-            stagger: 0.1,
-            scrollTrigger: {
-              trigger: '.footer',
-              start: 'top 88%',
-              once: true,
-            },
-            delay: 0.4,
-          });
-      }
+      gsap.fromTo('.footer-socials a',
+        { opacity: 0, scale: 0, rotation: -15 },
+        {
+          opacity: 1, scale: 1, rotation: 0,
+          duration: 0.7, ease: EASE.spring,
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: '.footer',
+            start: 'top 88%',
+            once: true,
+          },
+          delay: 0.4,
+        });
 
       // Footer bottom copyright fade
-      if (document.querySelector('.footer-bottom-bar')) {
-        gsap.fromTo('.footer-bottom-bar',
-          { opacity: 0, y: 15 },
-          {
-            opacity: 1, y: 0,
-            duration: 0.8, ease: EASE.out,
-            scrollTrigger: {
-              trigger: '.footer-bottom-bar',
-              start: 'top 95%',
-              once: true,
-            },
-            delay: 0.6,
-          });
-      }
+      gsap.fromTo('.footer-bottom',
+        { opacity: 0, y: 15 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.8, ease: EASE.out,
+          scrollTrigger: {
+            trigger: '.footer-bottom',
+            start: 'top 95%',
+            once: true,
+          },
+          delay: 0.6,
+        });
     })();
 
 
@@ -949,7 +941,7 @@
        18. FOOTER SOCIAL ICONS — Magnetic hover
        ───────────────────────────────────────────────────────────── */
     (function footerSocialMagnetic() {
-      document.querySelectorAll('.footer-social-bubbles a, .footer-bubble').forEach(icon => {
+      document.querySelectorAll('.footer-socials a').forEach(icon => {
         icon.addEventListener('mousemove', e => {
           const r = icon.getBoundingClientRect();
           const dx = (e.clientX - (r.left + r.width  / 2)) * 0.35;
