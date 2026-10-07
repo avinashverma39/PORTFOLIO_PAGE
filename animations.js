@@ -602,13 +602,11 @@
         once: true,
         onEnter: () => {
           anime({
-            targets: '.resources-cylinder-track .ribbon-card-wrap',
+            targets: '#resources .resources-header, #resourcesPanoramicStage',
             opacity: [0, 1],
-            scale: [0.85, 1],
-            translateY: [35, 0],
-            delay: anime.stagger(60),
+            translateY: [30, 0],
             duration: 800,
-            easing: 'spring(1, 80, 12, 0)'
+            easing: 'easeOutCubic'
           });
         }
       });
@@ -628,13 +626,11 @@
         once: true,
         onEnter: () => {
           anime({
-            targets: '#journeyArcTrack .arc-card',
+            targets: '#journey .arc-stage-card',
             opacity: [0, 1],
-            scale: [0.85, 1],
-            translateY: [40, 0],
-            delay: anime.stagger(80),
+            translateY: [30, 0],
             duration: 850,
-            easing: 'spring(1, 80, 12, 0)'
+            easing: 'easeOutCubic'
           });
         }
       });
@@ -654,13 +650,11 @@
         once: true,
         onEnter: () => {
           anime({
-            targets: '#hobbiesArcTrack .arc-card',
+            targets: '#hobbies .arc-stage-card',
             opacity: [0, 1],
-            scale: [0.85, 1],
-            translateY: [40, 0],
-            delay: anime.stagger(80),
+            translateY: [30, 0],
             duration: 850,
-            easing: 'spring(1, 80, 12, 0)'
+            easing: 'easeOutCubic'
           });
         }
       });
