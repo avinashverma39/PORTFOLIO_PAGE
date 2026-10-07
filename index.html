@@ -2063,10 +2063,8 @@
                         </div>
                         <p class="resume-role">C++ &amp; AI Web Developer &bull; B.Tech CSE (2023–2027)</p>
                         <div class="resume-meta-pills">
-                            <span class="resume-meta-pill"><i class="fa-solid fa-location-dot"></i> Lucknow,
-                                India</span>
-                            <span class="resume-meta-pill"><i class="fa-solid fa-building-columns"></i> RRIMT
-                                Lucknow</span>
+                            <span class="resume-meta-pill"><i class="fa-solid fa-location-dot"></i> Lucknow, India</span>
+                            <span class="resume-meta-pill"><i class="fa-solid fa-building-columns"></i> RRIMT Lucknow</span>
                             <span class="resume-meta-pill"><i class="fa-solid fa-bolt"></i> Immediate Joiner</span>
                         </div>
                     </div>
@@ -2081,237 +2079,210 @@
                 </div>
             </div>
 
-            <p class="card-fan-instruction">Click on any resume card to slide open details &amp; credentials</p>
+            <!-- Resume Gallery Filter Pills Row -->
+            <div class="resume-gallery-filters" id="resumeGalleryFilters" role="tablist" aria-label="Resume Gallery Filters">
+                <button class="res-gallery-pill active" data-index="0" role="tab" aria-selected="true"><i class="fa-solid fa-user-astronaut"></i> Profile</button>
+                <button class="res-gallery-pill" data-index="1" role="tab" aria-selected="false"><i class="fa-solid fa-microchip"></i> Tech Stack</button>
+                <button class="res-gallery-pill" data-index="2" role="tab" aria-selected="false"><i class="fa-solid fa-briefcase"></i> Experience</button>
+                <button class="res-gallery-pill" data-index="3" role="tab" aria-selected="false"><i class="fa-solid fa-graduation-cap"></i> Education</button>
+                <button class="res-gallery-pill" data-index="4" role="tab" aria-selected="false"><i class="fa-solid fa-trophy"></i> Achievements</button>
+                <button class="res-gallery-pill" data-index="5" role="tab" aria-selected="false"><i class="fa-solid fa-file-pdf"></i> Official CV</button>
+                <a href="cv.html" target="_blank" rel="noopener noreferrer" class="res-gallery-pill res-gallery-pill-link">View Full CV <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
 
-            <div class="card-fan-container" id="resumeFan">
-                <!-- Resume 1 — Profile & Objective -->
-                <div class="card-fan-item fan-color-purple">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-user-astronaut"></i>
+            <!-- 3D CoverFlow Visual Stage -->
+            <div class="resume-visual-stage" id="resumeVisualStage" aria-label="Visual Resume Showcase">
+                <div class="resume-visual-track" id="resumeVisualTrack">
+                    <!-- Card 0 — Career Objective & Profile -->
+                    <div class="resume-visual-card active" data-index="0" data-pill="Profile">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80" alt="Career Objective" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
                         </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-user-tie"></i> Profile</span>
-                        <h3>Career Objective</h3>
-                        <span class="card-fan-sub">AI Web &amp; C++ Engineer</span>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-user-astronaut"></i> Profile</span>
+                                <span class="rc-chip"><i class="fa-solid fa-sparkles"></i> Active Seeker</span>
+                            </div>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Career Objective</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-location-dot"></i> Avinash Verma &bull; Lucknow, India</p>
+                                <p class="rc-desc">Goal-oriented Computer Science undergraduate &amp; developer specializing in AI-infused web platforms, high-performance C++ systems, and modern responsive front-ends. Passionate about solving architectural challenges and shipping clean code.</p>
+                                <div class="rc-tags">
+                                    <span>Full-Stack</span><span>AI Integration</span><span>C++ Systems</span><span>Clean Code</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="cv.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-file-invoice"></i> View Full CV
+                                </a>
+                                <div class="rc-circle-action" title="Active Card" aria-hidden="true">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-user-tie" style="color: #c084fc;"></i>
+
+                    <!-- Card 1 — Core Technical Mastery -->
+                    <div class="resume-visual-card" data-index="1" data-pill="Tech Stack">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="Core Technical Mastery" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
+                        </div>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-microchip"></i> Tech Stack</span>
+                                <span class="rc-chip"><i class="fa-solid fa-bolt"></i> 85%+ Proficiency</span>
                             </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-sparkles"></i> Active Job
-                                    Seeker</span>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Core Technical Mastery</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-terminal"></i> C++, Java, JS, Python &amp; Cloud</p>
+                                <p class="rc-desc">Proficient in Object-Oriented Programming (OOP), Data Structures &amp; Algorithms, RESTful APIs, modern JavaScript (ES6+), responsive CSS architectures, and cloud database persistence.</p>
+                                <div class="rc-tags">
+                                    <span>C++</span><span>Java</span><span>JavaScript</span><span>Python</span><span>HTML5/CSS3</span><span>Git</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="#skills" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-brain"></i> Skills Radar
+                                </a>
+                                <div class="rc-circle-action" title="View Stack" aria-hidden="true">
+                                    <i class="fa-solid fa-code"></i>
+                                </div>
                             </div>
                         </div>
-                        <h3>Career Objective</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-location-dot"></i> Avinash Verma — Lucknow, India
+                    </div>
+
+                    <!-- Card 2 — Industry & Freelance -->
+                    <div class="resume-visual-card" data-index="2" data-pill="Experience">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80" alt="Industry & Freelance" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
                         </div>
-                        <p>Goal-oriented Computer Science undergraduate &amp; developer specializing in AI-infused web
-                            platforms, high-performance C++ systems, and modern responsive front-ends. Passionate about
-                            solving architectural challenges and shipping clean code.</p>
-                        <div class="project-tags">
-                            <span>Full-Stack</span><span>AI Integration</span><span>C++ Systems</span><span>Clean
-                                Code</span>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-briefcase"></i> Experience</span>
+                                <span class="rc-chip"><i class="fa-solid fa-clock-rotate-left"></i> Client Roles</span>
+                            </div>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Industry &amp; Freelance</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-globe"></i> Web Developer &amp; UI Architect</p>
+                                <p class="rc-desc">Architected and shipped production-grade web solutions for clients. Focused on responsive UI/UX, AI tool integrations, fast render speeds, and pixel-accurate cross-browser compatibility.</p>
+                                <div class="rc-tags">
+                                    <span>Client Solutions</span><span>Production Deploy</span><span>API Design</span><span>Performance</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="#projects" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-cubes"></i> Browse Projects
+                                </a>
+                                <div class="rc-circle-action" title="Explore Work" aria-hidden="true">
+                                    <i class="fa-solid fa-laptop-code"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="project-card-actions">
-                            <a href="cv.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-file-invoice"></i> View Full CV
-                            </a>
+                    </div>
+
+                    <!-- Card 3 — Academic Foundation -->
+                    <div class="resume-visual-card" data-index="3" data-pill="Education">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80" alt="Academic Foundation" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
+                        </div>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-graduation-cap"></i> Education</span>
+                                <span class="rc-chip"><i class="fa-solid fa-calendar"></i> 2023 – 2027</span>
+                            </div>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Academic Foundation</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-building-columns"></i> R. R. Institute of Modern Tech (RRIMT)</p>
+                                <p class="rc-desc">Pursuing Bachelor of Technology in Computer Science &amp; Engineering. Strong grounding in Operating Systems, Database Management Systems, Discrete Mathematics, and Software Engineering.</p>
+                                <div class="rc-tags">
+                                    <span>B.Tech CSE</span><span>AKTU/RRIMT</span><span>Algorithms</span><span>DBMS</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="#education" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-timeline"></i> View Timeline
+                                </a>
+                                <div class="rc-circle-action" title="View Education" aria-hidden="true">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 — Key Achievements -->
+                    <div class="resume-visual-card" data-index="4" data-pill="Achievements">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80" alt="Key Achievements" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
+                        </div>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-trophy"></i> Honors</span>
+                                <span class="rc-chip"><i class="fa-solid fa-award"></i> Recognized</span>
+                            </div>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Key Achievements</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-star"></i> Innovathon &amp; Certifications</p>
+                                <p class="rc-desc">Showcased technical excellence at RRGI Innovathon 2025, achieved certifications across C++, Java, and Full-Stack Development, and actively solved competitive programming challenges.</p>
+                                <div class="rc-tags">
+                                    <span>Hackathons</span><span>C++ Certified</span><span>Java Mastery</span><span>LeetCode</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="#achievements" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-certificate"></i> View Certificates
+                                </a>
+                                <div class="rc-circle-action" title="Honors" aria-hidden="true">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 — Official CV & Export -->
+                    <div class="resume-visual-card" data-index="5" data-pill="Official CV">
+                        <div class="rc-media">
+                            <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1200&q=80" alt="Print & PDF Download" class="rc-img" loading="lazy" />
+                            <div class="rc-overlay"></div>
+                        </div>
+                        <div class="rc-content">
+                            <div class="rc-header">
+                                <span class="rc-badge"><i class="fa-solid fa-file-pdf"></i> Official CV</span>
+                                <span class="rc-chip"><i class="fa-solid fa-check-circle"></i> ATS-Optimized</span>
+                            </div>
+                            <div class="rc-body">
+                                <h3 class="rc-title">Print &amp; PDF Download</h3>
+                                <p class="rc-subtitle"><i class="fa-solid fa-file-lines"></i> Interactive CV Portal</p>
+                                <p class="rc-desc">One-click export ready for technical recruiters and hiring managers. Features verified contact details, full project breakdown, timeline progression, and instant printer-friendly PDF formatting.</p>
+                                <div class="rc-tags">
+                                    <span>ATS Ready</span><span>PDF Format</span><span>One-Click Save</span><span>Recruiter Friendly</span>
+                                </div>
+                            </div>
+                            <div class="rc-footer">
+                                <a href="cv.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm rc-action-btn">
+                                    <i class="fa-solid fa-download"></i> Download / View CV
+                                </a>
+                                <div class="rc-circle-action" title="Download CV" aria-hidden="true">
+                                    <i class="fa-solid fa-file-arrow-down"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Resume 2 — Technical Mastery -->
-                <div class="card-fan-item fan-color-teal">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-microchip"></i>
-                        </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-layer-group"></i> Technical Stack</span>
-                        <h3>Core Technical Mastery</h3>
-                        <span class="card-fan-sub">Languages &amp; Frameworks</span>
-                    </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-code" style="color: #14b8a6;"></i>
-                            </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-bolt"></i> 85%+ Proficiency</span>
-                            </div>
-                        </div>
-                        <h3>Core Technical Mastery</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-terminal"></i> C++, Java, JS, Python &amp; Cloud
-                        </div>
-                        <p>Proficient in Object-Oriented Programming (OOP), Data Structures &amp; Algorithms, RESTful
-                            APIs, modern JavaScript (ES6+), responsive CSS architectures, and cloud database
-                            persistence.</p>
-                        <div class="project-tags">
-                            <span>C++</span><span>Java</span><span>JavaScript</span><span>Python</span><span>HTML5/CSS3</span><span>Git</span>
-                        </div>
-                        <div class="project-card-actions">
-                            <a href="#skills" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-brain"></i> Skills Radar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resume 3 — Experience & Freelance -->
-                <div class="card-fan-item fan-color-gold">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-laptop-code"></i>
-                        </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-briefcase"></i> Experience</span>
-                        <h3>Industry &amp; Freelance</h3>
-                        <span class="card-fan-sub">Real Project Delivery</span>
-                    </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-briefcase" style="color: #eab308;"></i>
-                            </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-clock-rotate-left"></i> Client
-                                    Roles</span>
-                            </div>
-                        </div>
-                        <h3>Industry &amp; Freelance</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-globe"></i> Web Developer &amp; Designer
-                        </div>
-                        <p>Architected and shipped production-grade web solutions for clients. Focused on responsive
-                            UI/UX, AI tool integrations, fast render speeds, and pixel-accurate cross-browser
-                            compatibility.</p>
-                        <div class="project-tags">
-                            <span>Client Solutions</span><span>Production Deploy</span><span>API
-                                Design</span><span>Performance</span>
-                        </div>
-                        <div class="project-card-actions">
-                            <a href="#projects" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-cubes"></i> Browse Projects
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resume 4 — Education & Academics -->
-                <div class="card-fan-item fan-color-brown">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-building-columns"></i>
-                        </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-graduation-cap"></i> Education</span>
-                        <h3>Academic Foundation</h3>
-                        <span class="card-fan-sub">B.Tech CSE &amp; Boards</span>
-                    </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-graduation-cap" style="color: #c29b62;"></i>
-                            </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-calendar"></i> 2023 – 2027</span>
-                            </div>
-                        </div>
-                        <h3>Academic Foundation</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-university"></i> R. R. Institute of Modern Tech (RRIMT)
-                        </div>
-                        <p>Pursuing Bachelor of Technology in Computer Science &amp; Engineering. Strong grounding in
-                            Operating Systems, Database Management Systems, Discrete Mathematics, and Software
-                            Engineering.</p>
-                        <div class="project-tags">
-                            <span>B.Tech CSE</span><span>AKTU/RRIMT</span><span>Algorithms</span><span>DBMS</span>
-                        </div>
-                        <div class="project-card-actions">
-                            <a href="#education" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-timeline"></i> View Timeline
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resume 5 — Achievements & Honors -->
-                <div class="card-fan-item fan-color-coral">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-medal"></i>
-                        </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-award"></i> Honors</span>
-                        <h3>Key Achievements</h3>
-                        <span class="card-fan-sub">Hackathons &amp; Ratings</span>
-                    </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-trophy" style="color: #fb7185;"></i>
-                            </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-award"></i> Recognized</span>
-                            </div>
-                        </div>
-                        <h3>Key Achievements</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-star"></i> Innovathon &amp; Certifications
-                        </div>
-                        <p>Showcased technical excellence at RRGI Innovathon 2025, achieved certifications across C++,
-                            Java, and Full-Stack Development, and actively solved competitive programming challenges.
-                        </p>
-                        <div class="project-tags">
-                            <span>Hackathons</span><span>C++ Certified</span><span>Java
-                                Mastery</span><span>LeetCode</span>
-                        </div>
-                        <div class="project-card-actions">
-                            <a href="#achievements" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-certificate"></i> View Certificates
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resume 6 — Official CV & Download -->
-                <div class="card-fan-item fan-color-dark">
-                    <div class="card-fan-front">
-                        <div class="card-fan-preview">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </div>
-                        <span class="card-fan-type-badge"><i class="fa-solid fa-download"></i> Official CV</span>
-                        <h3>Print &amp; PDF Download</h3>
-                        <span class="card-fan-sub">Ready for Recruiters</span>
-                    </div>
-                    <div class="card-fan-details">
-                        <div class="card-fan-detail-top">
-                            <div class="project-icon-wrap">
-                                <i class="fa-solid fa-file-arrow-down" style="color: #38bdf8;"></i>
-                            </div>
-                            <div class="card-fan-meta">
-                                <span class="card-fan-date"><i class="fa-solid fa-check-circle"></i>
-                                    ATS-Optimized</span>
-                            </div>
-                        </div>
-                        <h3>Print &amp; PDF Download</h3>
-                        <div class="card-fan-org">
-                            <i class="fa-solid fa-file-lines"></i> Interactive CV Portal
-                        </div>
-                        <p>One-click export ready for technical recruiters and hiring managers. Features verified
-                            contact details, full project breakdown, timeline progression, and instant printer-friendly
-                            PDF formatting.</p>
-                        <div class="project-tags">
-                            <span>ATS Ready</span><span>PDF Format</span><span>One-Click Save</span><span>Recruiter
-                                Friendly</span>
-                        </div>
-                        <div class="project-card-actions">
-                            <a href="cv.html" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-                                <i class="fa-solid fa-download"></i> Download / View CV
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <!-- Centered Circular Navigation Arrows -->
+            <div class="resume-nav-controls">
+                <button class="res-nav-btn prev" id="resNavPrev" aria-label="Previous Slide">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button class="res-nav-btn next" id="resNavNext" aria-label="Next Slide">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </section>
