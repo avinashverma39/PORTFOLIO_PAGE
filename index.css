@@ -4120,32 +4120,34 @@ button {
 }
 
 .cert-modal-image-wrap {
-  background: rgba(0, 0, 0, 0.45);
-  padding: 24px;
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.7) 0%, rgba(10, 15, 20, 0.95) 100%);
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 380px;
-  overflow: auto;
-  cursor: grab;
-}
-
-.cert-modal-image-wrap:active {
-  cursor: grabbing;
+  max-height: 52vh;
+  min-height: 240px;
+  overflow: hidden;
+  position: relative;
 }
 
 .cert-modal-image {
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 48vh;
   object-fit: contain;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center center;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  cursor: zoom-in;
+}
+
+.cert-modal-image.zoomed {
+  cursor: zoom-out;
 }
 
 .cert-modal-info {
-  padding: 28px;
+  padding: 24px 28px;
   border-top: 1px solid var(--border);
 }
 

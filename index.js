@@ -1290,6 +1290,7 @@ function initAchievements() {
   const countersEl = document.getElementById('achievementCounters');
   const filterBtns = document.querySelectorAll('[data-achievement-filter]');
   const viewAllWrap = document.getElementById('achievementsViewAllWrap');
+  const viewAllBtn = document.getElementById('achievementsViewAllBtn');
 
   if (viewAllWrap) {
     viewAllWrap.style.display = 'none';
@@ -1302,6 +1303,32 @@ function initAchievements() {
   initCertModal();
 
   if (!fan) return;
+
+  /* ── Filter Function ─── */
+  function applyFilter(filterVal) {
+    filterBtns.forEach(b => {
+      if (b.getAttribute('data-achievement-filter') === filterVal) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+
+    const cards = fan.querySelectorAll('.card-fan-item');
+    cards.forEach(card => {
+      const cat = card.getAttribute('data-category') || '';
+      if (filterVal === 'all' || cat === filterVal) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+        card.classList.remove('active');
+      }
+    });
+
+    if (typeof fan.spreadCards === 'function') {
+      fan.spreadCards();
+    }
+  }
 
   /* ── Attach Certificate Preview Modal Trigger to Buttons & Card Previews ─── */
   document.querySelectorAll('.achievement-view-cert-btn').forEach(btn => {
@@ -1330,38 +1357,32 @@ function initAchievements() {
 
   /* ── Setup Filters ─── */
   filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const filterVal = btn.getAttribute('data-achievement-filter');
-      const cards = fan.querySelectorAll('.card-fan-item');
-
-      cards.forEach(card => {
-        const cat = card.getAttribute('data-category') || '';
-        if (filterVal === 'all' || cat === filterVal) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-          card.classList.remove('active');
-        }
-      });
-
-      if (typeof fan.spreadCards === 'function') {
-        fan.spreadCards();
-      }
+      applyFilter(filterVal);
     });
   });
 
-  /* ── Render counters ─── */
+  /* ── Setup View All Button ─── */
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      applyFilter('all');
+      fan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  /* ── Render counters and attach filter clicks to pills ─── */
   function renderCounters() {
     if (!countersEl) return;
 
     const counts = {};
     const labels = {
-      certificate: { label: 'Certificates', icon: 'fa-certificate' },
-      course: { label: 'Courses', icon: 'fa-book' },
-      internship: { label: 'Internships', icon: 'fa-briefcase' },
-      achievement: { label: 'Achievements', icon: 'fa-trophy' }
+      certificate: { label: 'Certificates', icon: 'fa-certificate', filter: 'certificate' },
+      course: { label: 'Courses', icon: 'fa-book', filter: 'course' },
+      internship: { label: 'Internships', icon: 'fa-briefcase', filter: 'internship' },
+      achievement: { label: 'Achievements', icon: 'fa-trophy', filter: 'achievement' }
     };
 
     achievementsData.forEach(a => {
@@ -1376,7 +1397,7 @@ function initAchievements() {
         pills.push('<span class="achievement-counter-separator">|</span>');
       }
       pills.push(`
-        <div class="achievement-counter-pill">
+        <div class="achievement-counter-pill" data-counter-filter="${meta.filter}" style="cursor:pointer;" title="Click to filter by ${meta.label}">
           <i class="fa-solid ${meta.icon}"></i>
           <span class="counter-num" data-count="${count}">${count}+</span>
           ${meta.label}
@@ -1385,6 +1406,14 @@ function initAchievements() {
     });
 
     countersEl.innerHTML = pills.join('');
+
+    // Make counter pills clickable filter shortcuts
+    countersEl.querySelectorAll('.achievement-counter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const filterVal = pill.getAttribute('data-counter-filter');
+        if (filterVal) applyFilter(filterVal);
+      });
+    });
   }
 }
 
@@ -1392,6 +1421,8 @@ function initAchievements() {
 /* 
    23. CERTIFICATE PREVIEW MODAL
     */
+let certModalCurrentZoom = 1;
+
 function initCertModal() {
   const overlay = document.getElementById('certModalOverlay');
   const closeBtn = document.getElementById('certModalClose');
@@ -1402,25 +1433,38 @@ function initCertModal() {
 
   if (!overlay) return;
 
-  let currentZoom = 1;
   const ZOOM_STEP = 0.25;
-  const ZOOM_MAX = 3;
-  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 2.5;
+  const ZOOM_MIN = 0.6;
+
+  /* ── Zoom update function ─── */
+  function setZoom(level) {
+    certModalCurrentZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number(level.toFixed(2))));
+    if (modalImg) {
+      modalImg.style.transform = `scale(${certModalCurrentZoom})`;
+      modalImg.classList.toggle('zoomed', certModalCurrentZoom > 1.05);
+    }
+  }
 
   /* ── Close modal ─── */
   function closeModal() {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
-    currentZoom = 1;
-    if (modalImg) modalImg.style.transform = `scale(1)`;
+    setZoom(1);
     setTimeout(() => {
       if (!overlay.classList.contains('active')) {
         overlay.style.display = 'none';
       }
-    }, 400);
+    }, 350);
   }
 
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+    });
+  }
 
   // Click outside modal to close
   overlay.addEventListener('click', (e) => {
@@ -1435,14 +1479,39 @@ function initCertModal() {
   });
 
   /* ── Zoom controls ─── */
-  function setZoom(level) {
-    currentZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, level));
-    if (modalImg) modalImg.style.transform = `scale(${currentZoom})`;
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setZoom(certModalCurrentZoom + ZOOM_STEP);
+    });
+  }
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setZoom(certModalCurrentZoom - ZOOM_STEP);
+    });
+  }
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setZoom(1);
+    });
   }
 
-  if (zoomInBtn) zoomInBtn.addEventListener('click', () => setZoom(currentZoom + ZOOM_STEP));
-  if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => setZoom(currentZoom - ZOOM_STEP));
-  if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => setZoom(1));
+  // Click on image toggles zoom
+  if (modalImg) {
+    modalImg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (certModalCurrentZoom > 1.05) {
+        setZoom(1);
+      } else {
+        setZoom(1.5);
+      }
+    });
+  }
 }
 
 /* ── Open modal with achievement data ─── */
@@ -1450,16 +1519,23 @@ function openCertModal(achievementId) {
   const overlay = document.getElementById('certModalOverlay');
   const modalImg = document.getElementById('certModalImage');
   const modalInfo = document.getElementById('certModalInfo');
+  const modalBody = overlay ? overlay.querySelector('.cert-modal-body') : null;
 
   if (!overlay) return;
 
   const achievement = achievementsData.find(a => a.id === achievementId);
   if (!achievement) return;
 
+  // Reset zoom and scroll to top
+  certModalCurrentZoom = 1;
+  if (modalBody) modalBody.scrollTop = 0;
+
   // Set image
   if (achievement.image) {
     modalImg.src = achievement.image;
     modalImg.style.display = 'block';
+    modalImg.style.transform = 'scale(1)';
+    modalImg.classList.remove('zoomed');
     modalImg.parentElement.querySelector('.achievement-placeholder-img')?.remove();
   } else {
     modalImg.style.display = 'none';
@@ -1476,9 +1552,9 @@ function openCertModal(achievementId) {
       const icon = categoryMeta[achievement.category] || 'fa-star';
       const placeholder = document.createElement('div');
       placeholder.className = 'achievement-placeholder-img';
-      placeholder.style.minHeight = '250px';
-      placeholder.innerHTML = `<i class="fa-solid ${icon} placeholder-icon" style="font-size:5rem;"></i>
-        <span class="placeholder-label">Certificate image placeholder</span>`;
+      placeholder.style.minHeight = '240px';
+      placeholder.innerHTML = `<i class="fa-solid ${icon} placeholder-icon" style="font-size:4.5rem;"></i>
+        <span class="placeholder-label">Certificate Preview</span>`;
       wrap.appendChild(placeholder);
     }
   }
