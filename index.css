@@ -1508,9 +1508,28 @@ button {
   background: rgba(0, 0, 0, 0.15);
   border-radius: 16px;
   margin: 16px;
+  overflow: hidden;
+}
+
+.card-fan-preview img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  opacity: 0.32;
+  transition: opacity 0.35s ease, transform 0.45s ease;
+}
+
+.card-fan-item:hover .card-fan-preview img {
+  opacity: 0.52;
+  transform: scale(1.05);
 }
 
 .card-fan-preview i {
+  position: relative;
+  z-index: 1;
   font-size: 3rem;
   color: rgba(255, 255, 255, 0.3);
 }
