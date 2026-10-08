@@ -1423,92 +1423,97 @@ function initAchievements() {
     */
 let certModalCurrentZoom = 1;
 
+/* ── Close modal ─── */
+function closeCertModal() {
+  const overlay = document.getElementById('certModalOverlay');
+  const modal = document.querySelector('.cert-modal');
+  if (!overlay) return;
+
+  if (document.fullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+  if (modal) modal.classList.remove('is-fullscreen');
+
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  resetCertZoom();
+  setTimeout(() => {
+    if (!overlay.classList.contains('active')) {
+      overlay.style.display = 'none';
+    }
+  }, 350);
+}
+
+/* ── Zoom helpers ─── */
+function zoomCert(delta) {
+  const modalImg = document.getElementById('certModalImage');
+  const ZOOM_MAX = 2.5;
+  const ZOOM_MIN = 0.6;
+  certModalCurrentZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number((certModalCurrentZoom + delta).toFixed(2))));
+  if (modalImg) {
+    modalImg.style.transform = `scale(${certModalCurrentZoom})`;
+    modalImg.classList.toggle('zoomed', certModalCurrentZoom > 1.05);
+  }
+}
+
+function resetCertZoom() {
+  certModalCurrentZoom = 1;
+  const modalImg = document.getElementById('certModalImage');
+  if (modalImg) {
+    modalImg.style.transform = 'scale(1)';
+    modalImg.classList.remove('zoomed');
+  }
+}
+
+/* ── Toggle Fullscreen ─── */
+function toggleCertFullscreen() {
+  const modal = document.querySelector('.cert-modal');
+  if (!modal) return;
+
+  const isFs = modal.classList.contains('is-fullscreen') || !!document.fullscreenElement;
+  if (!isFs) {
+    modal.classList.add('is-fullscreen');
+    if (modal.requestFullscreen) {
+      modal.requestFullscreen().catch(() => {});
+    } else if (modal.webkitRequestFullscreen) {
+      modal.webkitRequestFullscreen();
+    }
+  } else {
+    modal.classList.remove('is-fullscreen');
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+  }
+}
+
 function initCertModal() {
   const overlay = document.getElementById('certModalOverlay');
-  const closeBtn = document.getElementById('certModalClose');
   const modalImg = document.getElementById('certModalImage');
-  const zoomInBtn = document.getElementById('certModalZoomIn');
-  const zoomOutBtn = document.getElementById('certModalZoomOut');
-  const zoomResetBtn = document.getElementById('certModalZoomReset');
 
   if (!overlay) return;
 
-  const ZOOM_STEP = 0.25;
-  const ZOOM_MAX = 2.5;
-  const ZOOM_MIN = 0.6;
-
-  /* ── Zoom update function ─── */
-  function setZoom(level) {
-    certModalCurrentZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number(level.toFixed(2))));
-    if (modalImg) {
-      modalImg.style.transform = `scale(${certModalCurrentZoom})`;
-      modalImg.classList.toggle('zoomed', certModalCurrentZoom > 1.05);
-    }
-  }
-
-  /* ── Close modal ─── */
-  function closeModal() {
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-    setZoom(1);
-    setTimeout(() => {
-      if (!overlay.classList.contains('active')) {
-        overlay.style.display = 'none';
-      }
-    }, 350);
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeModal();
-    });
-  }
-
   // Click outside modal to close
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
+    if (e.target === overlay) closeCertModal();
   });
 
   // Keyboard Esc to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && overlay.classList.contains('active')) {
-      closeModal();
+      closeCertModal();
     }
   });
-
-  /* ── Zoom controls ─── */
-  if (zoomInBtn) {
-    zoomInBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setZoom(certModalCurrentZoom + ZOOM_STEP);
-    });
-  }
-  if (zoomOutBtn) {
-    zoomOutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setZoom(certModalCurrentZoom - ZOOM_STEP);
-    });
-  }
-  if (zoomResetBtn) {
-    zoomResetBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setZoom(1);
-    });
-  }
 
   // Click on image toggles zoom
   if (modalImg) {
     modalImg.addEventListener('click', (e) => {
       e.stopPropagation();
       if (certModalCurrentZoom > 1.05) {
-        setZoom(1);
+        resetCertZoom();
       } else {
-        setZoom(1.5);
+        zoomCert(0.5);
       }
     });
   }
@@ -1527,7 +1532,7 @@ function openCertModal(achievementId) {
   if (!achievement) return;
 
   // Reset zoom and scroll to top
-  certModalCurrentZoom = 1;
+  resetCertZoom();
   if (modalBody) modalBody.scrollTop = 0;
 
   // Set image
@@ -1575,8 +1580,11 @@ function openCertModal(achievementId) {
   const skillsHTML = achievement.skills.map(s => `<span>${s}</span>`).join('');
 
   const fullImageBtnHTML = achievement.image
-    ? `<a href="${achievement.image}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
-         <i class="fa-solid fa-up-right-and-down-left-from-center"></i> View Full Resolution
+    ? `<button type="button" class="btn btn-outline btn-sm" onclick="toggleCertFullscreen()" style="display:inline-flex; align-items:center; gap:8px;">
+         <i class="fa-solid fa-expand"></i> View Full Screen
+       </button>
+       <a href="${achievement.image}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
+         <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Original
        </a>`
     : '';
 
@@ -1586,12 +1594,15 @@ function openCertModal(achievementId) {
        </a>`
     : '';
 
-  const actionsHTML = (fullImageBtnHTML || verifyBtnHTML)
-    ? `<div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px;">
-         ${verifyBtnHTML}
-         ${fullImageBtnHTML}
-       </div>`
-    : '';
+  const actionsHTML = `
+    <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+      ${verifyBtnHTML}
+      ${fullImageBtnHTML}
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeCertModal()" style="display:inline-flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Gallery
+      </button>
+    </div>
+  `;
 
   modalInfo.innerHTML = `
     <h3 class="cert-modal-info-title">${achievement.title}</h3>
@@ -1618,6 +1629,10 @@ function openCertModal(achievementId) {
 
 // Ensure global accessibility for inline event handlers
 window.openCertModal = openCertModal;
+window.closeCertModal = closeCertModal;
+window.toggleCertFullscreen = toggleCertFullscreen;
+window.zoomCert = zoomCert;
+window.resetCertZoom = resetCertZoom;
 
 
 /* 
