@@ -1594,15 +1594,12 @@ function openCertModal(achievementId) {
        </a>`
     : '';
 
-  const actionsHTML = `
-    <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-      ${verifyBtnHTML}
-      ${fullImageBtnHTML}
-      <button type="button" class="btn btn-secondary btn-sm" onclick="closeCertModal()" style="display:inline-flex; align-items:center; gap:6px;">
-        <i class="fa-solid fa-arrow-left"></i> Back to Gallery
-      </button>
-    </div>
-  `;
+  const actionsHTML = (verifyBtnHTML || fullImageBtnHTML)
+    ? `<div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+         ${verifyBtnHTML}
+         ${fullImageBtnHTML}
+       </div>`
+    : '';
 
   modalInfo.innerHTML = `
     <h3 class="cert-modal-info-title">${achievement.title}</h3>

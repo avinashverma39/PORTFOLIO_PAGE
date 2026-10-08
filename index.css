@@ -4124,27 +4124,18 @@ button {
   background: rgba(255, 255, 255, 0.9);
 }
 
-.cert-modal-back-btn {
+.cert-modal-header-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(50, 205, 50, 0.12);
-  border: 1px solid rgba(50, 205, 50, 0.3);
-  color: var(--accent);
-  padding: 7px 16px;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
+  letter-spacing: 0.02em;
 }
 
-.cert-modal-back-btn:hover {
-  background: var(--accent);
-  color: #061a06;
-  border-color: var(--accent);
-  transform: translateX(-3px);
-  box-shadow: 0 4px 14px rgba(50, 205, 50, 0.35);
+.cert-modal-header-title i {
+  color: var(--accent);
 }
 
 .cert-modal-header-actions {
