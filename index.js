@@ -1181,28 +1181,28 @@ function openProjectModal(projectId) {
 /* ── Achievement Data — Add your own entries here ─── */
 const achievementsData = [
   {
-    id: 'cert-cpp',
-    title: 'C++ Programming Certificate',
+    id: 'cert-c-datastructures',
+    title: 'C Data Structures Certificate',
     category: 'certificate',
-    organization: 'Coursera',
-    date: 'April 2025',
-    description: 'Completed a comprehensive C++ programming course covering OOP, STL, memory management, and modern C++ features with hands-on projects.',
-    skills: ['C++', 'OOP', 'STL'],
-    image: null, 
-    credentialUrl: '#',
-    credentialId: 'CERT-CPP-2025-001'
+    organization: 'MindLuster',
+    date: 'Sept 2026',
+    description: 'Earned Certificate of Achievement for successfully completing C Datastructures course covering data structures, algorithmic memory concepts, arrays, pointers, and problem-solving.',
+    skills: ['C', 'Data Structures', 'Algorithms', 'MindLuster'],
+    image: 'assets/certificates/mindluster_c_datastructures.jpg', 
+    credentialUrl: 'https://www.mindluster.com/certified/download_pdf/59a99309',
+    credentialId: 'a64d5303'
   },
   {
     id: 'course-webdev',
-    title: 'Web Development Course ',
+    title: 'Complete Web Development Course',
     category: 'course',
-    organization: 'Udemy',
-    date: 'Mar 2026',
-    description: 'Mastered full-stack web development fundamentals including HTML5, CSS3, responsive design, and JavaScript ES6+ With using AI tools for coding and debugging.',
-    skills: ['HTML', 'CSS', 'JavaScript', 'AI Tools'],
-    image: null,
-    credentialUrl: '#',
-    credentialId: 'UC-WEBDEV-2026'
+    organization: 'Udemy (Instructor: Hitesh Choudhary)',
+    date: 'Sept 2026',
+    description: 'Completed 100 total hours of comprehensive full-stack web development with instructor Hitesh Choudhary, mastering modern HTML5, CSS3, JavaScript ES6+, backend architectures, and AI-assisted workflows.',
+    skills: ['Full-Stack Web Dev', 'HTML5 & CSS3', 'JavaScript', 'Hitesh Choudhary', 'Udemy'],
+    image: 'assets/certificates/udemy_web_development.jpg',
+    credentialUrl: 'https://ude.my/UC-73f6ec2f-4cbe-43f1-85c4-780bd55cf6a7',
+    credentialId: 'UC-73f6ec2f-4cbe-43f1-85c4-780bd55cf6a7'
   },
   {
     id: 'Summer-Internship-JAVA',
@@ -1231,15 +1231,15 @@ const achievementsData = [
 
   {
     id: 'Hack-2026',
-    title: 'Hackathon -2026 RR Institute of Modern Technology',
+    title: 'RRGI INNOVATHON 2026 — Team Achievers',
     category: 'achievement',
-    organization: 'RRGI INNOVATHON - 2026',
-    date: 'Apr 2025',
-    description: 'Participated in Hackthon RRGI and give our best to solve real-world problems using innovative solutions and collaborative teamwork. Our team developed a web application that addressed a pressing social issue, showcasing our technical skills and creativity.',
-    skills: ['Problem Solving', 'Teamwork', 'Web Dev'],
-    image: null,
+    organization: 'R.R. Group of Institutions (Powered by OLA KRUTRIM & Trainx)',
+    date: '2026',
+    description: 'Awarded Certificate of Participation with Team Achievers at RR Institute of Modern Technology, Lucknow. Demonstrated exceptional innovation, creativity, and technical excellence solving real-world challenges in hackathon powered by OLA Krutrim and Trainx.',
+    skills: ['RRGI Innovathon', 'OLA Krutrim', 'Trainx', 'Hackathon', 'Problem Solving', 'Team Achievers'],
+    image: 'assets/certificates/rrgi_innovathon_2026.jpg',
     credentialUrl: '#',
-    credentialId: null
+    credentialId: 'RRGI-INNOVATHON-2026'
   },
 
  /* {
@@ -1484,6 +1484,14 @@ function openCertModal(achievementId) {
 
   const skillsHTML = achievement.skills.map(s => `<span>${s}</span>`).join('');
 
+  const verifyBtnHTML = (achievement.credentialUrl && achievement.credentialUrl !== '#')
+    ? `<div style="margin-top: 16px;">
+         <a href="${achievement.credentialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width:fit-content;">
+           <i class="fa-solid fa-arrow-up-right-from-square"></i> Verify Official Credential
+         </a>
+       </div>`
+    : '';
+
   modalInfo.innerHTML = `
     <h3 class="cert-modal-info-title">${achievement.title}</h3>
     <div class="cert-modal-info-org"><i class="fa-solid fa-building"></i> ${achievement.organization}</div>
@@ -1491,6 +1499,7 @@ function openCertModal(achievementId) {
     <p class="cert-modal-info-desc">${achievement.description}</p>
     ${credentialHTML}
     <div class="cert-modal-info-skills">${skillsHTML}</div>
+    ${verifyBtnHTML}
   `;
 
   // Show modal
