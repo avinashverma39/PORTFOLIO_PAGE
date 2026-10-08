@@ -1269,15 +1269,15 @@ const achievementsData = [
   },
   {
     id: 'award-academic',
-    title: 'Academic Excellence',
+    title: 'Academic Excellence — AKTU Merit',
     category: 'achievement',
-    organization: 'R R Institute of Modern Technology',
-    date: 'Aug 2025',
-    description: 'Recognized for outstanding academic performance and consistent contributions to the Computer Science department through projects and Academic Results.',
-    skills: ['Computer Science', 'Leadership'],
-    image: null,
+    organization: 'Dr. A.P.J. Abdul Kalam Technical University (AKTU)',
+    date: '2025–26',
+    description: 'Secured outstanding academic standing across Semesters 1 & 2 with total score 1417/1800 (78.7%), SGPA 7.95 (Sem 1) and 7.73 (Sem 2), zero backlogs, and top practical grades (A+ in Programming, Engineering Graphics, Electronics & Workshop Labs).',
+    skills: ['AKTU', 'SGPA 7.95', 'Marks 1417/1800', 'Computer Science', 'Zero Backlog'],
+    image: 'assets/certificates/aktu_academic_excellence.png',
     credentialUrl: '#',
-    credentialId: null
+    credentialId: 'AKTU-SESSION-2025-26'
   },
   {
     id: 'SIH-2026',
@@ -1311,13 +1311,28 @@ function initAchievements() {
 
   if (!fan) return;
 
-  /* ── Attach Certificate Preview Modal Trigger to Buttons ─── */
-  fan.querySelectorAll('.achievement-view-cert-btn').forEach(btn => {
+  /* ── Attach Certificate Preview Modal Trigger to Buttons & Card Previews ─── */
+  document.querySelectorAll('.achievement-view-cert-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const id = btn.getAttribute('data-achievement-id');
-      openCertModal(id);
+      if (id) openCertModal(id);
+    });
+  });
+
+  fan.querySelectorAll('.card-fan-preview').forEach(preview => {
+    preview.style.cursor = 'pointer';
+    preview.setAttribute('title', 'Click to view full certificate');
+    preview.addEventListener('click', (e) => {
+      const card = preview.closest('.card-fan-item');
+      if (!card) return;
+      const id = card.getAttribute('data-achievement-id');
+      if (id) {
+        e.preventDefault();
+        e.stopPropagation();
+        openCertModal(id);
+      }
     });
   });
 
@@ -1484,11 +1499,22 @@ function openCertModal(achievementId) {
 
   const skillsHTML = achievement.skills.map(s => `<span>${s}</span>`).join('');
 
+  const fullImageBtnHTML = achievement.image
+    ? `<a href="${achievement.image}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
+         <i class="fa-solid fa-up-right-and-down-left-from-center"></i> View Full Resolution
+       </a>`
+    : '';
+
   const verifyBtnHTML = (achievement.credentialUrl && achievement.credentialUrl !== '#')
-    ? `<div style="margin-top: 16px;">
-         <a href="${achievement.credentialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:8px; width:fit-content;">
-           <i class="fa-solid fa-arrow-up-right-from-square"></i> Verify Official Credential
-         </a>
+    ? `<a href="${achievement.credentialUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; gap:8px;">
+         <i class="fa-solid fa-arrow-up-right-from-square"></i> Verify Official Credential
+       </a>`
+    : '';
+
+  const actionsHTML = (fullImageBtnHTML || verifyBtnHTML)
+    ? `<div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px;">
+         ${verifyBtnHTML}
+         ${fullImageBtnHTML}
        </div>`
     : '';
 
@@ -1499,7 +1525,7 @@ function openCertModal(achievementId) {
     <p class="cert-modal-info-desc">${achievement.description}</p>
     ${credentialHTML}
     <div class="cert-modal-info-skills">${skillsHTML}</div>
-    ${verifyBtnHTML}
+    ${actionsHTML}
   `;
 
   // Show modal
