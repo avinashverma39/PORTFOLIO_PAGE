@@ -37,6 +37,54 @@
       --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card2: #f1f5f9;
+      --border: rgba(34, 197, 94, 0.25);
+      --border-light: rgba(34, 197, 94, 0.4);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --gradient-main: linear-gradient(135deg, #16a34a, #0891b2);
+      --gradient-bg: radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 40%);
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .cv-container {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .cv-sidebar {
+      background: #f8fafc;
+      border-right-color: #e2e8f0;
+    }
+
+    [data-theme="light"] .cv-main {
+      background: #ffffff;
+    }
+
+    [data-theme="light"] .cv-section-title {
+      color: #0f172a;
+    }
+
+    [data-theme="light"] .metric-card,
+    [data-theme="light"] .job-card,
+    [data-theme="light"] .edu-card,
+    [data-theme="light"] .project-card-cv,
+    [data-theme="light"] .highlight-card,
+    [data-theme="light"] .cert-badge {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    [data-theme="light"] .contact-item a,
+    [data-theme="light"] .contact-info span {
+      color: #334155;
+    }
+
     body {
       background: var(--bg-primary);
       background-image: var(--gradient-bg);

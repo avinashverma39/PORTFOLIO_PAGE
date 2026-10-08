@@ -639,8 +639,8 @@ function initParticles() {
   const COUNT = 45;
 
   function resize() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = canvas.offsetWidth || window.innerWidth || 800;
+    canvas.height = canvas.offsetHeight || window.innerHeight || 600;
   }
 
   function mkParticle() {
@@ -1052,20 +1052,37 @@ function initProjects() {
   projectCards.forEach(card => {
     card.style.cursor = 'default';
 
-    // Dynamic 3D mouse movement tilt (moving card without clicking)
+    // Dynamic 3D mouse movement tilt with smooth GSAP transition
     card.addEventListener('mousemove', (e) => {
       const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -6;
-      const rotateY = ((x - centerX) / centerX) * 6;
-      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+      const rx = ((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -6;
+      const ry = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 6;
+      if (typeof gsap !== 'undefined') {
+        gsap.to(card, {
+          rotationX: rx,
+          rotationY: ry,
+          transformPerspective: 800,
+          duration: 0.3,
+          ease: 'power1.out',
+          overwrite: 'auto'
+        });
+      } else {
+        card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      }
     });
 
     card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
+      if (typeof gsap !== 'undefined') {
+        gsap.to(card, {
+          rotationX: 0,
+          rotationY: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          overwrite: 'auto'
+        });
+      } else {
+        card.style.transform = '';
+      }
     });
   });
 }
