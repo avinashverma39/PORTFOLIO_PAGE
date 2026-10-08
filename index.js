@@ -1178,6 +1178,11 @@ function openProjectModal(projectId) {
   });
 }
 
+
+/* 
+   22. ACHIEVEMENTS & CERTIFICATES — DATA & 3D FAN GALLERY
+    */
+
 /* ── Achievement Data — Add your own entries here ─── */
 const achievementsData = [
   {
@@ -1188,6 +1193,8 @@ const achievementsData = [
     date: 'Sept 2026',
     description: 'Earned Certificate of Achievement for successfully completing C Datastructures course covering data structures, algorithmic memory concepts, arrays, pointers, and problem-solving.',
     skills: ['C', 'Data Structures', 'Algorithms', 'MindLuster'],
+    quote: 'Data structures and algorithms are the bedrock of computational problem-solving. Master memory, logic, and complexity, and every system becomes solvable.',
+    quoteAuthor: 'Foundational CS Principle',
     image: 'assets/certificates/mindluster_c_datastructures.jpg', 
     credentialUrl: 'https://www.mindluster.com/certified/download_pdf/59a99309',
     credentialId: 'a64d5303'
@@ -1200,35 +1207,26 @@ const achievementsData = [
     date: 'Sept 2026',
     description: 'Completed 100 total hours of comprehensive full-stack web development with instructor Hitesh Choudhary, mastering modern HTML5, CSS3, JavaScript ES6+, backend architectures, and AI-assisted workflows.',
     skills: ['Full-Stack Web Dev', 'HTML5 & CSS3', 'JavaScript', 'Hitesh Choudhary', 'Udemy'],
+    quote: "Building for the web isn't merely writing code — it is crafting living, intuitive digital experiences that connect and empower people across the world.",
+    quoteAuthor: 'Full-Stack Engineering Philosophy',
     image: 'assets/certificates/udemy_web_development.jpg',
     credentialUrl: 'https://ude.my/UC-73f6ec2f-4cbe-43f1-85c4-780bd55cf6a7',
     credentialId: 'UC-73f6ec2f-4cbe-43f1-85c4-780bd55cf6a7'
   },
   {
     id: 'Summer-Internship-JAVA',
-  title: 'Summer Internship — JAVA Development',
+    title: 'Summer Internship — JAVA Development',
     category: 'internship',
     organization: 'TechCorp Solutions',
     date: 'Jun 2025',
     description: 'Worked as a JAVA Development Intern building scalable applications, collaborating with senior developers, and delivering Projects using AI-assisted coding tools to enhance productivity and code quality.',
     skills: ['JAVA', 'Team Collaboration', 'AI Tools'],
+    quote: 'Great software is engineered through disciplined design, robust modularity, and continuous collaboration. Write code that is clean, resilient, and built to scale.',
+    quoteAuthor: 'Software Engineering Principle',
     image: null,
     credentialUrl: '#',
     credentialId: null
   },
- /* {
-    id: 'course-dsa',
-    title: 'DSA Course ',
-    category: 'course',
-    organization: 'GeeksforGeeks',
-    date: 'Feb 2025',
-    description: 'Completed an intensive Data Structures and Algorithms course covering arrays, linked lists, trees, graphs, dynamic programming, and competitive coding strategies.',
-    skills: ['C++', 'DSA', 'Algorithms'],
-    image: null,
-    credentialUrl: '#',
-    credentialId: 'GFG-DSA-2025'
-  },*/
-
   {
     id: 'Hack-2026',
     title: 'RRGI INNOVATHON 2026 — Team Achievers',
@@ -1237,24 +1235,12 @@ const achievementsData = [
     date: '2026',
     description: 'Awarded Certificate of Participation with Team Achievers at RR Institute of Modern Technology, Lucknow. Demonstrated exceptional innovation, creativity, and technical excellence solving real-world challenges in hackathon powered by OLA Krutrim and Trainx.',
     skills: ['RRGI Innovathon', 'OLA Krutrim', 'Trainx', 'Hackathon', 'Problem Solving', 'Team Achievers'],
+    quote: 'Innovation flourishes when audacious thinking meets relentless execution. In hackathons and in life, a united team turns complex challenges into breakthrough solutions.',
+    quoteAuthor: 'Hackathon & Innovation Creed',
     image: 'assets/certificates/rrgi_innovathon_2026.jpg',
     credentialUrl: '#',
     credentialId: 'RRGI-INNOVATHON-2026'
   },
-
- /* {
-    id: 'cert-python',
-    title: 'Python Programming Certificate',
-    category: 'certificate',
-    organization: 'Coursera',
-    date: 'Dec 2024',
-    description: 'Earned a certification in Python programming covering data types, control flow, functions, file handling, and introduction to libraries like NumPy and Pandas.',
-    skills: ['Python', 'Automation', 'Data Analysis'],
-    image: null,
-    credentialUrl: '#',
-    credentialId: 'CERT-PY-2024-042'
-  },*/
-
   {
     id: 'course-git',
     title: 'Git & GitHub Masterclass',
@@ -1263,6 +1249,8 @@ const achievementsData = [
     date: 'Nov 2025',
     description: 'All Basic version control with Git and GitHub including branching strategies, pull requests, collaboration workflows, and CI/CD fundamentals and push code to GitHub repository for real-world project collaboration.',
     skills: ['Git', 'GitHub', 'Version Control'],
+    quote: 'Version control is the bedrock of collaborative engineering. Commit with intention, branch with courage, and build software that stands on transparent history.',
+    quoteAuthor: 'Open-Source & DevOps Creed',
     image: null,
     credentialUrl: '#',
     credentialId: null
@@ -1275,6 +1263,8 @@ const achievementsData = [
     date: '2025–26',
     description: 'Secured outstanding academic standing across Semesters 1 & 2 with total score 1417/1800 (78.7%), SGPA 7.95 (Sem 1) and 7.73 (Sem 2), zero backlogs, and top practical grades (A+ in Programming, Engineering Graphics, Electronics & Workshop Labs).',
     skills: ['AKTU', 'SGPA 7.95', 'Marks 1417/1800', 'Computer Science', 'Zero Backlog'],
+    quote: 'Academic excellence is the fruit of daily discipline and deep conceptual curiosity. Strong theoretical fundamentals are the launchpad for world-class engineering.',
+    quoteAuthor: 'Academic & Analytical Excellence',
     image: 'assets/certificates/aktu_academic_excellence.png',
     credentialUrl: '#',
     credentialId: 'AKTU-SESSION-2025-26'
@@ -1287,6 +1277,8 @@ const achievementsData = [
     date: '2026',
     description: 'National Grand Finale Finalist in Smart India Hackathon 2026 for engineering SmartLearn — an adaptive AI-driven, offline-first learning platform with vernacular voice accessibility to eliminate digital barriers.',
     skills: ['SIH 2026', 'National Finalist', 'AI EdTech', 'IndexedDB', 'WebSockets'],
+    quote: 'Technology achieves its highest calling when it solves problems for the grassroots, dismantling barriers and empowering every mind to learn and build without limits.',
+    quoteAuthor: 'National Innovation & Impact Mission',
     image: null,
     credentialUrl: '#',
     credentialId: 'SIH-2026-FINALIST'
@@ -1404,7 +1396,6 @@ function initCertModal() {
   const overlay = document.getElementById('certModalOverlay');
   const closeBtn = document.getElementById('certModalClose');
   const modalImg = document.getElementById('certModalImage');
-  const modalInfo = document.getElementById('certModalInfo');
   const zoomInBtn = document.getElementById('certModalZoomIn');
   const zoomOutBtn = document.getElementById('certModalZoomOut');
   const zoomResetBtn = document.getElementById('certModalZoomReset');
@@ -1493,6 +1484,14 @@ function openCertModal(achievementId) {
   }
 
   // Set info
+  const quoteHTML = achievement.quote
+    ? `<div class="cert-modal-quote">
+         <div class="cert-modal-quote-icon"><i class="fa-solid fa-quote-left"></i></div>
+         <p class="cert-modal-quote-text">"${achievement.quote}"</p>
+         ${achievement.quoteAuthor ? `<span class="cert-modal-quote-author">— ${achievement.quoteAuthor}</span>` : ''}
+       </div>`
+    : '';
+
   const credentialHTML = achievement.credentialId
     ? `<div class="cert-modal-info-credential"><strong>Credential ID:</strong> ${achievement.credentialId}</div>`
     : '';
@@ -1522,6 +1521,7 @@ function openCertModal(achievementId) {
     <h3 class="cert-modal-info-title">${achievement.title}</h3>
     <div class="cert-modal-info-org"><i class="fa-solid fa-building"></i> ${achievement.organization}</div>
     <div class="cert-modal-info-date"><i class="fa-solid fa-calendar"></i> ${achievement.date}</div>
+    ${quoteHTML}
     <p class="cert-modal-info-desc">${achievement.description}</p>
     ${credentialHTML}
     <div class="cert-modal-info-skills">${skillsHTML}</div>
@@ -1539,6 +1539,9 @@ function openCertModal(achievementId) {
     });
   });
 }
+
+// Ensure global accessibility for inline event handlers
+window.openCertModal = openCertModal;
 
 
 /* 
