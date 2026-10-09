@@ -1521,7 +1521,8 @@
       bar.className = 'scroll-progress-bar';
       document.body.prepend(bar);
       window.addEventListener('scroll', () => {
-        const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
         bar.style.width = pct + '%';
       }, { passive: true });
     })();

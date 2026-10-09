@@ -44,6 +44,7 @@ function startApp() {
     ['FloatingSkillIcons', initFloatingSkillIcons],
     ['CardFan', initCardFan],
     ['ResumeGallery', initResumeGallery],
+    ['ContactForm', initContactForm],
     ['Footer', initFooter]
   ];
 
@@ -343,7 +344,7 @@ function initTypingEffect() {
 /* 
    9. CONTACT FORM SUBMIT HANDLER
     */
-(function initContactForm() {
+function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
 
@@ -527,7 +528,7 @@ function initTypingEffect() {
       }
     });
   }
-})();
+}
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1045,12 +1046,34 @@ function initProjects() {
     });
   });
 
-  // Setup Project Modal listeners if needed
+  // Setup Project Modal listeners
   initProjectModal();
 
-  // Cards are non-clickable (display only) with dynamic 3D moving tilt animation
+  // Attach modal trigger to Details buttons and preview clicks
+  document.querySelectorAll('.project-open-detail-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const pId = btn.getAttribute('data-project-id');
+      if (pId) openProjectModal(pId);
+    });
+  });
+
+  // Project cards interactive preview and 3D moving tilt animation
   projectCards.forEach(card => {
-    card.style.cursor = 'default';
+    const preview = card.querySelector('.project-card-preview');
+    if (preview) {
+      preview.style.cursor = 'pointer';
+      preview.setAttribute('title', 'Click to view project details');
+      preview.addEventListener('click', (e) => {
+        const pId = card.getAttribute('data-project-id');
+        if (pId) {
+          e.preventDefault();
+          e.stopPropagation();
+          openProjectModal(pId);
+        }
+      });
+    }
 
     // Dynamic 3D mouse movement tilt with smooth GSAP transition
     card.addEventListener('mousemove', (e) => {
@@ -1113,6 +1136,8 @@ function initProjectModal() {
       closeModal();
     }
   });
+
+  window.closeProjectModal = closeModal;
 }
 
 function openProjectModal(projectId) {
@@ -1177,6 +1202,8 @@ function openProjectModal(projectId) {
     overlay.focus();
   });
 }
+
+window.openProjectModal = openProjectModal;
 
 
 /* 
