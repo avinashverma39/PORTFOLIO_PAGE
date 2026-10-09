@@ -25,7 +25,7 @@
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  --section-padding: 42px 0;
+  --section-padding: 56px 0;
   --glow-accent: rgba(50, 205, 50, 0.15);
   --glow-accent-strong: rgba(50, 205, 50, 0.4);
 }
@@ -46,7 +46,6 @@ html {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-snap-type: y proximity;
 }
 
 body {
@@ -152,14 +151,10 @@ button {
   padding: var(--section-padding);
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
-  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   scroll-margin-top: 70px;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
   box-sizing: border-box;
 }
 
