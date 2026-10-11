@@ -13,11 +13,29 @@
     spring: 'elastic.out(1, 0.6)'
   };
 
+  let waitCount = 0;
+  function revealAllFallbacks() {
+    document.querySelectorAll('.reveal, .anim-hidden, .hero-tag, .hero-title, .hero-desc, .hero-cta, .hero-stats').forEach(el => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      el.style.filter = 'none';
+    });
+  }
+
   function waitForLibraries(cb) {
     if (typeof anime !== 'undefined' && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-      cb();
-    } else {
+      try {
+        cb();
+      } catch (err) {
+        console.warn('[Animations] Initialization error:', err);
+        revealAllFallbacks();
+      }
+    } else if (waitCount < 60) {
+      waitCount++;
       setTimeout(() => waitForLibraries(cb), 50);
+    } else {
+      console.warn('[Animations] Libraries load timeout, activating fallback');
+      revealAllFallbacks();
     }
   }
 
