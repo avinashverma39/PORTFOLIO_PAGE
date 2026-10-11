@@ -24,61 +24,9 @@ try {
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---- App Initialization ---- */
-function startApp() {
-  const sections = [
-    ['CustomCursor', initCustomCursor],
-    ['Navbar', initNavbar],
-    ['Hamburger', initHamburger],
-    ['ScrollProgress', initScrollProgress],
-    ['ThemeToggle', initThemeToggle],
-    ['Particles', initParticles],       
-    ['TypingEffect', initTypingEffect],    
-    ['SkillBars', initSkillBars],       
-    ['ActiveNavLink', initActiveNavLink],   
-    ['BackToTop', initBackToTop],       
-    ['Achievements', initAchievements],   
-    ['Projects', initProjects],
-    ['Resources', initResources],
-    ['Journey', initJourney],
-    ['FloatingSkillIcons', initFloatingSkillIcons],
-    ['CardFan', initCardFan],
-    ['ResumeGallery', initResumeGallery],
-    ['ContactForm', initContactForm],
-    ['Footer', initFooter]
-  ];
-
-  sections.forEach(([name, fn]) => {
-    try {
-      if (typeof fn === 'function') fn();
-    } catch (err) {
-      console.warn(`[Portfolio] Error initializing ${name}:`, err);
-    }
-  });
-
-  checkAuth();
-}
-
-async function checkAuth() {
-  const authNavLink = document.getElementById('authNavLink');
-  if (authNavLink && insforge?.auth) {
-    try {
-      const { data } = await insforge.auth.getCurrentUser();
-      if (data?.user) {
-        authNavLink.textContent = 'Dashboard';
-        authNavLink.href = 'dashboard.html';
-      }
-    } catch (err) {
-      console.debug('Auth check skipped:', err);
-    }
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startApp);
-} else {
-  startApp(); // Executes immediately if DOM is already ready
-}
+/* Note: Application initialization is booted at the bottom of the script
+   after all datasets (projectsData, achievementsData, resourcesData) and
+   helper functions are fully defined. */
 
 
 /* 
@@ -3084,5 +3032,63 @@ function initResumeGallery() {
 
   // Initial layout activation
   updateCoverFlow(0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   30. APPLICATION BOOTSTRAPPER (BOTTOM INITIALIZATION)
+   ═══════════════════════════════════════════════════════════ */
+async function checkAuth() {
+  const authNavLink = document.getElementById('authNavLink');
+  if (authNavLink && insforge?.auth) {
+    try {
+      const { data } = await insforge.auth.getCurrentUser();
+      if (data?.user) {
+        authNavLink.textContent = 'Dashboard';
+        authNavLink.href = 'dashboard.html';
+      }
+    } catch (err) {
+      console.debug('Auth check skipped:', err);
+    }
+  }
+}
+
+function startApp() {
+  const sections = [
+    ['CustomCursor', initCustomCursor],
+    ['Navbar', initNavbar],
+    ['Hamburger', initHamburger],
+    ['ScrollProgress', initScrollProgress],
+    ['ThemeToggle', initThemeToggle],
+    ['Particles', initParticles],       
+    ['TypingEffect', initTypingEffect],    
+    ['SkillBars', initSkillBars],       
+    ['ActiveNavLink', initActiveNavLink],   
+    ['BackToTop', initBackToTop],       
+    ['Achievements', initAchievements],   
+    ['Projects', initProjects],
+    ['Resources', initResources],
+    ['Journey', initJourney],
+    ['FloatingSkillIcons', initFloatingSkillIcons],
+    ['CardFan', initCardFan],
+    ['ResumeGallery', initResumeGallery],
+    ['ContactForm', initContactForm],
+    ['Footer', initFooter]
+  ];
+
+  sections.forEach(([name, fn]) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn(`[Portfolio] Error initializing ${name}:`, err);
+    }
+  });
+
+  checkAuth();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
 }
 
