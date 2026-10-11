@@ -1052,7 +1052,7 @@
           <li class="contact-item">
             <div class="contact-icon"><i class="fas fa-globe"></i></div>
             <div class="contact-info">
-              <a href="https://eyot.insforge.site" target="_blank">eyot.insforge.site</a>
+              <a href="https://avinash.insforge.site" target="_blank">avinash.insforge.site</a>
             </div>
           </li>
           <li class="contact-item">
@@ -1357,12 +1357,12 @@
       // InsForge offline or local environment; CV page remains fully functional
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
+    async function initCvApp() {
       // Trigger skill progress bar animations on load
       setTimeout(() => {
         document.querySelectorAll('.skill-fill').forEach(fill => {
           const pct = fill.getAttribute('data-pct');
-          fill.style.width = pct + '%';
+          if (pct) fill.style.width = pct + '%';
         });
       }, 300);
       
@@ -1371,7 +1371,13 @@
       init3DTiltCards();
       initCopyCvLink();
       await checkAuthButtons();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initCvApp);
+    } else {
+      initCvApp();
+    }
 
     function init3DTiltCards() {
       const cards = document.querySelectorAll('.cv-3d-card');
