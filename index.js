@@ -321,27 +321,42 @@ function initContactForm() {
     try {
       let aiResponse = null;
 
-      // 1. Call InsForge AI Edge Function
-      const edgeFunctionUrls = [
-        'https://r4s69m7b.function2.insforge.app/handle-contact',
-        'https://n9cxde66.function2.insforge.app/handle-contact'
-      ];
-
-      for (const url of edgeFunctionUrls) {
+      // 1. Call InsForge AI Edge Function via SDK or Direct Endpoints
+      if (insforge && insforge.functions) {
         try {
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, subject, message })
+          const { data, error } = await insforge.functions.invoke('handle-contact', {
+            body: { name, email, subject, message }
           });
-
-          if (response.ok) {
-            const data = await response.json();
+          if (!error && data?.ai_response) {
             aiResponse = data.ai_response;
-            if (aiResponse) break;
           }
-        } catch (fnErr) {
-          console.warn(`Edge function at ${url} unavailable:`, fnErr);
+        } catch (sdkErr) {
+          console.warn('InsForge SDK functions.invoke notice:', sdkErr);
+        }
+      }
+
+      if (!aiResponse) {
+        const edgeFunctionUrls = [
+          'https://r4s69m7b.function2.insforge.app/handle-contact',
+          'https://r4s69m7b.ap-southeast.insforge.app/api/functions/handle-contact'
+        ];
+
+        for (const url of edgeFunctionUrls) {
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, email, subject, message })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              aiResponse = data.ai_response;
+              if (aiResponse) break;
+            }
+          } catch (fnErr) {
+            console.warn(`Edge function at ${url} unavailable:`, fnErr);
+          }
         }
       }
 
