@@ -2,8 +2,6 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/cv", "destination": "/cv.html" },
-    { "source": "/auth", "destination": "/auth.html" },
-    { "source": "/dashboard", "destination": "/dashboard.html" }
+    { "source": "/cv", "destination": "/cv.html" }
   ]
 }
