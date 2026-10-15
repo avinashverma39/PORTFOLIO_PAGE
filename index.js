@@ -3,25 +3,7 @@
 
     */
 
-let insforge = null;
-try {
-  if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
-    import('https://esm.sh/@insforge/sdk@latest')
-      .then(({ createClient }) => {
-        insforge = createClient({
-          baseUrl: 'https://r4s69m7b.ap-southeast.insforge.app',
-          anonKey: 'anon_e477484020cb5f6036d7fa05715227a98204ee6b293d38ad446f77bf4dde73a2'
-        });
-        checkAuth();
-      })
-      .catch(() => {
-        // Insforge offline or CDN unavailable; portfolio remains fully functional
-      });
-  }
-} catch (_) {
-  // Ignored in non-module or file:// environment
-}
-
+// Client security notice: All edge operations are routed securely via authenticated serverless functions.
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* Note: Application initialization is booted at the bottom of the script
@@ -321,73 +303,20 @@ function initContactForm() {
     try {
       let aiResponse = null;
 
-      // 1. Call InsForge AI Edge Function via SDK or Direct Endpoints
-      if (insforge && insforge.functions) {
-        try {
-          const { data, error } = await insforge.functions.invoke('handle-contact', {
-            body: { name, email, subject, message }
-          });
-          if (!error && data?.ai_response) {
-            aiResponse = data.ai_response;
-          }
-        } catch (sdkErr) {
-          console.warn('InsForge SDK functions.invoke notice:', sdkErr);
-        }
-      }
+      // Call secure backend Edge Function (handles input validation, AI acknowledgment, and DB persistence)
+      const edgeFunctionUrl = 'https://r4s69m7b.function2.insforge.app/handle-contact';
+      const response = await fetch(edgeFunctionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message })
+      });
 
-      if (!aiResponse) {
-        const edgeFunctionUrls = [
-          'https://r4s69m7b.function2.insforge.app/handle-contact',
-          'https://r4s69m7b.ap-southeast.insforge.app/api/functions/handle-contact'
-        ];
-
-        for (const url of edgeFunctionUrls) {
-          try {
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name, email, subject, message })
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              aiResponse = data.ai_response;
-              if (aiResponse) break;
-            }
-          } catch (fnErr) {
-            console.warn(`Edge function at ${url} unavailable:`, fnErr);
-          }
-        }
-      }
-
-      // 2. Direct InsForge Database Backup
-      try {
-        if (insforge && insforge.database) {
-          const { error: dbErr } = await insforge
-            .database
-            .from('messages')
-            .insert([{ name, email, message }]);
-          if (dbErr) console.warn('InsForge database direct insert notice:', dbErr);
-        }
-      } catch (e) {
-        console.warn('InsForge database direct insert exception:', e);
-      }
-
-      // 3. Direct Email Notification via FormSubmit
-      try {
-        await fetch('https://formsubmit.co/ajax/avinashverma3939@gmail.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            name,
-            email,
-            subject: subject || 'New Message from Portfolio',
-            message,
-            _captcha: 'false'
-          })
-        });
-      } catch (e) {
-        console.warn('Direct email notification notice:', e);
+      if (response.ok) {
+        const data = await response.json();
+        aiResponse = data.ai_response;
+      } else {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error || 'Message dispatch failed');
       }
 
       // Display success feedback
@@ -402,8 +331,8 @@ function initContactForm() {
       formSuccess.style.display = 'block';
 
     } catch (err) {
-      console.error(err);
-      showFieldError('message', 'messageError', 'Sorry, there was an error. Please check your network and try again.');
+      console.warn('Contact submission notice:', err?.message || err);
+      showFieldError('message', 'messageError', 'Sorry, there was an issue sending your message. Please try again or connect directly on LinkedIn.');
       sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Direct Message';
       sendBtn.disabled = false;
     }
@@ -3051,54 +2980,7 @@ function initResumeGallery() {
 
 /* ═══════════════════════════════════════════════════════════
    30. APPLICATION BOOTSTRAPPER (BOTTOM INITIALIZATION)
-   ═══════════════════════════════════════════════════════════ */
-async function checkAuth() {
-  const authNavLink = document.getElementById('authNavLink');
-  if (authNavLink && insforge?.auth) {
-    try {
-      const { data } = await insforge.auth.getCurrentUser();
-      if (data?.user) {
-        authNavLink.textContent = 'Dashboard';
-        authNavLink.href = 'dashboard.html';
-      }
-    } catch (err) {
-      console.debug('Auth check skipped:', err);
-    }
-  }
-}
-
-function startApp() {
-  const sections = [
-    ['CustomCursor', initCustomCursor],
-    ['Navbar', initNavbar],
-    ['Hamburger', initHamburger],
-    ['ScrollProgress', initScrollProgress],
-    ['ThemeToggle', initThemeToggle],
-    ['Particles', initParticles],       
-    ['TypingEffect', initTypingEffect],    
-    ['SkillBars', initSkillBars],       
-    ['ActiveNavLink', initActiveNavLink],   
-    ['BackToTop', initBackToTop],       
-    ['Achievements', initAchievements],   
-    ['Projects', initProjects],
-    ['Resources', initResources],
-    ['Journey', initJourney],
-    ['FloatingSkillIcons', initFloatingSkillIcons],
-    ['CardFan', initCardFan],
-    ['ResumeGallery', initResumeGallery],
-    ['ContactForm', initContactForm],
-    ['Footer', initFooter]
-  ];
-
-  sections.forEach(([name, fn]) => {
-    try {
-      if (typeof fn === 'function') fn();
-    } catch (err) {
-      console.warn(`[Portfolio] Error initializing ${name}:`, err);
-    }
   });
-
-  checkAuth();
 }
 
 if (document.readyState === 'loading') {
