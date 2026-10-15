@@ -2980,6 +2980,36 @@ function initResumeGallery() {
 
 /* ═══════════════════════════════════════════════════════════
    30. APPLICATION BOOTSTRAPPER (BOTTOM INITIALIZATION)
+   ═══════════════════════════════════════════════════════════ */
+function startApp() {
+  const sections = [
+    ['CustomCursor', initCustomCursor],
+    ['Navbar', initNavbar],
+    ['Hamburger', initHamburger],
+    ['ScrollProgress', initScrollProgress],
+    ['ThemeToggle', initThemeToggle],
+    ['Particles', initParticles],       
+    ['TypingEffect', initTypingEffect],    
+    ['SkillBars', initSkillBars],       
+    ['ActiveNavLink', initActiveNavLink],   
+    ['BackToTop', initBackToTop],       
+    ['Achievements', initAchievements],   
+    ['Projects', initProjects],
+    ['Resources', initResources],
+    ['Journey', initJourney],
+    ['FloatingSkillIcons', initFloatingSkillIcons],
+    ['CardFan', initCardFan],
+    ['ResumeGallery', initResumeGallery],
+    ['ContactForm', initContactForm],
+    ['Footer', initFooter]
+  ];
+
+  sections.forEach(([name, fn]) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn(`[Portfolio] Error initializing ${name}:`, err);
+    }
   });
 }
 
@@ -2988,4 +3018,5 @@ if (document.readyState === 'loading') {
 } else {
   startApp();
 }
+
 
