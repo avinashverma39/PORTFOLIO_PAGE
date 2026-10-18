@@ -1552,164 +1552,814 @@ window.resetCertZoom = resetCertZoom;
 
 
 /* 
-   24. RESOURCES — NOTES, BOOKS & IMPORTANT QUESTIONS
-    */
+   24. RESOURCES — NOTES, BOOKS & IMPORTANT QUESTIONS (COMPREHENSIVE FULL DETAIL)
+*/
 
-/* ── Resource Data — Add your own entries here ─── */
+/* ── Resource Data — Comprehensive study notes, blueprints, and interview problem sets ─── */
 const resourcesData = [
   {
     id: 'res-dsa-notes',
     title: 'Data Structures & Algorithms Notes',
     category: 'notes',
     icon: 'fa-solid fa-laptop-code',
-    description: 'Comprehensive handwritten and typed notes covering arrays, linked lists, stacks, queues, trees, graphs, sorting, searching, and dynamic programming.',
+    difficulty: 'Advanced Core CS',
+    estTime: '80+ Hours Mastery',
+    prereq: 'C++ / Java / Python Basics & Discrete Math',
+    description: 'Comprehensive handwritten and typed notes covering asymptotic analysis, linear and non-linear data structures, trees, advanced graph traversals, and dynamic programming patterns.',
     content: [
-      'Arrays & Strings — sliding window, two pointers, prefix sums',
-      'Linked Lists — reversal, cycle detection, merge techniques',
-      'Trees & Graphs — BFS, DFS, shortest path, MST',
-      'Dynamic Programming — memoization, tabulation, classic problems',
-      'Sorting & Searching — quicksort, mergesort, binary search variants'
+      'Arrays & Strings — Sliding Window, Two Pointers, Prefix Sums, Kadane’s Algorithm',
+      'Linked Lists — Fast & Slow Pointers, In-place Reversal, Cycle Detection, LRU Cache Design',
+      'Stacks & Queues — Monotonic Stack, Nearest Greater Element, Circular Buffer, Min-Stack',
+      'Trees & BSTs — DFS/BFS Traversals, Lowest Common Ancestor (LCA), Tree Diameter, AVL/Red-Black Invariants',
+      'Graphs & Networks — BFS/DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Kruskal, Prim, Topological Sort',
+      'Dynamic Programming — 0/1 Knapsack, Unbounded Knapsack, LCS, LIS, Matrix Chain Multiplication, State Machine DP'
     ],
-    tags: ['DSA', 'C++', 'Algorithms', 'Competitive Programming'],
-    actionLabel: 'Read Notes',
-    actionIcon: 'fa-solid fa-book-open-reader',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Essential Algorithmic Paradigms & Patterns',
+        icon: 'fa-solid fa-brain',
+        summary: 'Core algorithmic mental models tested in high-bar engineering interviews:',
+        points: [
+          '<strong>Sliding Window:</strong> Used for contiguous subarray/substring queries under constraints (fixed or dynamic window size). Converts brute-force O(N²) into linear O(N).',
+          '<strong>Two Pointers:</strong> Inward movement for sorted arrays (e.g. 2Sum/3Sum) and fast/slow runner pointers for linked-list midpoint & Floyd cycle detection.',
+          '<strong>Monotonic Stack:</strong> Maintains strictly increasing or decreasing elements to find the nearest greater or smaller element in single-pass O(N).',
+          '<strong>Dynamic Programming:</strong> Solves problems with overlapping subproblems and optimal substructure. State transition: dp[i][w] = max(dp[i-1][w], dp[i-1][w - wt[i]] + val[i]).'
+        ]
+      },
+      {
+        title: 'Master Theorem for Divide & Conquer',
+        icon: 'fa-solid fa-calculator',
+        summary: 'Solving recurrences of the form T(n) = aT(n/b) + f(n):',
+        points: [
+          '<strong>Case 1 (f(n) = O(n^(log_b a - ε))):</strong> Leaf level dominates the runtime → T(n) = Θ(n^(log_b a)).',
+          '<strong>Case 2 (f(n) = Θ(n^(log_b a) log^k n)):</strong> Work is evenly balanced across levels → T(n) = Θ(n^(log_b a) log^(k+1) n).',
+          '<strong>Case 3 (f(n) = Ω(n^(log_b a + ε))):</strong> Root node dominates the total work → T(n) = Θ(f(n)).'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Binary Search & Graph BFS Traversal Templates',
+      language: 'C++',
+      code: `// Template: Invariant-based Binary Search (Avoids Off-By-One)
+int binarySearch(const vector<int>& nums, int target) {
+    int left = 0, right = (int)nums.size() - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1; // Target not found
+}
+
+// Template: Graph Shortest Path via BFS (Unweighted)
+int shortestPathBFS(int start, int target, const vector<vector<int>>& adj) {
+    queue<pair<int, int>> q;
+    vector<bool> visited(adj.size(), false);
+    q.push({start, 0});
+    visited[start] = true;
+    while (!q.empty()) {
+        auto [node, dist] = q.front(); q.pop();
+        if (node == target) return dist;
+        for (int neighbor : adj[node]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push({neighbor, dist + 1});
+            }
+        }
+    }
+    return -1;
+}`,
+      complexityTable: [
+        { op: 'Array Access', avg: 'O(1)', worst: 'O(1)', space: 'O(N)' },
+        { op: 'Binary Search', avg: 'O(log N)', worst: 'O(log N)', space: 'O(1)' },
+        { op: 'QuickSort (In-place)', avg: 'O(N log N)', worst: 'O(N²)', space: 'O(log N)' },
+        { op: 'Dijkstra (Min-Heap)', avg: 'O((V+E) log V)', worst: 'O((V+E) log V)', space: 'O(V)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Two Sum II — Input Array Is Sorted',
+        difficulty: 'medium',
+        company: 'Google, Amazon',
+        concept: 'Two pointers from boundary inwards. Since array is sorted, increment left if sum < target, decrement right if sum > target in O(N) time and O(1) space.'
+      },
+      {
+        q: '2. LRU Cache (Least Recently Used)',
+        difficulty: 'hard',
+        company: 'Amazon, Meta, Microsoft',
+        concept: 'Combine Doubly Linked List with Hash Map (unordered_map) for O(1) get and O(1) put operations.'
+      },
+      {
+        q: '3. Longest Increasing Subsequence (LIS)',
+        difficulty: 'medium',
+        company: 'Apple, Netflix',
+        concept: 'O(N log N) patience sorting via std::lower_bound or O(N²) dynamic programming array.'
+      }
+    ],
+    tags: ['DSA', 'C++', 'Algorithms', 'Competitive Programming', 'LeetCode'],
+    actionLabel: 'Open NeetCode Roadmap',
+    actionIcon: 'fa-solid fa-arrow-up-right-from-square',
+    actionUrl: 'https://neetcode.io/roadmap'
   },
   {
     id: 'res-os-notes',
     title: 'Operating Systems Concepts',
     category: 'notes',
     icon: 'fa-solid fa-server',
-    description: 'Detailed notes on OS fundamentals including process management, memory management, file systems, CPU scheduling, and synchronization primitives.',
+    difficulty: 'Core Systems Fundamental',
+    estTime: '50+ Hours Systems Deep Dive',
+    prereq: 'C Language & Basic Computer Architecture',
+    description: 'Detailed systems engineering notes covering kernel space vs user space, process management, CPU scheduling algorithms, thread synchronization primitives, deadlocks, and virtual memory paging.',
     content: [
-      'Process Management — states, PCB, context switching',
-      'CPU Scheduling — FCFS, SJF, Round Robin, Priority',
-      'Memory Management — paging, segmentation, virtual memory',
-      'Deadlocks — prevention, avoidance, detection, recovery',
-      'File Systems — allocation methods, directory structures'
+      'Process Management — Process Control Block (PCB), Context Switching, Process States & Lifecycle',
+      'CPU Scheduling — FCFS, SJF (Preemptive & Non-preemptive), Round Robin, Multi-level Feedback Queues',
+      'Synchronization Primitives — Critical Section, Mutex Locks, Counting Semaphores, Monitors, Spinlocks',
+      'Deadlock Dynamics — 4 Coffman Conditions, Resource Allocation Graphs, Banker’s Algorithm, Recovery',
+      'Memory Management — Virtual Memory, Paging, TLB, Page Fault Handling, Page Replacement (LRU, Optimal, Clock)',
+      'Storage & File Systems — Inodes, File Allocation Methods (Indexed, Linked), Disk Scheduling (SCAN, C-SCAN)'
     ],
-    tags: ['OS', 'Systems', 'Theory', 'BTech CS'],
-    actionLabel: 'Read Notes',
-    actionIcon: 'fa-solid fa-book-open-reader',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Process Synchronization & Concurrency Control',
+        icon: 'fa-solid fa-arrows-split-up-and-left',
+        summary: 'Preventing race conditions and ensuring deterministic concurrent execution:',
+        points: [
+          '<strong>Critical Section Requirements:</strong> Mutual Exclusion (only one process inside), Progress (no unbounded waiting for entry), and Bounded Waiting (starvation prevention).',
+          '<strong>Mutex vs Semaphore:</strong> Mutex is an ownership lock (only locker can unlock); Semaphore is a signaling mechanism without ownership (wait/P and signal/V operations).',
+          '<strong>Classical Concurrency Challenges:</strong> Producer-Consumer (bounded buffer synchronization), Dining Philosophers (circular wait avoidance), and Reader-Writer (priority deadlock avoidance).'
+        ]
+      },
+      {
+        title: 'Virtual Memory & Demand Paging',
+        icon: 'fa-solid fa-microchip',
+        summary: 'Decoupling physical RAM from logical process address spaces:',
+        points: [
+          '<strong>Address Translation:</strong> Virtual address divided into Page Number and Offset. Looked up in Translation Lookaside Buffer (TLB) in ~1ns hardware cache.',
+          '<strong>Page Fault Routine:</strong> CPU trap → OS kernel validates address → reads frame from swap disk into RAM frame → updates Page Table → restarts instruction.',
+          '<strong>Thrashing & Belady’s Anomaly:</strong> Thrashing occurs when system spends more time swapping than executing. FIFO suffers from Belady’s Anomaly (more frames cause more faults); LRU is stack-based and immune.'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'POSIX Thread & Semaphore Concurrency in C',
+      language: 'C',
+      code: `#include <pthread.h>
+#include <semaphore.h>
+#include <stdio.h>
+
+#define BUFFER_SIZE 5
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+
+sem_t emptySlots;
+sem_t fullSlots;
+pthread_mutex_t mutex;
+
+void* producer(void* arg) {
+    int item = 1;
+    sem_wait(&emptySlots);        // Decrement empty slot count
+    pthread_mutex_lock(&mutex);   // Enter critical section
+
+    buffer[in] = item;
+    in = (in + 1) % BUFFER_SIZE;
+
+    pthread_mutex_unlock(&mutex); // Leave critical section
+    sem_post(&fullSlots);         // Signal item is ready
+    return NULL;
+}`,
+      complexityTable: [
+        { op: 'FCFS Scheduling', avg: 'Convoy Effect', worst: 'High Wait Time', space: 'O(N)' },
+        { op: 'SJF Scheduling', avg: 'Optimal Avg Wait', worst: 'Starvation', space: 'O(N)' },
+        { op: 'Round Robin', avg: 'Low Response Time', worst: 'High Context Switch', space: 'O(N)' },
+        { op: 'LRU Page Replacement', avg: 'High Hit Rate', worst: 'Stack Maintenance', space: 'O(Frames)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. What is the fundamental difference between a Process and a Thread?',
+        difficulty: 'easy',
+        company: 'Google, Microsoft, Amazon',
+        concept: 'Processes have independent address spaces, file descriptors, and memory isolation. Threads share the heap, code segment, and global data of their parent process while maintaining private program counters and stack frames.'
+      },
+      {
+        q: '2. Explain the 4 Necessary Conditions for Deadlock and how to break them.',
+        difficulty: 'medium',
+        company: 'Meta, Bloomberg',
+        concept: 'Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait. Breaking circular wait by imposing a total ordering on all resource acquisitions prevents deadlocks entirely.'
+      },
+      {
+        q: '3. What causes Thrashing and how does the Working Set Model prevent it?',
+        difficulty: 'hard',
+        company: 'Intel, Apple Systems',
+        concept: 'When sum of active working sets of all processes exceeds available physical memory, page fault frequency surges. Working Set Model tracks pages referenced in time window Δ and suspends low-priority processes when memory is constrained.'
+      }
+    ],
+    tags: ['OS', 'Systems', 'Theory', 'BTech CS', 'Linux Internals', 'Concurrency'],
+    actionLabel: 'View OSTEP Textbook Online',
+    actionIcon: 'fa-solid fa-book-open',
+    actionUrl: 'https://pages.cs.wisc.edu/~remzi/OSTEP/'
   },
   {
     id: 'res-clrs-book',
     title: 'Introduction to Algorithms (CLRS)',
     category: 'books',
     icon: 'fa-solid fa-book',
-    description: 'The gold-standard textbook for algorithms. Covers algorithm design, analysis, and a broad range of data structures used in computer science.',
+    difficulty: 'Rigorous Academic & Mathematical',
+    estTime: '120+ Hours Formal Proofs',
+    prereq: 'Discrete Mathematics, Calculus & Probability',
+    description: 'The gold-standard textbook for algorithmic computer science by Cormen, Leiserson, Rivest, and Stein. Detailed breakdowns of formal algorithm proofs, amortized analysis, and network flows.',
     content: [
-      'Foundations — growth of functions, recurrences, probabilistic analysis',
-      'Sorting & Order Statistics — heapsort, quicksort, linear-time sorting',
-      'Data Structures — hash tables, BSTs, red-black trees, B-trees',
-      'Advanced Design — dynamic programming, greedy algorithms, amortized analysis',
-      'Graph Algorithms — BFS, DFS, MST, shortest paths, network flow'
+      'Foundations — Asymptotic Notations (O, Ω, Θ, o, ω), Recurrences, Probabilistic Analysis',
+      'Sorting & Order Statistics — Heapsort, Quicksort analysis, Linear Time Sorting (Counting, Radix, Bucket)',
+      'Advanced Data Structures — Red-Black Trees, B-Trees, Disjoint Set (Union-Find) with Rank & Path Compression',
+      'Advanced Design Techniques — Dynamic Programming proofs, Greedy choice property & Matroids, Amortized analysis',
+      'Graph Algorithms — Bellman-Ford, Dijkstra, Johnson’s algorithm, Maximum Flow (Ford-Fulkerson, Edmonds-Karp)',
+      'NP-Completeness — Polynomial time verification, Circuit Satisfiability, 3-CNF SAT, Clique, Vertex Cover'
     ],
-    tags: ['Algorithms', 'Textbook', 'CS Fundamentals'],
-    actionLabel: 'View Book',
-    actionIcon: 'fa-solid fa-arrow-up-right-from-square',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Red-Black Tree Balance Theorems & Proofs',
+        icon: 'fa-solid fa-circle-nodes',
+        summary: 'Self-balancing binary search trees with guaranteed O(log N) worst case:',
+        points: [
+          '<strong>The 5 Invariants:</strong> 1) Every node is red or black. 2) Root is black. 3) Every leaf (NIL) is black. 4) If a node is red, both children are black. 5) For each node, all paths to leaves have same number of black nodes (bh(x)).',
+          '<strong>Height Bound Proof:</strong> A red-black tree with n internal nodes has height at most 2 log_2(n + 1). Proven by induction showing subtree at x contains at least 2^(bh(x)) - 1 internal nodes.',
+          '<strong>Restructuring via Rotations:</strong> Insertions and deletions require at most 2 and 3 rotations respectively, making it superior to AVL trees for write-heavy workloads.'
+        ]
+      },
+      {
+        title: 'Amortized Analysis Methodologies',
+        icon: 'fa-solid fa-scale-balanced',
+        summary: 'Guaranteeing average performance of sequence of operations in the worst case:',
+        points: [
+          '<strong>Aggregate Analysis:</strong> Determines upper bound T(n) on total cost of sequence of n operations; amortized cost per operation is T(n)/n.',
+          '<strong>Accounting Method:</strong> Assigns differing charges to operations, overcharging early operations and storing credits to pay for expensive later operations.',
+          '<strong>Potential Method:</strong> Defines potential energy function Φ(D_i) mapping data structure state to real number. Amortized cost = actual cost + ΔΦ.'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Disjoint Set Union (DSU) with Path Compression & Rank',
+      language: 'C++',
+      code: `// Disjoint Set Union: Nearly O(1) Amortized via Inverse Ackermann α(N)
+class DisjointSet {
+    vector<int> parent, rank;
+public:
+    DisjointSet(int n) : parent(n), rank(n, 0) {
+        for (int i = 0; i < n; i++) parent[i] = i;
+    }
+
+    int find(int u) {
+        if (parent[u] != u)
+            parent[u] = find(parent[u]); // Path compression
+        return parent[u];
+    }
+
+    bool unite(int u, int v) {
+        int rootU = find(u), rootV = find(v);
+        if (rootU == rootV) return false; // Already connected
+        if (rank[rootU] < rank[rootV])
+            parent[rootU] = rootV;
+        else if (rank[rootV] < rank[rootU])
+            parent[rootV] = rootU;
+        else {
+            parent[rootV] = rootU;
+            rank[rootU]++;
+        }
+        return true;
+    }
+};`,
+      complexityTable: [
+        { op: 'Comparison Sort Lower Bound', avg: 'Ω(N log N)', worst: 'Ω(N log N)', space: 'O(1)' },
+        { op: 'Counting Sort (Linear)', avg: 'O(N + K)', worst: 'O(N + K)', space: 'O(K)' },
+        { op: 'Red-Black Tree Search/Insert', avg: 'O(log N)', worst: 'O(log N)', space: 'O(N)' },
+        { op: 'Union-Find with α(N)', avg: 'O(α(N)) ≈ O(1)', worst: 'O(α(N))', space: 'O(N)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Prove why comparison-based sorting has a mathematical lower bound of Ω(N log N).',
+        difficulty: 'medium',
+        company: 'Academic & FAANG Research',
+        concept: 'Any comparison sort can be modeled as a decision tree with N! possible permutation leaves. A binary tree of height h has at most 2^h leaves. Therefore, 2^h ≥ N! ⇒ h ≥ log_2(N!). Using Stirling’s approximation, log(N!) = Θ(N log N).'
+      },
+      {
+        q: '2. What is the Max-Flow Min-Cut Theorem and how does Edmonds-Karp solve it?',
+        difficulty: 'hard',
+        company: 'Google, Palantir',
+        concept: 'The maximum amount of flow passing from source to sink equals the total weight of edges in the minimum cut. Edmonds-Karp uses BFS to find augmenting paths in O(V · E²) time, guaranteeing polynomial convergence.'
+      }
+    ],
+    tags: ['Algorithms', 'Textbook', 'CS Fundamentals', 'CLRS', 'Theoretical CS'],
+    actionLabel: 'View MIT OCW Course Material',
+    actionIcon: 'fa-solid fa-graduation-cap',
+    actionUrl: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/'
   },
   {
     id: 'res-clean-code',
     title: 'Clean Code by Robert C. Martin',
     category: 'books',
     icon: 'fa-solid fa-broom',
-    description: 'A handbook of agile software craftsmanship. Learn how to write readable, maintainable, and elegant code through real-world examples and principles.',
+    difficulty: 'Software Engineering Best Practices',
+    estTime: '35+ Hours Practical Refactoring',
+    prereq: 'Any OOP Language (Java, C++, TypeScript)',
+    description: 'A handbook of agile software craftsmanship. Master how to write readable, maintainable, and elegant code through proven refactoring principles, SOLID patterns, and code smell elimination.',
     content: [
-      'Meaningful Names — choosing intention-revealing names',
-      'Functions — small, focused, single-responsibility functions',
-      'Comments — good comments vs bad comments',
-      'Error Handling — exceptions over return codes',
-      'Code Smells — identifying and refactoring bad patterns'
+      'Meaningful Names — Choosing intention-revealing, pronounceable, and searchable identifiers',
+      'Functions — Small, focused, single level of abstraction (Stepdown Rule), monadic/dyadic params',
+      'Comments — Good comments explain intent or legalities; bad comments compensate for expressive code failure',
+      'Error Handling — Prefer unchecked exceptions over error codes; never pass or return null values',
+      'The SOLID Principles — Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion',
+      'Code Smells & Refactoring — Eliminating Long Methods, God Objects, Feature Envy, and Primitive Obsession'
     ],
-    tags: ['Software Engineering', 'Best Practices', 'Clean Code'],
-    actionLabel: 'View Book',
-    actionIcon: 'fa-solid fa-arrow-up-right-from-square',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'The SOLID Principles of Object-Oriented Design',
+        icon: 'fa-solid fa-shield-halved',
+        summary: 'Foundational architectural rules for robust, extensible systems:',
+        points: [
+          '<strong>Single Responsibility (SRP):</strong> A class should have only one reason to change. Separate presentation from persistence and domain logic.',
+          '<strong>Open/Closed (OCP):</strong> Open for extension, closed for modification. Use interfaces and abstract base classes to extend behavior without modifying existing code.',
+          '<strong>Liskov Substitution (LSP):</strong> Subtypes must be substitutable for their base types without altering system correctness or violating invariants.',
+          '<strong>Interface Segregation (ISP):</strong> Clients should not be forced to depend on methods they do not use. Split fat interfaces into fine-grained role interfaces.',
+          '<strong>Dependency Inversion (DIP):</strong> Depend on abstractions, not concretions. High-level policy modules should not depend on low-level infrastructure modules.'
+        ]
+      },
+      {
+        title: 'The Boy Scout Rule & Code Smell Remediation',
+        icon: 'fa-solid fa-campground',
+        summary: 'Continuous code hygiene to combat architectural degradation:',
+        points: [
+          '<strong>The Boy Scout Rule:</strong> Always leave the campground cleaner than you found it. Check in code a little cleaner than when you checked it out.',
+          '<strong>Command Query Separation (CQS):</strong> Functions should either do something (mutate state) or answer something (return data), but never both.',
+          '<strong>Don’t Repeat Yourself (DRY):</strong> Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Clean Code Refactoring: Dependency Injection & Strategy Pattern',
+      language: 'TypeScript',
+      code: `// BAD: Tight coupling, multiple responsibilities, hard to test
+class BadOrderProcessor {
+    process(order: any) {
+        console.log("Validating...");
+        // Direct database call
+        db.save(order);
+        // Direct SMTP call
+        smtp.sendEmail(order.userEmail, "Confirmed");
+    }
+}
+
+// CLEAN: Inversion of Control, Single Responsibility, Testable
+interface NotificationService {
+    notify(recipient: string, message: string): Promise<void>;
+}
+
+interface OrderRepository {
+    save(order: Order): Promise<void>;
+}
+
+class CleanOrderProcessor {
+    constructor(
+        private readonly repo: OrderRepository,
+        private readonly notifier: NotificationService
+    ) {}
+
+    async process(order: Order): Promise<void> {
+        order.validate();
+        await this.repo.save(order);
+        await this.notifier.notify(order.userEmail, "Your order is confirmed!");
+    }
+}`,
+      complexityTable: [
+        { op: 'SRP Compliance', avg: 'High Cohesion', worst: 'Single Reason to Change', space: 'Low Coupling' },
+        { op: 'OCP via Polymorphism', avg: 'Extensible', worst: 'Zero Regression Risk', space: 'Decoupled' },
+        { op: 'DIP via Interfaces', avg: 'Mockable & Testable', worst: 'Loose Coupling', space: 'Inverted' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. What is Dependency Inversion and how does it differ from Dependency Injection?',
+        difficulty: 'medium',
+        company: 'Microsoft, Stripe',
+        concept: 'Dependency Inversion Principle (DIP) is high-level architectural rule stating modules depend on abstractions. Dependency Injection (DI) is a creational design pattern/mechanism used to pass concrete dependencies to a class constructor or setter.'
+      },
+      {
+        q: '2. How do you identify Feature Envy and how do you refactor it?',
+        difficulty: 'easy',
+        company: 'Atlassian, Shopify',
+        concept: 'Feature Envy occurs when a method accesses the data of another object more than its own. Refactor by using "Move Method" to relocate the logic directly into the data-holding class.'
+      }
+    ],
+    tags: ['Software Engineering', 'Best Practices', 'Clean Code', 'SOLID', 'Refactoring'],
+    actionLabel: 'Clean Code JavaScript Guide',
+    actionIcon: 'fa-solid fa-code-branch',
+    actionUrl: 'https://github.com/ryanmcdermott/clean-code-javascript'
   },
   {
     id: 'res-dsa-interview',
     title: 'Top 50 DSA Interview Questions',
     category: 'questions',
     icon: 'fa-solid fa-code',
-    description: 'Curated collection of the most frequently asked Data Structures & Algorithms questions in technical interviews at top tech companies.',
+    difficulty: 'Tier-1 FAANG Coding Bar',
+    estTime: '65+ Hours Intensive Practice',
+    prereq: 'Strong DSA Foundations & Pattern Recognition',
+    description: 'Curated collection of the 50 most frequently tested technical coding interview problems across Google, Amazon, Microsoft, and Meta, grouped by core algorithmic patterns with solution intuition.',
     content: [
-      'Array — two sum, maximum subarray, merge intervals',
-      'String — longest palindrome, anagram grouping, pattern matching',
-      'Tree — level order traversal, LCA, diameter of binary tree',
-      'Graph — number of islands, course schedule, detect cycle',
-      'DP — longest common subsequence, coin change, 0/1 knapsack'
+      'Array & Hashing: Two Sum, Group Anagrams, Top K Frequent Elements, Product of Array Except Self',
+      'Two Pointers: 3Sum, Container With Most Water, Trapping Rain Water, Valid Palindrome',
+      'Sliding Window: Longest Substring Without Repeating Characters, Minimum Window Substring',
+      'Trees & Graphs: Lowest Common Ancestor, Binary Tree Maximum Path Sum, Number of Islands, Word Ladder',
+      'Dynamic Programming: Coin Change, Word Break, Maximum Subarray (Kadane’s), House Robber II',
+      'Heaps & Intervals: Merge K Sorted Lists, Merge Intervals, Non-overlapping Intervals'
     ],
-    tags: ['Interview Prep', 'DSA', 'Problem Solving'],
-    actionLabel: 'Practice Questions',
-    actionIcon: 'fa-solid fa-pen-to-square',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Mastering the 4-Phase Technical Interview Method',
+        icon: 'fa-solid fa-clipboard-check',
+        summary: 'Systematic approach to ace live technical coding screens:',
+        points: [
+          '<strong>1. Clarify Constraints:</strong> Clarify input range, empty inputs, negative values, and memory/time limits.',
+          '<strong>2. Articulate Naive Baseline:</strong> State the brute force solution (e.g. O(N²) or O(2^N)) to verify problem comprehension.',
+          '<strong>3. Pattern Matching:</strong> Identify key data structure (Heap for Top-K, Monotonic Stack for next greater, Map for lookups).',
+          '<strong>4. Edge Case Dry Run:</strong> Test empty inputs, single element, negative numbers, and duplicates before coding.'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Sliding Window & Merge Intervals Master Templates',
+      language: 'Python',
+      code: `# Template: Minimum Window Substring (Dynamic Sliding Window)
+def minWindow(s: str, t: str) -> str:
+    from collections import Counter
+    if not s or not t: return ""
+    target_counts = Counter(t)
+    window_counts = {}
+    have, need = 0, len(target_counts)
+    res, res_len = [-1, -1], float("infinity")
+    left = 0
+
+    for right in range(len(s)):
+        char = s[right]
+        window_counts[char] = window_counts.get(char, 0) + 1
+        if char in target_counts and window_counts[char] == target_counts[char]:
+            have += 1
+
+        while have == need:
+            if (right - left + 1) < res_len:
+                res = [left, right]
+                res_len = right - left + 1
+            # Shrink window from left
+            window_counts[s[left]] -= 1
+            if s[left] in target_counts and window_counts[s[left]] < target_counts[s[left]]:
+                have -= 1
+            left += 1
+
+    l, r = res
+    return s[l:r+1] if res_len != float("infinity") else ""`,
+      complexityTable: [
+        { op: 'Trapping Rain Water', avg: 'O(N)', worst: 'O(N)', space: 'O(1)' },
+        { op: 'Merge Intervals', avg: 'O(N log N)', worst: 'O(N log N)', space: 'O(N)' },
+        { op: 'Merge K Sorted Lists', avg: 'O(N log K)', worst: 'O(N log K)', space: 'O(K)' },
+        { op: 'Word Ladder (BFS)', avg: 'O(M² · N)', worst: 'O(M² · N)', space: 'O(M · N)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Trapping Rain Water',
+        difficulty: 'hard',
+        company: 'Meta, Google, Amazon',
+        concept: 'Two pointers starting at 0 and N-1 maintaining max_left and max_right. The smaller boundary determines the water level at current position, allowing linear O(N) single-pass with O(1) space.'
+      },
+      {
+        q: '2. Number of Islands',
+        difficulty: 'medium',
+        company: 'Amazon, Microsoft',
+        concept: 'Grid traversal using DFS/BFS. Whenever a "1" is encountered, increment count and sink the island by mutating visited land to "0". Runs in O(R · C) time.'
+      },
+      {
+        q: '3. Merge K Sorted Lists',
+        difficulty: 'hard',
+        company: 'Uber, Amazon, Meta',
+        concept: 'Maintain a Min-Heap of size K containing the current node of each linked list. Extract the minimum node and push its next pointer into the heap. Total time O(N log K).'
+      }
+    ],
+    tags: ['Interview Prep', 'DSA', 'Problem Solving', 'FAANG', 'Top 50'],
+    actionLabel: 'Explore Grind 75 Roadmap',
+    actionIcon: 'fa-solid fa-list-ol',
+    actionUrl: 'https://www.techinterviewhandbook.org/grind75'
   },
   {
     id: 'res-oop-practice',
     title: 'OOP Concepts Practice Set',
     category: 'questions',
     icon: 'fa-solid fa-cubes',
-    description: 'Practice problems and conceptual questions on Object-Oriented Programming including inheritance, polymorphism, abstraction, and design patterns.',
+    difficulty: 'Object-Oriented Design Mastery',
+    estTime: '45+ Hours Systems Modeling',
+    prereq: 'Core OOP in C++, Java, or TypeScript',
+    description: 'Comprehensive practice problems and conceptual blueprints on Object-Oriented Analysis & Design (OOAD), Gang of Four (GoF) design patterns, UML class diagrams, and low-level system design (LLD).',
     content: [
-      'Encapsulation — access modifiers, getters/setters, data hiding',
-      'Inheritance — types, method overriding, super keyword',
-      'Polymorphism — compile-time vs runtime, virtual functions',
-      'Abstraction — abstract classes, interfaces, real-world modeling',
-      'Design Patterns — singleton, factory, observer, strategy'
+      'The 4 Pillars — Encapsulation, Abstraction, Inheritance, Polymorphism in production engineering',
+      'Creational Patterns — Singleton (Thread-safe Double-Checked Locking), Factory Method, Abstract Factory, Builder',
+      'Structural Patterns — Adapter, Decorator, Facade, Composite, Proxy (Virtual & Protection proxies)',
+      'Behavioral Patterns — Observer, Strategy, Command, State, Chain of Responsibility, Iterator',
+      'Low-Level Design (LLD) — Designing a Multi-Level Parking Lot, Elevator Controller, and Rate Limiter',
+      'Coupling vs Cohesion — Minimizing tight coupling through dependency injection and interfaces'
     ],
-    tags: ['OOP', 'Java', 'C++', 'Design Patterns'],
-    actionLabel: 'Practice Questions',
-    actionIcon: 'fa-solid fa-pen-to-square',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Core Design Patterns Deep Dive',
+        icon: 'fa-solid fa-sitemap',
+        summary: 'Essential GoF design patterns for real-world software architecture:',
+        points: [
+          '<strong>Strategy Pattern:</strong> Defines a family of interchangeable algorithms and encapsulates each one, making the algorithm vary independently from clients that use it.',
+          '<strong>Observer Pattern:</strong> Defines a one-to-many relationship where state change in one subject automatically notifies and updates all subscriber objects (Event Bus, Pub-Sub).',
+          '<strong>Decorator Pattern:</strong> Attaches additional responsibilities to an object dynamically as an alternative to subclassing (e.g. Java I/O streams: BufferedReader(new FileReader())).'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Thread-Safe Double-Checked Locking Singleton & Strategy in C++',
+      language: 'C++',
+      code: `// Modern C++ Thread-Safe Meyers' Singleton
+class DatabaseConnection {
+private:
+    DatabaseConnection() { /* Connect to DB */ }
+    ~DatabaseConnection() = default;
+public:
+    DatabaseConnection(const DatabaseConnection&) = delete;
+    DatabaseConnection& operator=(const DatabaseConnection&) = delete;
+
+    static DatabaseConnection& getInstance() {
+        // Guaranteed to be thread-safe in C++11 and later
+        static DatabaseConnection instance;
+        return instance;
+    }
+};
+
+// Strategy Pattern Interface
+class PaymentStrategy {
+public:
+    virtual ~PaymentStrategy() = default;
+    virtual void pay(double amount) = 0;
+};`,
+      complexityTable: [
+        { op: 'Singleton Pattern', avg: 'Single Global Instance', worst: 'Potential Bottleneck', space: 'O(1)' },
+        { op: 'Strategy Pattern', avg: 'Interchangeable Behavior', worst: 'Extra Object Allocation', space: 'O(1)' },
+        { op: 'Observer Pattern', avg: 'Decoupled Notification', worst: 'Memory Leaks if not unsubscribed', space: 'O(N)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Design an Object-Oriented Multi-Level Parking Lot System',
+        difficulty: 'medium',
+        company: 'Amazon, Adobe',
+        concept: 'Model Vehicle subclasses (Motorcycle, Car, Bus), ParkingSpot subclasses (Compact, Large), Level, and ParkingLot singleton. Use Strategy pattern for parking allocation and pricing.'
+      },
+      {
+        q: '2. How does Dynamic Dispatch / Virtual Table (vtable) work under the hood in C++?',
+        difficulty: 'hard',
+        company: 'Microsoft, Qualcomm Systems',
+        concept: 'Compiler creates a vtable for each class containing virtual functions. Each instance carries a hidden vptr pointing to this table. Method calls resolve at runtime through pointer dereference.'
+      }
+    ],
+    tags: ['OOP', 'Java', 'C++', 'Design Patterns', 'LLD', 'Architecture'],
+    actionLabel: 'Refactoring Guru Design Patterns',
+    actionIcon: 'fa-solid fa-puzzle-piece',
+    actionUrl: 'https://refactoring.guru/design-patterns'
   },
   {
     id: 'res-system-design',
     title: 'System Design & Scalable Architecture',
     category: 'notes',
     icon: 'fa-solid fa-network-wired',
-    description: 'Comprehensive engineering blueprints on scalable system architectures, microservices, load balancing, caching strategies, and distributed databases.',
+    difficulty: 'Advanced Distributed Systems',
+    estTime: '70+ Hours Architecture Study',
+    prereq: 'Databases, Networking, Client-Server Systems',
+    description: 'Comprehensive engineering blueprints on scalable system architectures, microservices, load balancing, multi-level caching strategies, distributed databases, message brokers, and high-availability design.',
     content: [
-      'Scalability Fundamentals — vertical vs horizontal scaling, latency vs throughput',
-      'Caching & Content Delivery — Redis, Memcached, CDN edge caching strategies',
-      'Load Balancing & Gateways — Nginx, reverse proxies, round-robin & consistent hashing',
-      'Databases — SQL vs NoSQL trade-offs, sharding, replication, CAP theorem',
-      'Message Queues — Kafka, RabbitMQ, asynchronous pub-sub architectures'
+      'Scalability Fundamentals — Horizontal vs Vertical Scaling, Latency vs Throughput, 99.999% SLA metrics',
+      'Load Balancing & Gateways — L4 vs L7 Load Balancers, Round Robin, Least Connections, Consistent Hashing',
+      'Caching Strategies — Redis, Memcached, Cache-Aside, Write-Through, Write-Back, Eviction policies (LRU, LFU)',
+      'Distributed Databases — SQL vs NoSQL, Sharding, Read Replicas, CAP Theorem (Consistency, Availability, Partitioning)',
+      'Asynchronous Messaging — Kafka (Event Streaming, Partitions, Consumer Groups), RabbitMQ (Message Queuing)',
+      'Architecture Blueprints — Designing URL Shortener (TinyURL), Distributed Rate Limiter, and Notification System'
     ],
-    tags: ['System Design', 'Microservices', 'Distributed Systems', 'Architecture'],
-    actionLabel: 'Read Architecture Notes',
-    actionIcon: 'fa-solid fa-book-open-reader',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'CAP Theorem & PACELC Trade-Offs',
+        icon: 'fa-solid fa-diagram-project',
+        summary: 'Theoretical foundations of distributed consistency and partition tolerance:',
+        points: [
+          '<strong>CAP Theorem:</strong> In the presence of a network partition (P), a distributed system must choose between strict Consistency (C) and high Availability (A).',
+          '<strong>PACELC Theorem:</strong> If Partition (P), trade off Availability (A) vs Consistency (C); Else (E), trade off Latency (L) vs Consistency (C). Example: DynamoDB/Cassandra default to PA/EL.',
+          '<strong>Consistent Hashing:</strong> Maps servers and keys to a 360° virtual ring (0 to 2³² - 1). Adding/removing a server only reassigns 1/N keys, preventing catastrophic reshuffling.'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Token Bucket Distributed Rate Limiter & Architecture Blueprints',
+      language: 'Lua / Redis',
+      code: `-- Redis Token Bucket Rate Limiter Script
+local key = KEYS[1]
+local limit = tonumber(ARGV[1])
+local current = tonumber(redis.call('get', key) or "0")
+
+if current + 1 > limit then
+    return 0 -- Rate limit exceeded
+else
+    redis.call("INCRBY", key, 1)
+    if current == 0 then
+        redis.call("EXPIRE", key, 60) -- 60 second window
+    end
+    return 1 -- Request allowed
+end`,
+      complexityTable: [
+        { op: 'Cache-Aside (Lazy Loading)', avg: 'Read: Cache Hit O(1)', worst: 'Cache Miss Disk Read', space: 'O(Cached Keys)' },
+        { op: 'Write-Through Cache', avg: 'High Consistency', worst: 'Higher Write Latency', space: 'O(Keys)' },
+        { op: 'Consistent Hashing Ring', avg: 'O(log S) Node Lookup', worst: 'Balanced with V-Nodes', space: 'O(S · V)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Design a Scalable URL Shortening Service (TinyURL) handling 100M Daily Active Users',
+        difficulty: 'medium',
+        company: 'Google, Amazon, Meta',
+        concept: 'Use Base62 encoding on a distributed 64-bit ID generator (Twitter Snowflake). Store in NoSQL database (Cassandra/DynamoDB) with Redis caching for top 20% trending URLs.'
+      },
+      {
+        q: '2. How do you handle Distributed Transactions across Microservices? (2PC vs Saga)',
+        difficulty: 'hard',
+        company: 'Uber, Stripe, Netflix',
+        concept: 'Two-Phase Commit (2PC) is synchronous and blocking. The Saga pattern uses asynchronous compensating transactions coordinated via events (Choreography) or an Orchestrator.'
+      }
+    ],
+    tags: ['System Design', 'Microservices', 'Distributed Systems', 'Kafka', 'Redis', 'High Availability'],
+    actionLabel: 'System Design Primer on GitHub',
+    actionIcon: 'fa-solid fa-book-bookmark',
+    actionUrl: 'https://github.com/donnemartin/system-design-primer'
   },
   {
     id: 'res-dbms-notes',
     title: 'DBMS & SQL Deep Dive',
     category: 'notes',
     icon: 'fa-solid fa-database',
-    description: 'Detailed study notes covering relational database engines, normalization, B-Tree index optimization, transaction isolation levels, and complex SQL joins.',
+    difficulty: 'Core Database Internals',
+    estTime: '55+ Hours RDBMS Mastery',
+    prereq: 'Relational Database Fundamentals',
+    description: 'Detailed study notes covering relational database engines, normalization theorems, B+ Tree index optimization, transaction isolation levels, concurrency anomalies, and complex SQL joins.',
     content: [
-      'Relational Theory — ER modeling, functional dependencies, 1NF to BCNF',
-      'Transactions & Concurrency — ACID properties, serializability, 2PL, MVCC',
-      'Indexing & Optimization — B+ Trees, hash indexes, query execution plans',
-      'Advanced SQL — window functions, CTEs, subqueries, stored procedures',
-      'NoSQL & Document Stores — MongoDB schema design, indexing, aggregation pipelines'
+      'Relational Model & Constraints — ER Modeling, Primary/Foreign Keys, Referential Integrity, Functional Dependencies',
+      'Normalization Forms — 1NF, 2NF, 3NF, Boyce-Codd Normal Form (BCNF), Decomposition and Lossless Joins',
+      'Transaction Management & ACID — Atomicity (WAL), Consistency, Isolation (Locks & MVCC), Durability (Checkpoints)',
+      'Concurrency Control & Anomalies — Dirty Read, Non-repeatable Read, Phantom Read, Two-Phase Locking (2PL)',
+      'Storage & Index Internals — B+ Tree Indexing vs Hash Index, Clustered vs Non-clustered, Composite Index order',
+      'Advanced SQL Mastery — Window Functions (ROW_NUMBER, DENSE_RANK), Common Table Expressions (CTEs), EXPLAIN ANALYZE'
     ],
-    tags: ['DBMS', 'SQL', 'PostgreSQL', 'Database Internals'],
-    actionLabel: 'Read DBMS Notes',
-    actionIcon: 'fa-solid fa-book-open-reader',
-    actionUrl: '#'
+    deepDive: [
+      {
+        title: 'Transaction Isolation Levels & Concurrency Anomalies',
+        icon: 'fa-solid fa-arrows-spin',
+        summary: 'Guarantees provided by SQL engines under concurrent execution:',
+        points: [
+          '<strong>Read Uncommitted:</strong> Allows Dirty Reads (transaction reads uncommitted data from another concurrent transaction).',
+          '<strong>Read Committed:</strong> Eliminates dirty reads using snapshot read on statement level; still prone to Non-Repeatable Reads.',
+          '<strong>Repeatable Read:</strong> Ensures rows read remain unchanged throughout transaction via MVCC; prone to Phantom Reads.',
+          '<strong>Serializable:</strong> Complete isolation guaranteeing equivalent serial order via two-phase locking (2PL) or serializable snapshot isolation (SSI).'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Advanced SQL: Window Functions, Recursive CTEs & Performance Tuning',
+      language: 'SQL',
+      code: `-- Nth Highest Salary using DENSE_RANK Window Function
+WITH RankedSalaries AS (
+    SELECT employee_id, department_id, salary,
+           DENSE_RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) as salary_rank
+    FROM employees
+)
+SELECT employee_id, department_id, salary
+FROM RankedSalaries
+WHERE salary_rank = 2; -- 2nd Highest Salary in each department
+
+-- Index Optimization Check
+EXPLAIN ANALYZE
+SELECT * FROM orders
+WHERE customer_id = 42 AND status = 'COMPLETED'
+ORDER BY created_at DESC;`,
+      complexityTable: [
+        { op: 'B+ Tree Index Lookup', avg: 'O(log_B N)', worst: 'O(log_B N)', space: 'O(N)' },
+        { op: 'Hash Index Exact Match', avg: 'O(1)', worst: 'O(N) (colliding)', space: 'O(N)' },
+        { op: 'Full Table Scan', avg: 'O(N) I/O reads', worst: 'O(N) I/O reads', space: 'O(1)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. What is the difference between Clustered Index and Non-Clustered Index?',
+        difficulty: 'easy',
+        company: 'Oracle, Amazon, Microsoft',
+        concept: 'A clustered index physically sorts table rows on disk based on the key (only one per table). A non-clustered index stores index keys and row pointers (RID/PK) in a separate B+ tree structure.'
+      },
+      {
+        q: '2. Explain Multi-Version Concurrency Control (MVCC) in PostgreSQL',
+        difficulty: 'medium',
+        company: 'Databricks, Stripe',
+        concept: 'PostgreSQL avoids read locks by storing multiple versions of rows (xmin and xmax transaction IDs). Readers never block writers and writers never block readers.'
+      }
+    ],
+    tags: ['DBMS', 'SQL', 'PostgreSQL', 'Database Internals', 'ACID', 'Indexing'],
+    actionLabel: 'Use The Index, Luke! Guide',
+    actionIcon: 'fa-solid fa-magnifying-glass',
+    actionUrl: 'https://use-the-index-luke.com/'
   },
   {
     id: 'res-leetcode-75',
     title: 'LeetCode 75 Top Interview Question Bank',
     category: 'questions',
     icon: 'fa-solid fa-code',
-    description: 'Curated problem bank of the top 75 essential coding interview questions categorized by core algorithmic patterns with step-by-step solution breakdowns.',
+    difficulty: 'Must-Solve Interview Core',
+    estTime: '75+ Hours Algorithm Drills',
+    prereq: 'Data Structures & Pattern Familiarity',
+    description: 'Curated problem bank of the top 75 essential coding interview questions categorized by core algorithmic patterns with step-by-step solution breakdowns, edge cases, and time/space complexity targets.',
     content: [
-      'Array / String — Greatest Common Divisor of Strings, Reverse Vowels, Increasing Triplet',
-      'Two Pointers & Sliding Window — Is Subsequence, Max Number of Vowels, Longest 1s Subarray',
+      'Array / String — Greatest Common Divisor of Strings, Reverse Vowels, Product of Array Except Self, Increasing Triplet',
+      'Two Pointers & Sliding Window — Is Subsequence, Container With Most Water, Max Number of Vowels, Longest 1s Subarray',
+      'Prefix Sum & Hash Map — Find Pivot Index, Unique Number of Occurrences, Equal Row/Column Pairs',
+      'Stack & Queue — Removing Stars From String, Asteroid Collision, Decode String, Number of Recent Calls',
+      'Binary Tree DFS & BFS — Maximum Depth, Leaf-Similar Trees, Count Good Nodes, Path Sum III, Binary Tree Right Side View',
+      'Graphs & DP — Keys and Rooms, Number of Provinces, Rotting Oranges, N-th Tribonacci, Min Cost Climbing Stairs'
+    ],
+    deepDive: [
+      {
+        title: 'The 14 Fundamental Algorithmic Patterns in LeetCode 75',
+        icon: 'fa-solid fa-cubes',
+        summary: 'Pattern classification to solve unseen coding problems rapidly:',
+        points: [
+          '<strong>Fast & Slow Pointers:</strong> Detect cycles in arrays or lists; find middle element in O(N) single pass.',
+          '<strong>Prefix Sums:</strong> Precomputes cumulative sums for instant O(1) range sum queries.',
+          '<strong>Multi-source BFS:</strong> Explodes waves outward from multiple starting points simultaneously (e.g. Rotting Oranges).'
+        ]
+      }
+    ],
+    cheatsheet: {
+      title: 'Rotting Oranges (Multi-Source BFS) & Decode String Solutions',
+      language: 'Python',
+      code: `# Multi-Source BFS: Rotting Oranges
+from collections import deque
+
+def orangesRotting(grid: list[list[int]]) -> int:
+    rows, cols = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
+
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == 2:
+                queue.append((r, c, 0)) # row, col, minute
+            elif grid[r][c] == 1:
+                fresh += 1
+
+    if fresh == 0: return 0
+    max_minutes = 0
+
+    while queue:
+        r, c, minutes = queue.popleft()
+        max_minutes = max(max_minutes, minutes)
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:
+                grid[nr][nc] = 2 # Rot the orange
+                fresh -= 1
+                queue.append((nr, nc, minutes + 1))
+
+    return max_minutes if fresh == 0 else -1`,
+      complexityTable: [
+        { op: 'Rotting Oranges (BFS)', avg: 'O(R · C)', worst: 'O(R · C)', space: 'O(R · C)' },
+        { op: 'Decode String (Stack)', avg: 'O(MaxK · N)', worst: 'O(MaxK · N)', space: 'O(N)' },
+        { op: 'Equal Row & Column Pairs', avg: 'O(N²)', worst: 'O(N²)', space: 'O(N²)' }
+      ]
+    },
+    interviewQuestions: [
+      {
+        q: '1. Decode String (Stack Pattern)',
+        difficulty: 'medium',
+        company: 'Google, Bloomberg',
+        concept: 'Use two stacks (one for integer multiplier counts and one for string segments). Push previous string on "[", pop and repeat on "]".'
+      },
+      {
+        q: '2. Rotting Oranges (Multi-source BFS)',
+        difficulty: 'medium',
+        company: 'Amazon, Microsoft',
+        concept: 'Queue all initial rotten oranges at time 0. Process level-by-level tracking elapsed minutes until fresh count reaches 0.'
+      }
+    ],
+    tags: ['LeetCode 75', 'FAANG Prep', 'Algorithms', 'Pattern Mastery', 'Interview Ready'],
+    actionLabel: 'Open LeetCode 75 Plan',
+    actionIcon: 'fa-solid fa-circle-play',
+    actionUrl: 'https://leetcode.com/studyplan/leetcode-75/'
+  }
+];1s Subarray',
       'Prefix Sum & Hash Map — Find Pivot Index, Unique Number of Occurrences, Equal Row/Column Pairs',
       'Stack & Queue — Asteroid Collision, Decode String, Number of Recent Calls',
       'Binary Tree & Graph — Leaf-Similar Trees, Path Sum III, Nearest Exit from Entrance in Maze'
