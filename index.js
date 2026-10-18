@@ -2937,9 +2937,9 @@ function openCardDetail(card) {
     `;
   }
   if (link && link !== '#') {
-    const isExternal = link.startsWith('http');
+    const isExternal = link.startsWith('http') || link.endsWith('.html');
     actionHtml += `
-      <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-outline btn-sm">
+      <a href="${link}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="btn btn-outline btn-sm arc-modal-nav-link">
         <i class="fa-solid fa-arrow-up-right-from-square"></i> ${linkText}
       </a>
     `;
@@ -3022,6 +3022,23 @@ function openCardDetail(card) {
       closeArcDetailModal();
     });
   }
+
+  // Wire in-page anchor links inside modal to close modal first then smooth scroll
+  body.querySelectorAll('.arc-modal-nav-link').forEach(navLink => {
+    const href = navLink.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      navLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeArcDetailModal();
+        const targetEl = document.querySelector(href);
+        if (targetEl) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      });
+    }
+  });
 
   // Show modal instantly
   modal.style.display = 'flex';
@@ -3527,21 +3544,33 @@ function initResumeGallery() {
       if (diff === 0) {
         card.classList.add('active');
         card.setAttribute('aria-hidden', 'false');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('title', 'Click to explore full card details');
       } else if (diff === -1) {
         card.classList.add('slot-left-1');
         card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('title', 'Click to bring card to front');
       } else if (diff === 1) {
         card.classList.add('slot-right-1');
         card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('title', 'Click to bring card to front');
       } else if (diff === -2) {
         card.classList.add('slot-left-2');
         card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '-1');
+        card.setAttribute('title', 'Click to bring card to front');
       } else if (diff === 2) {
         card.classList.add('slot-right-2');
         card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '-1');
+        card.setAttribute('title', 'Click to bring card to front');
       } else {
         card.classList.add('slot-hidden');
         card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '-1');
+        card.removeAttribute('title');
       }
     });
 
@@ -3552,23 +3581,63 @@ function initResumeGallery() {
     });
   }
 
-  // Filter Pill Clicks
+  // Filter Pill Clicks (clicking active pill also opens card details)
   filterPills.forEach((pill, idx) => {
     pill.addEventListener('click', () => {
-      updateCoverFlow(idx);
-    });
-  });
-
-  // Direct Card Clicks
-  cards.forEach((card, idx) => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('a') || (e.target.closest('button') && !e.target.classList.contains('resume-visual-card'))) {
-        return; // Let direct anchor/button clicks work immediately
-      }
-      if (idx !== currentIndex) {
+      if (idx === currentIndex) {
+        openCardDetail(cards[idx]);
+      } else {
         updateCoverFlow(idx);
       }
     });
+  });
+
+  // Direct Card Clicks & Modal Triggers
+  cards.forEach((card, idx) => {
+    function handleCardActivation(e) {
+      // Let direct anchor button clicks proceed to target URL/section
+      if (e.target.closest('.rc-action-btn')) {
+        return;
+      }
+
+      const circleBtn = e.target.closest('.rc-circle-action');
+
+      if (idx !== currentIndex) {
+        // First click brings card to the center CoverFlow spot
+        updateCoverFlow(idx);
+        // If circle button specifically was clicked, immediately open details
+        if (circleBtn) {
+          openCardDetail(card);
+        }
+      } else {
+        // Active card clicked anywhere opens the full interactive detail modal
+        openCardDetail(card);
+      }
+    }
+
+    card.addEventListener('click', handleCardActivation);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (idx !== currentIndex) {
+          updateCoverFlow(idx);
+        } else {
+          openCardDetail(card);
+        }
+      }
+    });
+
+    // Make circle action button explicitly interactive
+    const circleBtn = card.querySelector('.rc-circle-action');
+    if (circleBtn) {
+      circleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (idx !== currentIndex) {
+          updateCoverFlow(idx);
+        }
+        openCardDetail(card);
+      });
+    }
   });
 
   // Circular Prev/Next Controls
