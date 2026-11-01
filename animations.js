@@ -15,7 +15,7 @@
 
   let waitCount = 0;
   function revealAllFallbacks() {
-    document.querySelectorAll('.reveal, .anim-hidden, .hero-tag, .hero-title, .hero-desc, .hero-cta, .hero-stats').forEach(el => {
+    document.querySelectorAll('.reveal, .anim-hidden, .hero-tag, .hero-title, .hero-desc, .hero-description, .hero-cta, .hero-stats').forEach(el => {
       el.style.opacity = '1';
       el.style.transform = 'none';
       el.style.filter = 'none';
@@ -709,7 +709,7 @@
           });
 
           anime({
-            targets: '.contact-detail',
+            targets: '.contact-card-interactive, .contact-detail',
             opacity: [0, 1],
             translateX: [-20, 0],
             delay: anime.stagger(100, { start: 300 }),

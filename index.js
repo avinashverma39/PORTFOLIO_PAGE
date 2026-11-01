@@ -2359,16 +2359,6 @@ def orangesRotting(grid: list[list[int]]) -> int:
     actionIcon: 'fa-solid fa-circle-play',
     actionUrl: 'https://leetcode.com/studyplan/leetcode-75/'
   }
-];1s Subarray',
-      'Prefix Sum & Hash Map — Find Pivot Index, Unique Number of Occurrences, Equal Row/Column Pairs',
-      'Stack & Queue — Asteroid Collision, Decode String, Number of Recent Calls',
-      'Binary Tree & Graph — Leaf-Similar Trees, Path Sum III, Nearest Exit from Entrance in Maze'
-    ],
-    tags: ['LeetCode 75', 'FAANG Prep', 'Algorithms', 'Pattern Mastery'],
-    actionLabel: 'Practice LeetCode 75',
-    actionIcon: 'fa-solid fa-circle-play',
-    actionUrl: '#'
-  }
 ];
 
 /* Module-level timers for instant, collision-free modal opening and closing */
@@ -2391,29 +2381,18 @@ function initResources() {
   if (track.dataset.cloned) return;
   track.dataset.cloned = 'true';
 
-  // Duplicate cards for seamless infinite cylinder loop
+  // Duplicate cards for seamless infinite cylinder loop (5 full sets of cards for true endless buffer)
   const originalCards = Array.from(track.children);
-  originalCards.forEach(card => {
-    const clone = card.cloneNode(true);
-    track.appendChild(clone);
-  });
+  for (let s = 0; s < 4; s++) {
+    originalCards.forEach(card => {
+      const clone = card.cloneNode(true);
+      track.appendChild(clone);
+    });
+  }
 
   const allCards = Array.from(track.children);
-  const cardStep = 232; // 210px card width + 22px gap
+  let cardStep = 232; // fallback default: 210px card width + 22px gap
   let singleWidth = originalCards.length * cardStep;
-
-  /* ── State variables for continuous 3D ribbon motion ─── */
-  let scrollOffset = 0;
-  let targetOffset = 0;
-  let isPlaying = true;
-  let isHovered = false;
-  let isDragging = false;
-  let isActuallyMoved = false;
-  let dragStartX = 0;
-  let dragStartOffset = 0;
-  let dragDelta = 0;
-  const normalSpeed = 0.65;
-  const hoverSpeed = 0.15;
 
   function updateMeasurements() {
     const firstCard = track.children[0];
@@ -2421,12 +2400,28 @@ function initResources() {
     if (firstCard && secondCard) {
       const computedStep = secondCard.offsetLeft - firstCard.offsetLeft;
       if (computedStep > 0) {
-        singleWidth = originalCards.length * computedStep;
+        cardStep = computedStep;
+        singleWidth = originalCards.length * cardStep;
       }
     }
   }
   updateMeasurements();
   window.addEventListener('resize', updateMeasurements);
+
+  /* ── State variables for continuous 3D ribbon motion (starts centered on set 2) ─── */
+  let scrollOffset = -2 * singleWidth;
+  let targetOffset = -2 * singleWidth;
+  let isPlaying = true;
+  let isHovered = false;
+  let isDragging = false;
+  let isActuallyMoved = false;
+  let dragStartTime = 0;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragStartOffset = 0;
+  let dragDelta = 0;
+  const normalSpeed = 1.05;
+  const hoverSpeed = 0; // Frozen completely on hover so user can easily inspect and click
 
   /* ── Smooth 3D Perspective Curvature Transform Updater ─── */
   function update3DCurvature() {
@@ -2449,22 +2444,23 @@ function initResources() {
     });
   }
 
-  /* ── Continuous Animation Loop ─── */
+  /* ── Continuous Animation Loop (Endless, Zero Hitch) ─── */
   function animateRibbon() {
-    if (isPlaying && !isDragging) {
-      const currentSpeed = isHovered ? hoverSpeed : normalSpeed;
-      targetOffset -= currentSpeed;
+    const isModalOpen = document.getElementById('resourceModalOverlay')?.classList.contains('active');
+    if (isPlaying && !isDragging && !isHovered && !isModalOpen) {
+      targetOffset -= normalSpeed;
     }
 
     // Smooth lerp for buttery motion
-    scrollOffset += (targetOffset - scrollOffset) * 0.14;
+    scrollOffset += (targetOffset - scrollOffset) * 0.12;
 
-    // Seamless infinite loop wrapping
+    // Seamless infinite loop wrapping (Set 2 smoothly maps between Set 1 and Set 3 with zero visible jump)
     if (singleWidth > 0) {
-      if (scrollOffset <= -singleWidth) {
+      while (scrollOffset <= -3 * singleWidth) {
         scrollOffset += singleWidth;
         targetOffset += singleWidth;
-      } else if (scrollOffset >= 0) {
+      }
+      while (scrollOffset >= -singleWidth) {
         scrollOffset -= singleWidth;
         targetOffset -= singleWidth;
       }
@@ -2478,23 +2474,37 @@ function initResources() {
 
   requestAnimationFrame(animateRibbon);
 
-  /* ── Hover Slow/Drift ─── */
+  /* ── Hover Detection (Stops motion when cursor hovers over stage or any card) ─── */
   stage.addEventListener('mouseenter', () => { isHovered = true; });
   stage.addEventListener('mouseleave', () => { isHovered = false; });
 
+  allCards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      isHovered = true;
+    });
+    card.addEventListener('mouseleave', (e) => {
+      if (!stage.contains(e.relatedTarget)) {
+        isHovered = false;
+      }
+    });
+  });
+
   /* ── Drag & Swipe Interaction ─── */
-  function onDragStart(clientX) {
+  function onDragStart(clientX, clientY) {
     isDragging = true;
     isActuallyMoved = false;
+    dragStartTime = Date.now();
     dragStartX = clientX;
+    dragStartY = clientY || 0;
     dragStartOffset = targetOffset;
     dragDelta = 0;
   }
 
-  function onDragMove(clientX) {
+  function onDragMove(clientX, clientY) {
     if (!isDragging) return;
     dragDelta = clientX - dragStartX;
-    if (Math.abs(dragDelta) > 8) {
+    const dy = (clientY || 0) - dragStartY;
+    if (Math.hypot(dragDelta, dy) > 12) {
       isActuallyMoved = true;
     }
     targetOffset = dragStartOffset + dragDelta;
@@ -2505,15 +2515,17 @@ function initResources() {
     isDragging = false;
     setTimeout(() => {
       isActuallyMoved = false;
-    }, 50);
+      dragDelta = 0;
+    }, 150);
   }
 
   // Mouse drag events
   stage.addEventListener('mousedown', (e) => {
-    onDragStart(e.clientX);
+    if (e.button !== 0) return;
+    onDragStart(e.clientX, e.clientY);
   });
   window.addEventListener('mousemove', (e) => {
-    if (isDragging) onDragMove(e.clientX);
+    if (isDragging) onDragMove(e.clientX, e.clientY);
   });
   window.addEventListener('mouseup', () => {
     if (isDragging) onDragEnd();
@@ -2521,54 +2533,62 @@ function initResources() {
 
   // Touch swipe events
   stage.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 0) onDragStart(e.touches[0].clientX);
+    if (e.touches.length > 0) onDragStart(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
-    if (isDragging && e.touches.length > 0) onDragMove(e.touches[0].clientX);
+    if (isDragging && e.touches.length > 0) onDragMove(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
   window.addEventListener('touchend', () => {
     if (isDragging) onDragEnd();
   });
 
+  /* ── Card Activation: Opens modal reliably on click or tap ─── */
+  function handleCardActivation(cardElement, e) {
+    const dragDist = Math.abs(dragDelta);
+
+    // If the user clearly performed an intentional drag gesture (> 25px movement), don't trigger modal
+    if (isActuallyMoved && dragDist > 25) {
+      return;
+    }
+
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+
+    const targetEl = (e && e.target) ? e.target : cardElement;
+    const resId = (cardElement && cardElement.getAttribute('data-resource-id')) || 
+                  (cardElement && cardElement.closest('[data-resource-id]')?.getAttribute('data-resource-id')) ||
+                  (targetEl && targetEl.closest('[data-resource-id]')?.getAttribute('data-resource-id'));
+    if (resId) {
+      openResourceModal(resId);
+    }
+  }
+
   /* ── Direct Click & Key Listeners on all ribbon cards (instant, zero lag) ─── */
   allCards.forEach(card => {
     card.style.cursor = 'pointer';
-    const resId = card.getAttribute('data-resource-id');
 
-    function triggerModal(e) {
-      if (isActuallyMoved && Math.abs(dragDelta) > 12) return;
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      if (resId) {
-        openResourceModal(resId);
-      }
-    }
-
-    card.addEventListener('click', triggerModal);
+    card.addEventListener('click', (e) => handleCardActivation(card, e));
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        triggerModal(e);
+        handleCardActivation(card, e);
       }
     });
 
-    const innerBtn = card.querySelector('.ribbon-quick-action, .ribbon-card');
-    if (innerBtn) {
-      innerBtn.addEventListener('click', triggerModal);
-    }
+    const clickables = card.querySelectorAll('.ribbon-card, .ribbon-quick-action, .ribbon-meta, .ribbon-step-title, .ribbon-step-sub, .ribbon-category-tag, .ribbon-card-img-box, .ribbon-card-img, .ribbon-step, .ribbon-card-overlay');
+    clickables.forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', (e) => handleCardActivation(card, e));
+    });
   });
 
   /* ── Track-level fallback delegate ─── */
   track.addEventListener('click', (e) => {
-    if (isActuallyMoved && Math.abs(dragDelta) > 12) return;
     const cardWrap = e.target.closest('.ribbon-card-wrap');
-    if (!cardWrap) return;
-    const resId = cardWrap.getAttribute('data-resource-id');
-    if (resId) {
-      e.stopPropagation();
-      openResourceModal(resId);
+    if (cardWrap) {
+      handleCardActivation(cardWrap, e);
     }
   });
 
@@ -2676,12 +2696,34 @@ function setupArcShowcase(cfg) {
   let activeIndex = visibleCards.length > 2 ? 2 : 0; // Centerpiece as default
   let isAutoMoving = true;
   let autoTimer = null;
+  const AUTO_INTERVAL = 2800;
 
   const stageCard = track.closest('.arc-stage-card');
+  const stageFrame = track.closest('.arc-stage-frame') || stageCard;
   const prevBtn = stageCard?.querySelector(`.arc-prev-btn[data-target="${cfg.id}"]`);
   const nextBtn = stageCard?.querySelector(`.arc-next-btn[data-target="${cfg.id}"]`);
   const playBtn = stageCard?.querySelector(`.arc-play-btn[data-target="${cfg.id}"]`);
   const slider = document.getElementById(cfg.sliderId);
+
+  /* ── Dynamic Slider Indicator Dots ─── */
+  function renderSliderDots() {
+    if (!slider) return;
+    slider.innerHTML = '';
+    visibleCards.forEach((card, idx) => {
+      const dot = document.createElement('span');
+      dot.className = 'arc-pill-dot' + (idx === activeIndex ? ' active' : '');
+      dot.setAttribute('role', 'button');
+      dot.setAttribute('aria-label', `Go to slide ${idx + 1}`);
+      dot.setAttribute('data-index', String(idx));
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        activeIndex = idx;
+        updateArcPositions();
+        startAutoCycle();
+      });
+      slider.appendChild(dot);
+    });
+  }
 
   /* ── Position cards in 3D Arc ─── */
   function updateArcPositions() {
@@ -2718,29 +2760,36 @@ function setupArcShowcase(cfg) {
 
       if (offset === 0) {
         card.classList.add('pos-slot-center');
+        card.setAttribute('aria-hidden', 'false');
+        card.setAttribute('title', 'Click to open details • In Center View');
       } else if (offset === -1) {
         card.classList.add('pos-slot-near-left');
+        card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('title', 'Click to bring card to center');
       } else if (offset === 1) {
         card.classList.add('pos-slot-near-right');
+        card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('title', 'Click to bring card to center');
       } else if (offset === -2) {
         card.classList.add('pos-slot-far-left');
+        card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('title', 'Click to bring card to center');
       } else if (offset === 2) {
         card.classList.add('pos-slot-far-right');
+        card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('title', 'Click to bring card to center');
       } else {
         card.classList.add('pos-slot-hidden');
+        card.setAttribute('aria-hidden', 'true');
+        card.removeAttribute('title');
       }
     });
 
     // Update bottom indicator dots
-    if (slider && visibleCards[activeIndex]) {
-      const activeOriginalIdx = visibleCards[activeIndex].getAttribute('data-index');
+    if (slider) {
       const dots = slider.querySelectorAll('.arc-pill-dot');
-      dots.forEach(dot => {
-        if (dot.getAttribute('data-index') === activeOriginalIdx) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === activeIndex);
       });
     }
   }
@@ -2752,13 +2801,19 @@ function setupArcShowcase(cfg) {
     updateArcPositions();
   }
 
+  function stepBackward() {
+    if (!visibleCards.length) return;
+    activeIndex = (activeIndex - 1 + visibleCards.length) % visibleCards.length;
+    updateArcPositions();
+  }
+
   function startAutoCycle() {
     stopAutoCycle();
     autoTimer = setInterval(() => {
       if (isAutoMoving) {
         stepForward();
       }
-    }, 2800);
+    }, AUTO_INTERVAL);
   }
 
   function stopAutoCycle() {
@@ -2783,12 +2838,13 @@ function setupArcShowcase(cfg) {
   }
 
   // Hover Pause & Resume
-  if (stageCard) {
-    stageCard.addEventListener('mouseenter', () => {
+  const hoverContainer = stageFrame || stageCard;
+  if (hoverContainer) {
+    hoverContainer.addEventListener('mouseenter', () => {
       isAutoMoving = false;
       updatePlayBtnUI();
     });
-    stageCard.addEventListener('mouseleave', () => {
+    hoverContainer.addEventListener('mouseleave', () => {
       isAutoMoving = true;
       updatePlayBtnUI();
     });
@@ -2800,6 +2856,9 @@ function setupArcShowcase(cfg) {
       e.stopPropagation();
       isAutoMoving = !isAutoMoving;
       updatePlayBtnUI();
+      if (isAutoMoving) {
+        startAutoCycle();
+      }
     });
   }
 
@@ -2807,8 +2866,8 @@ function setupArcShowcase(cfg) {
   if (prevBtn) {
     prevBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      activeIndex = (activeIndex - 1 + visibleCards.length) % visibleCards.length;
-      updateArcPositions();
+      stepBackward();
+      startAutoCycle();
     });
   }
 
@@ -2816,58 +2875,140 @@ function setupArcShowcase(cfg) {
     nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       stepForward();
+      startAutoCycle();
     });
   }
 
-  // Cards are animated 3D curved elements with rich details & notes on click
+  // Interactive Card Click System (Click ANY card to bring to center, click center to open details)
   allCards.forEach(card => {
     card.style.cursor = 'pointer';
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
 
-    function triggerModal(e) {
+    function handleCardInteraction(e) {
       if (e) {
         e.stopPropagation();
         e.preventDefault();
       }
 
-      // Center this card in the 3D arc
       const vIdx = visibleCards.indexOf(card);
-      if (vIdx !== -1) {
+      if (vIdx === -1) return;
+
+      const isCurrentCenter = (vIdx === activeIndex);
+      const isExploreBtn = e && e.target && e.target.closest('.arc-open-modal-btn, .arc-btn-pill');
+
+      if (!isCurrentCenter) {
+        // Clicking ANY flanking card brings it straight to the center
         activeIndex = vIdx;
         updateArcPositions();
-      }
+        startAutoCycle();
 
-      // Open the detail modal with full notes and questions
-      openCardDetail(card);
+        // If specifically clicked the "Explore Details" button on that card, also open the modal!
+        if (isExploreBtn) {
+          openCardDetail(card);
+        }
+      } else {
+        // Active center card clicked: open the detail modal
+        openCardDetail(card);
+      }
     }
 
-    card.addEventListener('click', triggerModal);
+    card.addEventListener('click', handleCardInteraction);
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        triggerModal(e);
+        handleCardInteraction(e);
       }
     });
 
-    // Also wire buttons/pills inside the card
-    card.querySelectorAll('button, .arc-btn-pill, .arc-open-modal-btn').forEach(btn => {
-      btn.addEventListener('click', triggerModal);
-    });
+    // Make Explore Details button explicitly open detail modal
+    const exploreBtn = card.querySelector('.arc-open-modal-btn, .arc-btn-pill');
+    if (exploreBtn) {
+      exploreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const vIdx = visibleCards.indexOf(card);
+        if (vIdx !== -1) {
+          activeIndex = vIdx;
+          updateArcPositions();
+          startAutoCycle();
+        }
+        openCardDetail(card);
+      });
+    }
   });
 
-  // Slider Pill Dot Jumps
-  if (slider) {
-    slider.querySelectorAll('.arc-pill-dot').forEach(dot => {
-      dot.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const targetIdx = dot.getAttribute('data-index');
-        const foundIdx = visibleCards.findIndex(c => c.getAttribute('data-index') === targetIdx);
-        if (foundIdx !== -1) {
-          activeIndex = foundIdx;
-          updateArcPositions();
+  // Touch Swipe & Mouse Drag Gestures
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragDelta = 0;
+
+  track.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button, a, .arc-btn-pill, .arc-open-modal-btn')) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragDelta = 0;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    dragDelta = e.clientX - dragStartX;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (Math.abs(dragDelta) > 45) {
+      if (dragDelta < 0) {
+        stepForward();
+      } else {
+        stepBackward();
+      }
+      startAutoCycle();
+    }
+    dragDelta = 0;
+  });
+
+  track.addEventListener('touchstart', (e) => {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      dragStartX = e.changedTouches[0].screenX;
+      dragDelta = 0;
+    }
+  }, { passive: true });
+
+  track.addEventListener('touchend', (e) => {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - dragStartX;
+      if (Math.abs(diff) > 40) {
+        if (diff < 0) {
+          stepForward();
+        } else {
+          stepBackward();
         }
-      });
+        startAutoCycle();
+      }
+    }
+  }, { passive: true });
+
+  // Keyboard Arrow Navigation when section is in viewport
+  const sectionEl = track.closest('section');
+  if (sectionEl) {
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      if (document.querySelector('.project-modal-overlay.active, .cert-modal-overlay.active, .resource-modal-overlay.active, .arc-modal-overlay.active')) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+      const rect = sectionEl.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
+      if (inView) {
+        if (e.key === 'ArrowLeft') {
+          stepBackward();
+          startAutoCycle();
+        } else if (e.key === 'ArrowRight') {
+          stepForward();
+          startAutoCycle();
+        }
+      }
     });
   }
 
@@ -2889,15 +3030,28 @@ function setupArcShowcase(cfg) {
           }
 
           activeIndex = 0;
+          renderSliderDots();
           updateArcPositions();
+          startAutoCycle();
         });
       });
     }
   }
 
+  // Page visibility awareness
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAutoCycle();
+    } else if (isAutoMoving) {
+      startAutoCycle();
+    }
+  });
+
   // Initial render & launch auto-moving
+  renderSliderDots();
   updateArcPositions();
   startAutoCycle();
+  updatePlayBtnUI();
 }
 
 /* ── Global Helper: Open Card Detail Modal (Instant & Comprehensive) ─── */
@@ -3006,8 +3160,7 @@ function openCardDetail(card) {
   if (modalCertBtn) {
     modalCertBtn.addEventListener('click', (ev) => {
       ev.preventDefault();
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
+      closeArcDetailModal();
       const id = modalCertBtn.getAttribute('data-achievement-id');
       if (typeof openCertModal === 'function') {
         openCertModal(id);
@@ -3107,54 +3260,86 @@ function setupArcDetailModal() {
 
 
 /* =============================================
-   25. RESOURCE PREVIEW MODAL
+   25. RESOURCE PREVIEW MODAL — FULL FUNCTIONAL READER
    ============================================= */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function initResourceModal() {
   const overlay = document.getElementById('resourceModalOverlay');
   const closeBtn = document.getElementById('resourceModalClose');
 
   if (!overlay) return;
 
-  function closeResModal() {
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-    clearTimeout(resModalCloseTimer);
-    resModalCloseTimer = setTimeout(() => {
-      if (!overlay.classList.contains('active')) {
-        overlay.style.display = 'none';
-      }
-    }, 350);
-  }
+  if (closeBtn) closeBtn.addEventListener('click', closeResourceModal);
 
-  if (closeBtn) closeBtn.addEventListener('click', closeResModal);
-
-  // Click outside modal to close
+  // Click outside modal container to close
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeResModal();
+    if (e.target === overlay) closeResourceModal();
   });
 
-  // Keyboard Esc to close
+  // Global keydown handler
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay.classList.contains('active')) {
-      closeResModal();
+    if (!overlay.classList.contains('active')) return;
+    if (e.key === 'Escape') {
+      closeResourceModal();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+      if (e.key === 'ArrowLeft') {
+        const prevBtn = document.getElementById('resModalPrevBtn');
+        if (prevBtn) prevBtn.click();
+      } else if (e.key === 'ArrowRight') {
+        const nextBtn = document.getElementById('resModalNextBtn');
+        if (nextBtn) nextBtn.click();
+      }
     }
   });
 }
 
-/* ── Open modal with resource data (Instant, zero lag) ─── */
+function closeResourceModal() {
+  const overlay = document.getElementById('resourceModalOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  clearTimeout(resModalCloseTimer);
+  resModalCloseTimer = setTimeout(() => {
+    if (!overlay.classList.contains('active')) {
+      overlay.style.display = 'none';
+    }
+  }, 350);
+}
+
+/* ── Open modal with resource data (Instant, zero lag, full feature) ─── */
 function openResourceModal(resourceId) {
   const overlay = document.getElementById('resourceModalOverlay');
-  const modalBody = document.getElementById('resourceModalBody');
+  const headerEl = document.getElementById('resourceModalHeader');
+  const tabsEl = document.getElementById('resourceModalTabs');
+  const bodyEl = document.getElementById('resourceModalBody');
+  const footerEl = document.getElementById('resourceModalFooter');
 
-  if (!overlay || !modalBody) return;
+  if (!overlay || !bodyEl) return;
 
   if (resModalCloseTimer) {
     clearTimeout(resModalCloseTimer);
     resModalCloseTimer = null;
   }
 
-  const resource = resourcesData.find(r => r.id === resourceId);
+  const resource = resourcesData.find(r => r.id === resourceId) || 
+                   resourcesData.find(r => r.id.includes(resourceId) || resourceId.includes(r.id)) || 
+                   resourcesData[0];
   if (!resource) return;
+
+  const currentIndex = resourcesData.findIndex(r => r.id === resource.id);
+  const totalResources = resourcesData.length;
+  const prevResource = resourcesData[(currentIndex - 1 + totalResources) % totalResources];
+  const nextResource = resourcesData[(currentIndex + 1) % totalResources];
 
   const categoryMeta = {
     notes: { icon: 'fa-sticky-note', label: 'Study Notes', bgClass: 'notes-bg' },
@@ -3163,68 +3348,312 @@ function openResourceModal(resourceId) {
   };
   const meta = categoryMeta[resource.category] || { icon: 'fa-file', label: 'Resource', bgClass: 'notes-bg' };
 
-  const tagsHTML = resource.tags.map(t => `<span>${t}</span>`).join('');
-  const contentHTML = resource.content.map(item => `<li><i class="fa-solid fa-check"></i> <span>${item}</span></li>`).join('');
+  // 1. POPULATE FIXED HEADER
+  if (headerEl) {
+    const optionsHTML = resourcesData.map((r, i) => {
+      const selected = r.id === resource.id ? 'selected' : '';
+      return `<option value="${r.id}" ${selected}>#0${i + 1} • ${r.title}</option>`;
+    }).join('');
 
-  const actionHref = (resource.actionUrl && resource.actionUrl !== '#') ? resource.actionUrl : '#';
-  const hasValidHref = actionHref !== '#';
-
-  modalBody.innerHTML = `
-    <div class="resource-modal-header">
+    headerEl.innerHTML = `
       <div class="resource-modal-icon ${meta.bgClass}">
-        <i class="${resource.icon}"></i>
+        <i class="${resource.icon || 'fa-solid fa-laptop-code'}"></i>
       </div>
       <div class="resource-modal-header-text">
         <h3 class="resource-modal-title">${resource.title}</h3>
-        <span class="resource-modal-category">
-          <i class="fa-solid ${meta.icon}"></i>
-          ${meta.label}
-        </span>
+        <div class="resource-modal-meta-row">
+          <span class="resource-modal-category">
+            <i class="fa-solid ${meta.icon}"></i> ${meta.label}
+          </span>
+          <div class="resource-modal-switcher">
+            <span><i class="fa-solid fa-arrow-right-arrow-left"></i> Jump:</span>
+            <select class="resource-modal-select" id="resModalSelect" aria-label="Quick jump to another resource">
+              ${optionsHTML}
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="resource-modal-content">
-      <p class="resource-modal-desc">${resource.description}</p>
-      <div class="resource-modal-preview">
-        <h4><i class="fa-solid fa-list-check"></i> Comprehensive Chapters &amp; Modules</h4>
-        <ul class="resource-modal-list">${contentHTML}</ul>
+    `;
+
+    const selectEl = headerEl.querySelector('#resModalSelect');
+    if (selectEl) {
+      selectEl.addEventListener('change', (e) => {
+        openResourceModal(e.target.value);
+      });
+    }
+  }
+
+  // 2. POPULATE FIXED TABS
+  if (tabsEl) {
+    tabsEl.innerHTML = `
+      <button type="button" class="res-modal-tab-btn active" data-tab="overview">
+        <i class="fa-solid fa-layer-group"></i> Overview &amp; Syllabus
+      </button>
+      <button type="button" class="res-modal-tab-btn" data-tab="deepdive">
+        <i class="fa-solid fa-brain"></i> Architecture &amp; Core
+      </button>
+      <button type="button" class="res-modal-tab-btn" data-tab="code">
+        <i class="fa-solid fa-code"></i> Blueprint &amp; Complexity
+      </button>
+      <button type="button" class="res-modal-tab-btn" data-tab="questions">
+        <i class="fa-solid fa-circle-question"></i> Interview Q&amp;A
+      </button>
+    `;
+  }
+
+  // 3. POPULATE SCROLLABLE BODY (4 TAB PANELS)
+  const tagsHTML = (resource.tags || []).map(t => `<span>${t}</span>`).join('');
+  const contentHTML = (resource.content || []).map(item => `
+    <li>
+      <i class="fa-solid fa-circle-check"></i>
+      <span>${item}</span>
+    </li>
+  `).join('');
+
+  // Deep dive panel
+  let deepDiveHTML = '';
+  if (resource.deepDive && resource.deepDive.length) {
+    deepDiveHTML = resource.deepDive.map(item => `
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="${item.icon || 'fa-solid fa-atom'}"></i> ${item.title}</h4>
+        <p>${item.summary}</p>
+        <ul class="res-topic-list">
+          ${item.points.map(pt => `<li><i class="fa-solid fa-chevron-right"></i> <span>${pt}</span></li>`).join('')}
+        </ul>
       </div>
+    `).join('');
+  } else {
+    deepDiveHTML = `
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="fa-solid fa-circle-info"></i> In-depth Architecture</h4>
+        <p>Comprehensive system architecture notes and algorithm breakdowns are detailed inside the study guide.</p>
+      </div>
+    `;
+  }
+
+  // Code & Complexity panel
+  let codePanelHTML = '';
+  if (resource.cheatsheet) {
+    const cs = resource.cheatsheet;
+    let tableRows = '';
+    if (cs.complexityTable && cs.complexityTable.length) {
+      tableRows = cs.complexityTable.map(row => `
+        <tr>
+          <td><strong>${row.op}</strong></td>
+          <td><code>${row.avg}</code></td>
+          <td><code>${row.worst}</code></td>
+          <td><code>${row.space}</code></td>
+        </tr>
+      `).join('');
+    }
+
+    codePanelHTML = `
+      <div class="res-detail-card">
+        <div class="res-code-header">
+          <span><i class="fa-solid fa-code"></i> ${cs.title} (${cs.language})</span>
+          <button type="button" class="res-copy-code-btn" id="resCopyBtn">
+            <i class="fa-regular fa-copy"></i> Copy Code
+          </button>
+        </div>
+        <pre class="res-code-box"><code>${escapeHtml(cs.code)}</code></pre>
+      </div>
+      ${tableRows ? `
+        <div class="res-detail-card">
+          <h4 class="res-detail-card-title"><i class="fa-solid fa-table-list"></i> Asymptotic Complexity &amp; Design Trade-offs</h4>
+          <div class="res-table-wrap">
+            <table class="res-table">
+              <thead>
+                <tr>
+                  <th>Operation / Component</th>
+                  <th>Average Case</th>
+                  <th>Worst Case</th>
+                  <th>Space Complexity</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
+    `;
+  } else {
+    codePanelHTML = `
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="fa-solid fa-terminal"></i> Implementation Blueprint</h4>
+        <p>Code templates and algorithmic implementations are available in the linked resource roadmap.</p>
+      </div>
+    `;
+  }
+
+  // Interview Questions panel
+  let questionsHTML = '';
+  if (resource.interviewQuestions && resource.interviewQuestions.length) {
+    questionsHTML = resource.interviewQuestions.map((qItem, idx) => `
+      <div class="res-question-card">
+        <div class="res-question-top">
+          <span class="res-question-num">#0${idx + 1} • High-Frequency Problem</span>
+          <span class="res-q-badge ${qItem.difficulty || 'medium'}">${(qItem.difficulty || 'medium').toUpperCase()}</span>
+        </div>
+        <h4 class="res-question-title">${qItem.q}</h4>
+        ${qItem.company ? `<div class="res-company-tags"><i class="fa-solid fa-building"></i> Target Companies: ${qItem.company}</div>` : ''}
+        <p class="res-question-concept"><strong>Core Intuition &amp; Solution:</strong> ${qItem.concept}</p>
+      </div>
+    `).join('');
+  } else {
+    questionsHTML = `
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="fa-solid fa-circle-question"></i> Practice Questions</h4>
+        <p>Explore curated problem banks and FAANG interview questions in the full roadmap.</p>
+      </div>
+    `;
+  }
+
+  bodyEl.innerHTML = `
+    <!-- PANEL 1: OVERVIEW -->
+    <div class="res-tab-panel active" data-panel="overview">
+      <div class="res-stat-grid">
+        <div class="res-stat-card">
+          <div class="res-stat-icon"><i class="fa-solid fa-gauge-high"></i></div>
+          <div>
+            <span class="res-stat-label">Difficulty</span>
+            <span class="res-stat-val">${resource.difficulty || 'Advanced Core CS'}</span>
+          </div>
+        </div>
+        <div class="res-stat-card">
+          <div class="res-stat-icon"><i class="fa-solid fa-clock"></i></div>
+          <div>
+            <span class="res-stat-label">Time to Master</span>
+            <span class="res-stat-val">${resource.estTime || '60+ Hours'}</span>
+          </div>
+        </div>
+        <div class="res-stat-card">
+          <div class="res-stat-icon"><i class="fa-solid fa-key"></i></div>
+          <div>
+            <span class="res-stat-label">Prerequisites</span>
+            <span class="res-stat-val">${resource.prereq || 'CS Fundamentals'}</span>
+          </div>
+        </div>
+        <div class="res-stat-card">
+          <div class="res-stat-icon"><i class="fa-solid fa-list-check"></i></div>
+          <div>
+            <span class="res-stat-label">Curriculum</span>
+            <span class="res-stat-val">${(resource.content || []).length} Core Modules</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="fa-solid fa-compass"></i> Learning Scope &amp; Architecture</h4>
+        <p>${resource.description}</p>
+      </div>
+
+      <div class="res-detail-card">
+        <h4 class="res-detail-card-title"><i class="fa-solid fa-book-open-reader"></i> Comprehensive Modules &amp; Chapters</h4>
+        <ul class="res-topic-list">${contentHTML}</ul>
+      </div>
+
       <div class="resource-modal-tags">${tagsHTML}</div>
     </div>
-    <div class="resource-modal-actions">
-      ${hasValidHref ? `
-        <a href="${actionHref}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-          <i class="${resource.actionIcon}"></i> ${resource.actionLabel}
-        </a>
-      ` : `
-        <button type="button" class="btn btn-primary" onclick="alert('Viewing comprehensive chapters for: ${resource.title}');">
-          <i class="${resource.actionIcon}"></i> ${resource.actionLabel}
-        </button>
-      `}
-      <button class="btn btn-outline resource-modal-inner-close" type="button">
-        <i class="fa-solid fa-xmark"></i> Close
-      </button>
+
+    <!-- PANEL 2: ARCHITECTURE & DEEP DIVE -->
+    <div class="res-tab-panel" data-panel="deepdive">
+      ${deepDiveHTML}
+    </div>
+
+    <!-- PANEL 3: CODE & COMPLEXITY -->
+    <div class="res-tab-panel" data-panel="code">
+      ${codePanelHTML}
+    </div>
+
+    <!-- PANEL 4: INTERVIEW QUESTIONS -->
+    <div class="res-tab-panel" data-panel="questions">
+      ${questionsHTML}
     </div>
   `;
 
-  // Wire inner close button
-  const innerCloseBtn = modalBody.querySelector('.resource-modal-inner-close');
-  if (innerCloseBtn) {
-    innerCloseBtn.addEventListener('click', () => {
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
-      clearTimeout(resModalCloseTimer);
-      resModalCloseTimer = setTimeout(() => {
-        if (!overlay.classList.contains('active')) {
-          overlay.style.display = 'none';
+  // 4. POPULATE FIXED FOOTER
+  if (footerEl) {
+    const actionHref = (resource.actionUrl && resource.actionUrl !== '#') ? resource.actionUrl : '#';
+    const hasValidHref = actionHref !== '#';
+
+    footerEl.innerHTML = `
+      <span class="res-footer-note">
+        <i class="fa-solid fa-graduation-cap"></i> Resource <strong>#0${currentIndex + 1}</strong> of ${totalResources}
+      </span>
+      <div class="res-modal-btn-group">
+        <button type="button" class="btn btn-outline" id="resModalPrevBtn" title="Previous: ${prevResource.title}">
+          <i class="fa-solid fa-chevron-left"></i> Prev
+        </button>
+        <button type="button" class="btn btn-outline" id="resModalNextBtn" title="Next: ${nextResource.title}">
+          Next <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        ${hasValidHref ? `
+          <a href="${actionHref}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+            <i class="${resource.actionIcon || 'fa-solid fa-arrow-up-right-from-square'}"></i> ${resource.actionLabel || 'Open Source'}
+          </a>
+        ` : ''}
+        <button type="button" class="btn btn-outline resource-modal-inner-close" id="resModalInnerClose">
+          <i class="fa-solid fa-xmark"></i> Close
+        </button>
+      </div>
+    `;
+
+    const prevBtn = footerEl.querySelector('#resModalPrevBtn');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => openResourceModal(prevResource.id));
+    }
+    const nextBtn = footerEl.querySelector('#resModalNextBtn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => openResourceModal(nextResource.id));
+    }
+    const innerCloseBtn = footerEl.querySelector('#resModalInnerClose');
+    if (innerCloseBtn) {
+      innerCloseBtn.addEventListener('click', closeResourceModal);
+    }
+  }
+
+  // 5. WIRE TAB BUTTONS
+  if (tabsEl) {
+    const tabBtns = tabsEl.querySelectorAll('.res-modal-tab-btn');
+    const panels = bodyEl.querySelectorAll('.res-tab-panel');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const targetPanel = bodyEl.querySelector(`.res-tab-panel[data-panel="${targetTab}"]`);
+        if (targetPanel) {
+          targetPanel.classList.add('active');
         }
-      }, 350);
+      });
     });
   }
 
-  // Show modal instantly
+  // 6. WIRE COPY CODE BUTTON
+  const copyBtn = bodyEl.querySelector('#resCopyBtn');
+  if (copyBtn && resource.cheatsheet) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(resource.cheatsheet.code).then(() => {
+        copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy Code';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        copyBtn.innerText = 'Copied!';
+      });
+    });
+  }
+
+  // Show modal
   overlay.style.display = 'flex';
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+  bodyEl.scrollTop = 0;
 }
 
 
@@ -3524,11 +3953,15 @@ function initResumeGallery() {
   const filterPills = Array.from(document.querySelectorAll('.resume-gallery-filters .res-gallery-pill:not(.res-gallery-pill-link)'));
   const prevBtn = document.getElementById('resNavPrev');
   const nextBtn = document.getElementById('resNavNext');
+  const playBtn = document.getElementById('resNavPlay');
 
   if (!cards.length) return;
 
   let currentIndex = 0;
   const totalCards = cards.length;
+  let isAutoMoving = true;
+  let autoTimer = null;
+  const AUTO_INTERVAL = 2900;
 
   function updateCoverFlow(newIndex) {
     currentIndex = ((newIndex % totalCards) + totalCards) % totalCards;
@@ -3581,13 +4014,74 @@ function initResumeGallery() {
     });
   }
 
-  // Filter Pill Clicks (clicking active pill also opens card details)
+  /* ── Auto Movement Engine (Infinite, Seamless One by One) ─── */
+  function stepForward() {
+    updateCoverFlow(currentIndex + 1);
+  }
+
+  function startAutoCycle() {
+    stopAutoCycle();
+    autoTimer = setInterval(() => {
+      if (isAutoMoving) {
+        stepForward();
+      }
+    }, AUTO_INTERVAL);
+  }
+
+  function stopAutoCycle() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function updatePlayBtnUI() {
+    if (!playBtn) return;
+    const icon = playBtn.querySelector('i');
+    if (isAutoMoving) {
+      playBtn.classList.remove('paused');
+      playBtn.title = 'Continuous motion active (Click to pause)';
+      if (icon) icon.className = 'fa-solid fa-pause';
+    } else {
+      playBtn.classList.add('paused');
+      playBtn.title = 'Motion paused (Click to resume)';
+      if (icon) icon.className = 'fa-solid fa-play';
+    }
+  }
+
+  // Hover Pause & Resume on Stage
+  stage.addEventListener('mouseenter', () => {
+    isAutoMoving = false;
+    updatePlayBtnUI();
+  });
+
+  stage.addEventListener('mouseleave', () => {
+    isAutoMoving = true;
+    updatePlayBtnUI();
+  });
+
+  // Play / Pause Button Toggle
+  if (playBtn) {
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isAutoMoving = !isAutoMoving;
+      updatePlayBtnUI();
+      if (isAutoMoving) {
+        startAutoCycle();
+      }
+    });
+  }
+
+  // Filter Pill Clicks (clicking active pill opens card details, inactive jumps to card)
   filterPills.forEach((pill, idx) => {
     pill.addEventListener('click', () => {
       if (idx === currentIndex) {
-        openCardDetail(cards[idx]);
+        if (typeof openCardDetail === 'function') {
+          openCardDetail(cards[idx]);
+        }
       } else {
         updateCoverFlow(idx);
+        startAutoCycle();
       }
     });
   });
@@ -3603,15 +4097,18 @@ function initResumeGallery() {
       const circleBtn = e.target.closest('.rc-circle-action');
 
       if (idx !== currentIndex) {
-        // First click brings card to the center CoverFlow spot
+        // Clicking flanking card brings it to front and resets auto cycle
         updateCoverFlow(idx);
+        startAutoCycle();
         // If circle button specifically was clicked, immediately open details
-        if (circleBtn) {
+        if (circleBtn && typeof openCardDetail === 'function') {
           openCardDetail(card);
         }
       } else {
         // Active card clicked anywhere opens the full interactive detail modal
-        openCardDetail(card);
+        if (typeof openCardDetail === 'function') {
+          openCardDetail(card);
+        }
       }
     }
 
@@ -3621,7 +4118,8 @@ function initResumeGallery() {
         e.preventDefault();
         if (idx !== currentIndex) {
           updateCoverFlow(idx);
-        } else {
+          startAutoCycle();
+        } else if (typeof openCardDetail === 'function') {
           openCardDetail(card);
         }
       }
@@ -3634,45 +4132,81 @@ function initResumeGallery() {
         e.stopPropagation();
         if (idx !== currentIndex) {
           updateCoverFlow(idx);
+          startAutoCycle();
         }
-        openCardDetail(card);
+        if (typeof openCardDetail === 'function') {
+          openCardDetail(card);
+        }
       });
     }
   });
 
   // Circular Prev/Next Controls
   if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       updateCoverFlow(currentIndex - 1);
+      startAutoCycle();
     });
   }
 
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       updateCoverFlow(currentIndex + 1);
+      startAutoCycle();
     });
   }
 
-  // Touch Swipe Gesture Support
-  let touchStartX = 0;
-  let touchEndX = 0;
+  // Mouse Drag & Touch Swipe Support
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragDelta = 0;
+
+  stage.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.rc-action-btn') || e.target.closest('.rc-circle-action')) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragDelta = 0;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    dragDelta = e.clientX - dragStartX;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (Math.abs(dragDelta) > 50) {
+      if (dragDelta < 0) {
+        updateCoverFlow(currentIndex + 1);
+      } else {
+        updateCoverFlow(currentIndex - 1);
+      }
+      startAutoCycle();
+    }
+    dragDelta = 0;
+  });
 
   stage.addEventListener('touchstart', (e) => {
     if (e.changedTouches && e.changedTouches.length > 0) {
-      touchStartX = e.changedTouches[0].screenX;
+      dragStartX = e.changedTouches[0].screenX;
+      dragDelta = 0;
     }
   }, { passive: true });
 
   stage.addEventListener('touchend', (e) => {
     if (e.changedTouches && e.changedTouches.length > 0) {
-      touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - touchStartX;
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - dragStartX;
       if (Math.abs(diff) > 40) {
         if (diff > 0) {
           updateCoverFlow(currentIndex - 1);
         } else {
           updateCoverFlow(currentIndex + 1);
         }
+        startAutoCycle();
       }
     }
   }, { passive: true });
@@ -3681,20 +4215,36 @@ function initResumeGallery() {
   const resumeSection = document.getElementById('resume');
   if (resumeSection) {
     window.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      if (document.querySelector('.project-modal-overlay.active, .cert-modal-overlay.active, .resource-modal-overlay.active, .arc-modal-overlay.active')) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
       const rect = resumeSection.getBoundingClientRect();
       const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
       if (inView) {
         if (e.key === 'ArrowLeft') {
           updateCoverFlow(currentIndex - 1);
+          startAutoCycle();
         } else if (e.key === 'ArrowRight') {
           updateCoverFlow(currentIndex + 1);
+          startAutoCycle();
         }
       }
     });
   }
 
-  // Initial layout activation
+  // Page visibility awareness
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAutoCycle();
+    } else if (isAutoMoving) {
+      startAutoCycle();
+    }
+  });
+
+  // Initial layout activation & start continuous motion
   updateCoverFlow(0);
+  startAutoCycle();
+  updatePlayBtnUI();
 }
 
 /* ═══════════════════════════════════════════════════════════

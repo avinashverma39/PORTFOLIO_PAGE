@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://r4s69m7b.insforge.site/sitemap.xml
+
