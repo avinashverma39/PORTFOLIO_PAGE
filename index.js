@@ -2376,6 +2376,7 @@ function initResources() {
 
   /* ── Setup Modal ─── */
   initResourceModal();
+  initGallerySystem();
 
   if (!stage || !track) return;
   if (track.dataset.cloned) return;
@@ -2413,15 +2414,30 @@ function initResources() {
   let targetOffset = -2 * singleWidth;
   let isPlaying = true;
   let isHovered = false;
-  let isDragging = false;
-  let isActuallyMoved = false;
-  let dragStartTime = 0;
+  let isPointerDown = false;
+  let hasMovedSignificantly = false;
   let dragStartX = 0;
   let dragStartY = 0;
   let dragStartOffset = 0;
   let dragDelta = 0;
+  let touchStartPos = { x: 0, y: 0, time: 0 };
+  let touchTargetWrap = null;
+  let lastModalOpenTime = 0;
   const normalSpeed = 1.05;
-  const hoverSpeed = 0; // Frozen completely on hover so user can easily inspect and click
+
+  function triggerModalSafe(resId) {
+    if (!resId) return;
+    if (Date.now() - lastModalOpenTime < 400) return; // Prevent double trigger
+    lastModalOpenTime = Date.now();
+    openResourceModal(resId);
+  }
+
+  function resolveResourceId(el) {
+    if (!el) return null;
+    const wrap = el.closest('[data-resource-id]');
+    if (!wrap) return null;
+    return wrap.getAttribute('data-resource-id') || null;
+  }
 
   /* ── Smooth 3D Perspective Curvature Transform Updater ─── */
   function update3DCurvature() {
@@ -2447,7 +2463,7 @@ function initResources() {
   /* ── Continuous Animation Loop (Endless, Zero Hitch) ─── */
   function animateRibbon() {
     const isModalOpen = document.getElementById('resourceModalOverlay')?.classList.contains('active');
-    if (isPlaying && !isDragging && !isHovered && !isModalOpen) {
+    if (isPlaying && !isPointerDown && !isHovered && !isModalOpen) {
       targetOffset -= normalSpeed;
     }
 
@@ -2479,9 +2495,7 @@ function initResources() {
   stage.addEventListener('mouseleave', () => { isHovered = false; });
 
   allCards.forEach(card => {
-    card.addEventListener('mouseenter', () => {
-      isHovered = true;
-    });
+    card.addEventListener('mouseenter', () => { isHovered = true; });
     card.addEventListener('mouseleave', (e) => {
       if (!stage.contains(e.relatedTarget)) {
         isHovered = false;
@@ -2489,106 +2503,115 @@ function initResources() {
     });
   });
 
-  /* ── Drag & Swipe Interaction ─── */
-  function onDragStart(clientX, clientY) {
-    isDragging = true;
-    isActuallyMoved = false;
-    dragStartTime = Date.now();
-    dragStartX = clientX;
-    dragStartY = clientY || 0;
+  /* ── Mobile & Touch Gesture Support (Guaranteed tap activation + smooth drag) ─── */
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 0) return;
+    const t = e.touches[0];
+    isPointerDown = true;
+    hasMovedSignificantly = false;
+    touchStartPos = { x: t.clientX, y: t.clientY, time: Date.now() };
+    touchTargetWrap = e.target.closest('.ribbon-card-wrap');
+    dragStartX = t.clientX;
     dragStartOffset = targetOffset;
     dragDelta = 0;
-  }
+  }, { passive: true });
 
-  function onDragMove(clientX, clientY) {
-    if (!isDragging) return;
-    dragDelta = clientX - dragStartX;
-    const dy = (clientY || 0) - dragStartY;
-    if (Math.hypot(dragDelta, dy) > 12) {
-      isActuallyMoved = true;
+  window.addEventListener('touchmove', (e) => {
+    if (!isPointerDown || e.touches.length === 0) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartPos.x;
+    const dy = t.clientY - touchStartPos.y;
+    dragDelta = dx;
+    if (Math.hypot(dx, dy) > 10) {
+      hasMovedSignificantly = true;
+      targetOffset = dragStartOffset + dx;
     }
-    targetOffset = dragStartOffset + dragDelta;
-  }
+  }, { passive: true });
 
-  function onDragEnd() {
-    if (!isDragging) return;
-    isDragging = false;
-    setTimeout(() => {
-      isActuallyMoved = false;
-      dragDelta = 0;
-    }, 150);
-  }
+  window.addEventListener('touchend', (e) => {
+    if (!isPointerDown) return;
+    isPointerDown = false;
+    const touchDuration = Date.now() - touchStartPos.time;
+    const changed = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    const endX = changed ? changed.clientX : touchStartPos.x;
+    const endY = changed ? changed.clientY : touchStartPos.y;
+    const totalDist = Math.hypot(endX - touchStartPos.x, endY - touchStartPos.y);
 
-  // Mouse drag events
+    // If tap (< 14px movement and quick duration < 400ms):
+    if (!hasMovedSignificantly && totalDist < 14 && touchDuration < 400) {
+      const el = touchTargetWrap || document.elementFromPoint(endX, endY);
+      const resId = resolveResourceId(el);
+      if (resId) {
+        triggerModalSafe(resId);
+      }
+    }
+    dragDelta = 0;
+    hasMovedSignificantly = false;
+  }, { passive: true });
+
+  /* ── Desktop Mouse Drag & Click Support ─── */
   stage.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
-    onDragStart(e.clientX, e.clientY);
+    isPointerDown = true;
+    hasMovedSignificantly = false;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragStartOffset = targetOffset;
+    dragDelta = 0;
   });
+
   window.addEventListener('mousemove', (e) => {
-    if (isDragging) onDragMove(e.clientX, e.clientY);
+    if (!isPointerDown) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    dragDelta = dx;
+    if (Math.hypot(dx, dy) > 8) {
+      hasMovedSignificantly = true;
+      targetOffset = dragStartOffset + dx;
+    }
   });
+
   window.addEventListener('mouseup', () => {
-    if (isDragging) onDragEnd();
+    if (isPointerDown) {
+      isPointerDown = false;
+      setTimeout(() => {
+        hasMovedSignificantly = false;
+        dragDelta = 0;
+      }, 80);
+    }
   });
 
-  // Touch swipe events
-  stage.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 0) onDragStart(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-  window.addEventListener('touchmove', (e) => {
-    if (isDragging && e.touches.length > 0) onDragMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-  window.addEventListener('touchend', () => {
-    if (isDragging) onDragEnd();
-  });
-
-  /* ── Card Activation: Opens modal reliably on click or tap ─── */
-  function handleCardActivation(cardElement, e) {
-    const dragDist = Math.abs(dragDelta);
-
-    // If the user clearly performed an intentional drag gesture (> 25px movement), don't trigger modal
-    if (isActuallyMoved && dragDist > 25) {
-      return;
-    }
-
-    if (e) {
-      if (typeof e.preventDefault === 'function') e.preventDefault();
-      if (typeof e.stopPropagation === 'function') e.stopPropagation();
-    }
-
-    const targetEl = (e && e.target) ? e.target : cardElement;
-    const resId = (cardElement && cardElement.getAttribute('data-resource-id')) || 
-                  (cardElement && cardElement.closest('[data-resource-id]')?.getAttribute('data-resource-id')) ||
-                  (targetEl && targetEl.closest('[data-resource-id]')?.getAttribute('data-resource-id'));
-    if (resId) {
-      openResourceModal(resId);
-    }
-  }
-
-  /* ── Direct Click & Key Listeners on all ribbon cards (instant, zero lag) ─── */
+  /* ── Unified Click Handler for All Cards (Full-Card Clickable) ─── */
   allCards.forEach(card => {
     card.style.cursor = 'pointer';
 
-    card.addEventListener('click', (e) => handleCardActivation(card, e));
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+    card.addEventListener('click', (e) => {
+      if (hasMovedSignificantly || Math.abs(dragDelta) > 12) return;
+      const resId = card.getAttribute('data-resource-id') || resolveResourceId(e.target);
+      if (resId) {
         e.preventDefault();
-        handleCardActivation(card, e);
+        e.stopPropagation();
+        triggerModalSafe(resId);
       }
     });
 
-    const clickables = card.querySelectorAll('.ribbon-card, .ribbon-quick-action, .ribbon-meta, .ribbon-step-title, .ribbon-step-sub, .ribbon-category-tag, .ribbon-card-img-box, .ribbon-card-img, .ribbon-step, .ribbon-card-overlay');
-    clickables.forEach(el => {
-      el.style.cursor = 'pointer';
-      el.addEventListener('click', (e) => handleCardActivation(card, e));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const resId = card.getAttribute('data-resource-id');
+        if (resId) triggerModalSafe(resId);
+      }
     });
   });
 
   /* ── Track-level fallback delegate ─── */
   track.addEventListener('click', (e) => {
-    const cardWrap = e.target.closest('.ribbon-card-wrap');
-    if (cardWrap) {
-      handleCardActivation(cardWrap, e);
+    if (hasMovedSignificantly || Math.abs(dragDelta) > 12) return;
+    const resId = resolveResourceId(e.target);
+    if (resId) {
+      e.preventDefault();
+      e.stopPropagation();
+      triggerModalSafe(resId);
     }
   });
 
@@ -3068,6 +3091,7 @@ function openCardDetail(card) {
   }
 
   const title = card.getAttribute('data-title') || '';
+  const photoImg = card.getAttribute('data-photo') || card.querySelector('.arc-card-round-img')?.getAttribute('src') || '';
   const sub = card.getAttribute('data-sub') || '';
   const org = card.getAttribute('data-org') || '';
   const desc = card.getAttribute('data-desc') || '';
@@ -3139,6 +3163,12 @@ function openCardDetail(card) {
   }
 
   body.innerHTML = `
+    ${photoImg ? `
+      <div class="arc-modal-photo-banner">
+        <img src="${photoImg}" alt="${title}" class="arc-modal-banner-img" draggable="false" />
+        <div class="arc-modal-banner-badge"><i class="fa-solid fa-camera"></i> Verified Milestone</div>
+      </div>
+    ` : ''}
     <span class="arc-modal-meta-tag">${sub || 'Showcase'}</span>
     <h3 class="arc-modal-title">${title}</h3>
     ${org ? `<div class="arc-modal-sub"><i class="fa-solid fa-layer-group"></i> ${org}</div>` : ''}
@@ -4288,4 +4318,130 @@ if (document.readyState === 'loading') {
   startApp();
 }
 
+
+
+
+
+/* =============================================
+   26. CURATED VISUAL GALLERY & LIGHTBOX SYSTEM
+   ============================================= */
+function initGallerySystem() {
+  const filterBtns = document.querySelectorAll('.gallery-filter-btn');
+  const cards = Array.from(document.querySelectorAll('.gallery-card'));
+  const lightbox = document.getElementById('galleryLightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCategory = document.getElementById('lightboxCategory');
+  const lightboxLocation = document.getElementById('lightboxLocation');
+  const lightboxYear = document.getElementById('lightboxYear');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxSub = document.getElementById('lightboxSub');
+  const lightboxDesc = document.getElementById('lightboxDesc');
+  const lightboxTags = document.getElementById('lightboxTags');
+  const lightboxClose = document.getElementById('galleryLightboxClose');
+  const lightboxBackdrop = document.getElementById('galleryLightboxBackdrop');
+  const lightboxPrev = document.getElementById('galleryLightboxPrev');
+  const lightboxNext = document.getElementById('galleryLightboxNext');
+
+  if (!cards.length) return;
+
+  let currentVisibleCards = [...cards];
+  let currentCardIndex = 0;
+
+  // 1. Category Filtering
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.getAttribute('data-gallery-filter');
+      currentVisibleCards = [];
+
+      cards.forEach(card => {
+        const cat = card.getAttribute('data-gallery-category');
+        if (filter === 'all' || cat === filter) {
+          card.classList.remove('hidden');
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+          currentVisibleCards.push(card);
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // 2. Open Lightbox
+  function openLightboxForCard(card) {
+    if (!card || !lightbox) return;
+    const photo = card.getAttribute('data-photo') || card.querySelector('img')?.getAttribute('src');
+    const title = card.getAttribute('data-title') || '';
+    const sub = card.getAttribute('data-sub') || '';
+    const location = card.getAttribute('data-location') || 'Lucknow, India';
+    const year = card.getAttribute('data-year') || '2026';
+    const desc = card.getAttribute('data-desc') || '';
+    const tagsStr = card.getAttribute('data-tags') || '';
+    const category = card.getAttribute('data-gallery-category') || 'Moment';
+
+    if (lightboxImg) lightboxImg.src = photo;
+    if (lightboxCategory) lightboxCategory.textContent = category.toUpperCase();
+    if (lightboxLocation) lightboxLocation.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${location}`;
+    if (lightboxYear) lightboxYear.textContent = year;
+    if (lightboxTitle) lightboxTitle.textContent = title;
+    if (lightboxSub) lightboxSub.textContent = sub;
+    if (lightboxDesc) lightboxDesc.textContent = desc;
+
+    if (lightboxTags) {
+      lightboxTags.innerHTML = '';
+      if (tagsStr) {
+        tagsStr.split(',').forEach(tag => {
+          const span = document.createElement('span');
+          span.textContent = tag.trim();
+          lightboxTags.appendChild(span);
+        });
+      }
+    }
+
+    currentCardIndex = currentVisibleCards.indexOf(card);
+    lightbox.classList.add('active');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('active');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function nextPhoto() {
+    if (!currentVisibleCards.length) return;
+    currentCardIndex = (currentCardIndex + 1) % currentVisibleCards.length;
+    openLightboxForCard(currentVisibleCards[currentCardIndex]);
+  }
+
+  function prevPhoto() {
+    if (!currentVisibleCards.length) return;
+    currentCardIndex = (currentCardIndex - 1 + currentVisibleCards.length) % currentVisibleCards.length;
+    openLightboxForCard(currentVisibleCards[currentCardIndex]);
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      openLightboxForCard(card);
+    });
+  });
+
+  if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+  if (lightboxBackdrop) lightboxBackdrop.addEventListener('click', closeLightbox);
+  if (lightboxPrev) lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); prevPhoto(); });
+  if (lightboxNext) lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); nextPhoto(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox || !lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowRight') nextPhoto();
+    else if (e.key === 'ArrowLeft') prevPhoto();
+  });
+}
 
