@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+    
+    <!-- Advanced Security, Privacy & Anti-Clickjacking Protections -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()" />
+
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="4Vx54PuBOkNm-0kbxhzePpKPRsuL5xhYm9npDefRohE" />
 
@@ -95,8 +102,7 @@
           "description": "Computer Science undergraduate and AI Web Developer specializing in high-performance C++ systems, interactive UI architectures, and modern web applications.",
           "image": "https://r4s69m7b.insforge.site/IMG_20250921_0254421.jpg",
           "url": "https://r4s69m7b.insforge.site/",
-          "email": "mailto:avinashverma3939@gmail.com",
-          "telephone": "+919838683260",
+          "contactPoint": { "@type": "ContactPoint", "contactType": "Portfolio Inquiries", "url": "https://r4s69m7b.insforge.site/#contact" },
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Lucknow",
@@ -289,7 +295,7 @@
                         aria-label="Twitter">
                         <i class="fa-brands fa-x-twitter"></i>
                     </a>
-                    <a href="mailto:avinashverma3939@gmail.com" class="social-icon" aria-label="Email">
+                    <a href="#" class="social-icon protected-email" aria-label="Email" title="Direct Email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
                 </div>
@@ -2963,10 +2969,9 @@
                             </div>
                             <div class="contact-card-body">
                                 <span class="contact-card-label">Direct Email</span>
-                                <a href="mailto:avinashverma3939@gmail.com"
-                                    class="contact-card-val">avinashverma3939@gmail.com</a>
+                                <a href="#" class="contact-card-val protected-email">avinashverma3939@gmail.com</a>
                             </div>
-                            <button type="button" class="contact-copy-btn" data-copy="avinashverma3939@gmail.com"
+                            <button type="button" class="contact-copy-btn protected-email" data-copy=""
                                 title="Copy Email">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
@@ -2980,14 +2985,14 @@
                             </div>
                             <div class="contact-card-body">
                                 <span class="contact-card-label">Direct Phone &amp; WhatsApp</span>
-                                <a href="tel:+919838683260" class="contact-card-val">+91 98386 83260</a>
+                                <a href="#" class="contact-card-val protected-phone">+91 98386 83260</a>
                             </div>
                             <div class="contact-card-actions-mini">
-                                <a href="https://wa.me/919838683260" target="_blank" rel="noopener noreferrer"
-                                    class="contact-mini-action" title="Open WhatsApp Chat">
+                                <a href="#" target="_blank" rel="noopener noreferrer"
+                                    class="contact-mini-action protected-phone-wa" title="Open WhatsApp Chat">
                                     <i class="fa-brands fa-whatsapp"></i>
                                 </a>
-                                <button type="button" class="contact-copy-btn" data-copy="+919838683260"
+                                <button type="button" class="contact-copy-btn protected-phone" data-copy=""
                                     title="Copy Phone Number">
                                     <i class="fa-regular fa-copy"></i>
                                 </button>
@@ -3064,6 +3069,12 @@
                     </div>
 
                     <form class="contact-form" id="contactForm" novalidate>
+                        <!-- Anti-Bot Honeypot Security Field (Hidden from human users, traps automated bots) -->
+                        <div style="opacity:0;position:absolute;top:0;left:0;height:0;width:0;z-index:-1;overflow:hidden;" aria-hidden="true">
+                            <label for="gotchaTrap">Security Verification</label>
+                            <input type="text" id="gotchaTrap" name="_gotcha_trap" tabindex="-1" autocomplete="off" />
+                        </div>
+
                         <div class="form-row-2">
                             <div class="form-group">
                                 <label for="name"><i class="fa-regular fa-user"></i> Full Name</label>
@@ -3228,7 +3239,7 @@
                             class="footer-bubble" aria-label="WhatsApp Direct" title="WhatsApp">
                             <i class="fa-brands fa-whatsapp"></i>
                         </a>
-                        <a href="mailto:avinashverma3939@gmail.com" class="footer-bubble" aria-label="Email"
+                        <a href="#" class="footer-bubble protected-email" aria-label="Email"
                             title="Direct Email">
                             <i class="fa-solid fa-envelope"></i>
                         </a>

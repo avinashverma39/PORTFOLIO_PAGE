@@ -1,3 +1,32 @@
+
+/* ===================================================
+   SECURITY ENGINE: SCRAPER SHIELD & PRIVACY ENFORCER
+   =================================================== */
+(function initSecurityPrivacyEngine() {
+  // Base64 decoded only in real user browser runtime
+  try {
+    const rawE = atob('YXZpbmFzaHZlcm1hMzkzOQ==') + '@' + atob('Z21haWwuY29t');
+    const rawP = atob('KzkxOTgzODY4MzI2MA=='); // +919838683260
+    const fmtP = '+91 98386 83260';
+
+    document.querySelectorAll('.protected-email').forEach(el => {
+      if (el.tagName === 'A') el.href = 'mailto:' + rawE;
+      if (el.classList.contains('contact-copy-btn')) el.dataset.copy = rawE;
+    });
+
+    document.querySelectorAll('.protected-phone').forEach(el => {
+      if (el.tagName === 'A') el.href = 'tel:' + rawP;
+      if (el.classList.contains('contact-copy-btn')) el.dataset.copy = rawP;
+    });
+
+    document.querySelectorAll('.protected-phone-wa').forEach(el => {
+      if (el.tagName === 'A') el.href = 'https://wa.me/' + rawP.replace('+', '');
+    });
+  } catch (err) {
+    // Graceful fallback
+  }
+})();
+
 /* 
    AVINASH VERMA PORTFOLIO — JAVASCRIPT
 
@@ -284,7 +313,32 @@ function initContactForm() {
     // Clear previous errors
     clearFormErrors();
 
-    const name = document.getElementById('name').value.trim();
+    // 1. Anti-Bot Honeypot Defense
+    const honeypot = document.getElementById('gotchaTrap');
+    if (honeypot && honeypot.value.trim().length > 0) {
+      // Silently discard bot submission
+      form.style.display = 'none';
+      const formSuccess = document.getElementById('formSuccess');
+      if (formSuccess) formSuccess.style.display = 'block';
+      sessionStorage.setItem('contact_last_sent', String(Date.now()));
+      return;
+    }
+
+    // 2. Client-Side Rate-Limiting Protection (Prevent form spamming)
+    const now = Date.now();
+    const lastSent = parseInt(sessionStorage.getItem('contact_last_sent') || '0', 10);
+    if (now - lastSent < 30000) {
+      showFieldError('message', 'messageError', 'Security rate-limit: Please wait 30 seconds before sending another message.');
+      return;
+    }
+
+    // 3. Input Sanitization
+    const sanitizeStr = (str, maxLen) => {
+      if (!str) return '';
+      return str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim().slice(0, maxLen);
+    };
+
+    const name = sanitizeStr(document.getElementById('name').value, 100);
     const email = document.getElementById('email').value.trim();
     const subject = document.getElementById('subject').value.trim();
     const message = document.getElementById('message').value.trim();
