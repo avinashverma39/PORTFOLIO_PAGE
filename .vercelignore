@@ -2,3 +2,11 @@
 .vscode
 portfolio
 *.md
+handle-contact.js
+*.backup.*
+*.bak
+.env*
+*.log
+*.sh
+*.ps1
+scratch/
